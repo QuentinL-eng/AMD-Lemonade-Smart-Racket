@@ -249,7 +249,7 @@ final class FlightTracker {
 
         let crossing = intercept(from: fitted.state, model: model)
         lastRejection = nil
-        note(String(format: "fit ok rms %.1f px speed %.1f m/s depth %.2f m%s",
+        note(String(format: "fit ok rms %.1f px speed %.1f m/s depth %.2f m%@",
                     fitted.rmsPx, speed, depth, crossing == nil ? " (no plane crossing)" : ""),
              at: sample.tNs)
         return FlightPrediction(
