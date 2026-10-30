@@ -32,7 +32,7 @@ import numpy as np
 from scipy.signal import butter, find_peaks, sosfilt
 
 REC = np.dtype([("t", "<f8"), ("v", "<f4", 9)])
-M = np.array([[0, 1, 0], [1, 0, 0], [0, 0, -1]], float)   # Calibration.default (tools/shot_type_check.py)
+M = np.array([[0, -1, 0], [-1, 0, 0], [0, 0, -1]], float)   # Calibration.default (tools/shot_type_check.py)
 APP_E, APP_R = 0.42, 1.15                                  # ImpactModel.acorCenter, RacketProfile.effectiveRadiusM
 SOUND = 343.0
 SR = 48000

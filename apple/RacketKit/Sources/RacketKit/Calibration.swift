@@ -14,10 +14,15 @@ public struct Calibration: Codable, Sendable, Equatable {
     /// Corrects MPU6050 clones whose accelerometer doesn't read exactly 1 g at rest (measured during calibration).
     public var accelScale: Float = 1
 
-    /// Default from the CAD: both boards lie flat along the handle, MPU6050 Y axis along the handle.
+    /// Default for the LSM6DSV320X board as mounted: the sensor's Y axis runs along the handle but points toward the
+    /// butt, X points across the face the other way from the old CAD assumption, and Z is the face normal flipped.
+    /// Measured two ways on 2026-10-29: the robot arm's tool frame fitted to the gyro (imu = -tool, x and y
+    /// swapped) and gravity with the racket clamped head-up (-1 g on sensor Y). The CAD default this replaces
+    /// (rows (0,1,0), (1,0,0), (0,0,-1)) had racket x and y flipped: a 180 degree turn about the face normal.
+    /// Per-player forehand signs learned under the old frame are inverted by this change.
     public static let `default` = Calibration(
-        mpuToRacket: simd_float3x3(rows: [SIMD3(0, 1, 0), SIMD3(1, 0, 0), SIMD3(0, 0, -1)]),
-        h3lisToRacket: simd_float3x3(rows: [SIMD3(0, 1, 0), SIMD3(1, 0, 0), SIMD3(0, 0, -1)]),
+        mpuToRacket: simd_float3x3(rows: [SIMD3(0, -1, 0), SIMD3(-1, 0, 0), SIMD3(0, 0, -1)]),
+        h3lisToRacket: simd_float3x3(rows: [SIMD3(0, -1, 0), SIMD3(-1, 0, 0), SIMD3(0, 0, -1)]),
         gyroBias: .zero, h3lisBias: .zero, isCalibrated: false)
 
     /// Identity mapping, used by the simulator, which already produces racket-frame data.

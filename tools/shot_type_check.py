@@ -26,8 +26,8 @@ SERVE_MIN_TIP_UP = 0.6    # |racket long axis . up| at contact
 LEARN_SHOTS = 5          # AppModel.learnShotsNeeded
 RIGHT_HANDED = True
 GATE = 3          # Mahony accel-correction gate, rad/s (Orientation.swift: simd_length(gyro) < 3)
-# Calibration.default: rows are the racket x, y, z axes in sensor coordinates.
-M = np.array([[0, 1, 0], [1, 0, 0], [0, 0, -1]], float)
+# Calibration.default: rows are the racket x, y, z axes in sensor coordinates (arm-fitted and gravity-checked 2026-10-29).
+M = np.array([[0, -1, 0], [-1, 0, 0], [0, 0, -1]], float)
 
 
 def qmul(a, b):

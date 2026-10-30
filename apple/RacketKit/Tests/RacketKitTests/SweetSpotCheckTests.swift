@@ -73,7 +73,8 @@ final class SweetSpotCheckTests: XCTestCase {
 
     /// The high-g channel shares the low-g axes, so it gets the same rotation even when its gravity reading is noisy.
     func testPoseCalibrationUsesLowGAxesForHighG() {
-        let tip = Calibration.PoseReading(samples: [IMUSample(time: 0, accel: SIMD3(0, 1, 0), gyro: .zero,
+        // Tip up reads -1 g on the sensor's Y axis (it points toward the butt), as on the clamped racket on 2026-10-29.
+        let tip = Calibration.PoseReading(samples: [IMUSample(time: 0, accel: SIMD3(0, -1, 0), gyro: .zero,
                                                               highG: SIMD3(0.4, 0.6, -0.5))])
         let face = Calibration.PoseReading(samples: [IMUSample(time: 0, accel: SIMD3(0, 0, -1), gyro: .zero,
                                                                highG: SIMD3(0.5, 0.3, -0.4))])
