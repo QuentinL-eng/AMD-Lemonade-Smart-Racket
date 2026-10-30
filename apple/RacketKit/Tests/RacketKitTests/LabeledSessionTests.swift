@@ -5,7 +5,7 @@ import simd
 /// Runs ShotAnalyzer on a labeled recording: a folder with the app's session-...-racket.csv and labels.txt (one
 /// stroke per visible impact: FH, BH, SV, VO). tools/shot_type_check.py is the same check in Python.
 /// Runs only with LABELED_SESSION=<folder> (e.g. data/room-2026-10-29); LABELED_FOREHAND_SIGN=-1 or 1 sets a
-/// taught forehand.
+/// taught forehand; LABELED_GYRO_SCALE=0.5 corrects a firmware 1.5 recording (the room session's gyro reads 2x high).
 final class LabeledSessionTests: XCTestCase {
     func testShotTypesMatchLabels() throws {
         guard let dir = ProcessInfo.processInfo.environment["LABELED_SESSION"] else {
@@ -17,11 +17,12 @@ final class LabeledSessionTests: XCTestCase {
         let labels = try String(contentsOf: folder.appendingPathComponent("labels.txt"), encoding: .utf8)
             .split { $0.isWhitespace || $0 == "," }.map(String.init)
         let cal = Calibration.default
+        let gyroScale = ProcessInfo.processInfo.environment["LABELED_GYRO_SCALE"].flatMap(Float.init) ?? 1
         let samples: [IMUSample] = try String(contentsOf: csv, encoding: .utf8).split(separator: "\n").dropFirst()
             .compactMap { line in
                 let v = line.split(separator: ",").compactMap { Float($0) }
                 guard v.count == 10, let time = Double(line.split(separator: ",")[0]) else { return nil }
-                return cal.apply(IMUSample(time: time, accel: SIMD3(v[1], v[2], v[3]), gyro: SIMD3(v[4], v[5], v[6]),
+                return cal.apply(IMUSample(time: time, accel: SIMD3(v[1], v[2], v[3]), gyro: SIMD3(v[4], v[5], v[6]) * gyroScale,
                                            highG: SIMD3(v[7], v[8], v[9])))
             }
 

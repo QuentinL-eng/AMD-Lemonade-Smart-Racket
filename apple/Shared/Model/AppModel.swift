@@ -307,7 +307,7 @@ final class AppModel {
     /// Returns true when the shot was consumed as a teaching swing.
     private func consumeTeachingShot(_ shot: ShotMetrics) -> Bool {
         guard teachingForehand else { return false }
-        guard shot.hasMotion, let spin = shot.features.spinAxisY, abs(spin) > 8 else {
+        guard shot.hasMotion, let spin = shot.features.spinAxisY, abs(spin) > 4 else {
             teachMessage = "That swing was too gentle to learn from. Hit a normal forehand."
             return true
         }
@@ -342,7 +342,7 @@ final class AppModel {
     private func learnForehandFace(from shot: ShotMetrics) {
         guard let index = players.firstIndex(where: { $0.id == activePlayerID }), players[index].forehandBodySign == nil,
               shot.type == .forehand, let vertical = shot.features.verticalSpin, vertical > 0.6,
-              let spin = shot.features.spinAxisY, abs(spin) > 5 else { return }
+              let spin = shot.features.spinAxisY, abs(spin) > 2.5 else { return }
         learnedSpins.append(spin)
         guard learnedSpins.count >= learnShotsNeeded else { return }
         let positive = learnedSpins.filter { $0 > 0 }.count

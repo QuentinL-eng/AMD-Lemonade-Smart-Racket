@@ -1,11 +1,14 @@
 """Checks the app's shot-type rules (apple/RacketKit/Sources/RacketKit/ShotAnalyzer.swift) on a labeled recording.
 
-    python tools/shot_type_check.py data/room-2026-10-29 [forehand sign]
+    python tools/shot_type_check.py data/room-2026-10-29 [forehand sign] [gyro scale]
 
 The folder holds one session-...-racket.csv (the app's recording, exported as CSV) and labels.txt: one stroke per
 visible impact, in order (FH, BH, SV, VO), whitespace or comma separated. Impacts are found from high-g peaks
 rather than the app's detector, so hits the phone missed still line up with their labels. Without a forehand sign
 (+1 or -1, as "Teach forehand" stores it) the sign is learned during the session the way AppModel does.
+
+The room session was recorded on firmware 1.5, which read the gyro 2x high: pass a gyro scale of 0.5 for it (and
+0 for the forehand sign to learn it). Recordings from firmware 1.6 need no scale.
 
 This mirrors ShotAnalyzer, including its sample-index windows, under the default calibration and a right-handed
 player. Keep the constants in step with the Swift.
@@ -17,10 +20,12 @@ import sys
 import numpy as np
 
 SWING_SPAN = 0.35
-VOLLEY_MAX_SWING_DEG = 93
+VOLLEY_MAX_SWING_DEG = 45
 SERVE_MAX_VERTICAL = -0.1
+SERVE_MIN_TIP_UP = 0.6    # |racket long axis . up| at contact
 LEARN_SHOTS = 5          # AppModel.learnShotsNeeded
 RIGHT_HANDED = True
+GATE = 3          # Mahony accel-correction gate, rad/s (Orientation.swift: simd_length(gyro) < 3)
 # Calibration.default: rows are the racket x, y, z axes in sensor coordinates.
 M = np.array([[0, 1, 0], [1, 0, 0], [0, 0, -1]], float)
 
@@ -52,7 +57,7 @@ def mahony(t, acc, gyr):
             continue
         dt = 0.001 if i == 0 else min(max(t[i] - t[i - 1], 0.0002), 0.02)
         w = gyr[i].copy()
-        if 0.85 < an < 1.15 and np.linalg.norm(gyr[i]) < 3:
+        if 0.85 < an < 1.15 and np.linalg.norm(gyr[i]) < GATE:
             up = rot(q * np.array([1, -1, -1, -1]), np.array([0, 0, 1.0]))
             e = np.cross(a / an, up)
             integ += 0.05 * e * dt
@@ -74,12 +79,12 @@ def swing_angle_deg(t, gyr, i0):
     return np.degrees(angle)
 
 
-def main(folder, taught=0.0):
+def main(folder, taught=0.0, gyro_scale=1.0):
     csv = glob.glob(os.path.join(folder, "*.csv"))[0]
     labels = open(os.path.join(folder, "labels.txt")).read().replace(",", " ").split()
     d = np.loadtxt(csv, delimiter=",", skiprows=1)
     t = d[:, 0]
-    acc, gyr, hg = d[:, 1:4] @ M.T, d[:, 4:7] @ M.T, d[:, 7:10] @ M.T
+    acc, gyr, hg = d[:, 1:4] @ M.T, d[:, 4:7] * gyro_scale @ M.T, d[:, 7:10] @ M.T
     Q = mahony(t, acc, gyr)
 
     hgm = np.linalg.norm(hg, axis=1)
@@ -108,14 +113,14 @@ def main(folder, taught=0.0):
         swing = swing_angle_deg(t, gyr, i0)
         if swing < VOLLEY_MAX_SWING_DEG:
             got = "VO"
+        elif abs(tip_up) > SERVE_MIN_TIP_UP and omega > 4:
+            got = "SV"       # long axis near vertical at contact; the sign depends on how the unit is mounted
         elif sign != 0:
             got = "BH" if w_pre[1] * sign <= 0 else ("SV" if vertical < SERVE_MAX_VERTICAL else "FH")
-        elif tip_up > 0.5 and omega > 8:
-            got = "SV"
         else:
             got = "FH" if vertical > 0 else "BH"
         # AppModel.learnForehandFace
-        if sign == 0 and got == "FH" and vertical > 0.6 and abs(w_pre[1]) > 5:
+        if sign == 0 and got == "FH" and vertical > 0.6 and abs(w_pre[1]) > 2.5:
             learned.append(w_pre[1])
             if len(learned) >= LEARN_SHOTS:
                 pos = sum(s > 0 for s in learned)
@@ -137,4 +142,4 @@ def main(folder, taught=0.0):
 
 
 if __name__ == "__main__":
-    main(sys.argv[1], float(sys.argv[2]) if len(sys.argv) > 2 else 0.0)
+    main(sys.argv[1], float(sys.argv[2]) if len(sys.argv) > 2 else 0.0, float(sys.argv[3]) if len(sys.argv) > 3 else 1.0)

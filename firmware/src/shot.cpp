@@ -209,17 +209,17 @@ bool shotAnalyze(const ShotConfig &cfg, const ImpactWindow &win, bool gyro4000, 
   float faceAngle = asinf(clampf(dot(hitNormal, up), -1, 1)) * 180 / (float)M_PI;
   float pathAngle = asinf(clampf(dot(vDir, up), -1, 1)) * 180 / (float)M_PI;
 
-  // Shot type (thresholds from ShotAnalyzer: volleyMaxSwingDeg, serveMaxVertical).
+  // Shot type (thresholds from ShotAnalyzer: volleyMaxSwingDeg, serveMaxVertical, serveMinTipUp).
   bool forehandTurn = (omegaW.z > 0) == m.rightHanded;
   float forehandVertical = (omega > 1e-3f ? omegaW.z / omega : 0) * (m.rightHanded ? 1 : -1);
   uint8_t type;
-  if (swingDeg < 93) {
+  if (swingDeg < 45) {
     type = TB_SHOT_VOLLEY;
+  } else if (fabsf(dot(tipW, up)) > 0.6f && omega > 4) {
+    type = TB_SHOT_SERVE;  // long axis near vertical at contact; the sign depends on the mounting (serveMinTipUp)
   } else if (m.forehandBodySign != 0) {
     bool forehandFace = wPre.y * m.forehandBodySign > 0;
     type = !forehandFace ? TB_SHOT_BACKHAND : (forehandVertical < -0.1f ? TB_SHOT_SERVE : TB_SHOT_FOREHAND);
-  } else if (dot(tipW, up) > 0.5f && omega > 8) {
-    type = TB_SHOT_SERVE;
   } else {
     type = forehandTurn ? TB_SHOT_FOREHAND : TB_SHOT_BACKHAND;
   }

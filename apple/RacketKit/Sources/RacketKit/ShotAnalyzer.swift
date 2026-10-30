@@ -22,11 +22,14 @@ public struct ShotAnalyzer: Sendable {
     public var profile: RacketProfile
     public var model: ImpactModel
 
-    // Shot-type tuning from a labeled session (data/room-2026-10-29: 22 hits, light, indoors). Volleys turned the
-    // racket 62–84° in the 350 ms before contact, groundstrokes and serves 102–149°. Fitted on that one session.
+    // Shot-type tuning from a labeled session (data/room-2026-10-29: 22 hits, light, indoors). With the gyro at its
+    // true scale (the session was recorded on firmware 1.5, which read it 2x high, so halve its raw values) volleys
+    // turned the racket 32–42° in the 350 ms before contact, backhands 47–60°, forehands 52–67° and serves 61–71°.
+    // Fitted on that one session; SmartTennisRacket's harder groundstrokes turn 140–250°.
     static let swingSpan: Double = 0.35          // fits in the racket's 384 ms impact window
-    static let volleyMaxSwingDeg: Float = 93
+    static let volleyMaxSwingDeg: Float = 45
     static let serveMaxVertical: Float = -0.1
+    static let serveMinTipUp: Float = 0.6
     /// Speed of the ball coming in, for the ball-speed estimate. Unknown without tracking it, so the estimate is
     /// the speed the racket gives a still ball; rally balls arrive with pace this leaves out.
     static let incomingBallMs: Float = 0
@@ -83,11 +86,13 @@ public struct ShotAnalyzer: Sendable {
             type = .calibration
         } else if swingDeg < Self.volleyMaxSwingDeg {
             type = .volley
+        } else if abs(simd_dot(tipW, up)) > Self.serveMinTipUp && omega > 4 {
+            // Long axis near vertical at contact: a serve. The sign depends on how the unit is mounted (the room
+            // session's serves read -0.82 to -0.97 under the default calibration), so only its size counts.
+            type = .serve
         } else if profile.forehandBodySign != 0 {
             let forehandFace = wPre.y * profile.forehandBodySign > 0
             type = !forehandFace ? .backhand : (forehandVertical < Self.serveMaxVertical ? .serve : .forehand)
-        } else if simd_dot(tipW, up) > 0.5 && omega > 8 {
-            type = .serve
         } else {
             type = forehandTurn ? .forehand : .backhand
         }
