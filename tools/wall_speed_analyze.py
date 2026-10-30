@@ -11,6 +11,15 @@ app's model predicts ball speed = (1 + e) * R * |omega_yz| for a ball with no in
 This fits the measured speeds against |omega_yz| and reports the implied radius R.
 
 Mean speed over the flight is lower than the speed just after contact (drag), typically 5-10% over 4 m.
+
+To fit the richer models in tools/wall_speed_fit.py (current formula vs the racket-speed-loss "impulse" model),
+export both inputs it reads. Its hit N is this script's shot N (same impact detector and windows):
+
+    python3 tools/wall_speed_analyze.py session.tbrec drill.mov --distance 4.0 \
+        --session-csv session.csv --truth-csv truth.csv
+    python3 tools/wall_speed_fit.py session.csv truth.csv [--gyro-scale 0.5]
+
+The session CSV is the raw gyro (no scale applied), so pass the same --gyro-scale to both tools for firmware 1.5.
 """
 import argparse
 import csv
@@ -60,6 +69,23 @@ def imu_shots(rec, gyro_scale):
         w = gyr[i0 - 10:i0 - 2].mean(0)
         out.append((t[i0], float(np.hypot(w[1], w[2])), float(np.linalg.norm(w))))
     return out
+
+
+def write_session_csv(rec, path):
+    """The app's session export format (RecordingFormat.csv): time_s,ax_g,...,hz_g. Main segment only, so impact
+    numbers match this script's shots."""
+    with open(path, "w") as f:
+        f.write("time_s,ax_g,ay_g,az_g,gx_rads,gy_rads,gz_rads,hx_g,hy_g,hz_g\n")
+        np.savetxt(f, np.c_[rec["t"], rec["v"]], delimiter=",", fmt=["%.4f"] + ["%.4f"] * 6 + ["%.3f"] * 3)
+
+
+def write_truth_csv(rows, distance, path):
+    """tools/wall_speed_fit.py truth file: hit (1-based impact number), distance_m, flight_time_s."""
+    with open(path, "w") as f:
+        f.write("hit,distance_m,flight_time_s\n")
+        for r in rows:
+            if r["status"] == "ok" and not r["excluded"]:
+                f.write(f"{r['shot']},{distance:.3f},{r['flight_s']:.4f}\n")
 
 
 def read_audio(path):
@@ -212,6 +238,8 @@ def main():
     ap.add_argument("--effort", default="", help='effort per shot in order, e.g. "E M H E M H"')
     ap.add_argument("--exclude", default="", help="shot numbers to drop, e.g. 3,17")
     ap.add_argument("--csv")
+    ap.add_argument("--session-csv", help="write the session in the app's CSV export format, for tools/wall_speed_fit.py")
+    ap.add_argument("--truth-csv", help="write hit,distance_m,flight_time_s for tools/wall_speed_fit.py")
     ap.add_argument("--selftest", action="store_true")
     a = ap.parse_args()
     if a.selftest:
@@ -224,6 +252,12 @@ def main():
     ex = {int(s) for s in a.exclude.split(",") if s}
     rows, nm, ni, na = analyze(rec, x, sr, a.distance, a.phone_to_contact, wall, a.gyro_scale, a.effort.split(), ex)
     report(rows, nm, ni, na, a.csv)
+    if a.session_csv:
+        write_session_csv(rec, a.session_csv)
+        print(f"session CSV: {a.session_csv}")
+    if a.truth_csv:
+        write_truth_csv(rows, a.distance, a.truth_csv)
+        print(f"truth CSV: {a.truth_csv}")
 
 
 if __name__ == "__main__":

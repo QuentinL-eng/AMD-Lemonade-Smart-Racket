@@ -5,6 +5,13 @@
 gyro error was found, so every displayed swing and ball speed is suspect. This drill measures real ball speed so the
 radius can be fitted instead of guessed. It also gives a first labeled set of hard, real shots.
 
+(`docs/WALL_SPEED_TEST.md` is a sibling version of this test, written for `tools/wall_speed_fit.py`: 8-10 m from the
+wall, flight time counted by hand from 240 fps video, audio as a fallback. This document is the audio-timed variant,
+and `tools/wall_speed_analyze.py` automates the audio timing and writes the truth file that `wall_speed_fit.py` reads.
+Both use the same truth-file format, so results from either can be fitted together. A longer distance gives better
+timing resolution but a bigger drag bias: expect the mean flight speed to read several percent low at 4 m and
+noticeably more at 9 m, and compare fitted radii only between recordings taken at the same distance.)
+
 **What it measures.** For each hit: the racket's pop (loudest sound, matched to the IMU's high-g spike), then the
 wall thud. Mean ball speed = wall distance / flight time. The analysis fits that against the IMU's `|ω_yz|`.
 
@@ -52,6 +59,18 @@ Rules that matter:
 
 End with 3 handle taps, then stop the video and stop the recording.
 
+## Part 2: rally hits (a second, separate recording)
+The drop hits above have no incoming ball, so they cannot tell the app's current formula from the "impulse" model in
+`tools/wall_speed_fit.py` (ball speed from how much the racket slows at contact): with a still ball the racket's
+slowdown is proportional to its speed, and the impulse model's two constants cannot be told apart. To test it the incoming ball must
+vary, so do a second recording:
+- Hit the wall; let the ball come back off the wall (one floor bounce), and hit it again. Keep the contact point
+  within about 0.5 m of your mark so the wall distance holds.
+- 30 hits, forehands, effort E M H interleaved as before; mixing short and long returns is good (varied incoming
+  speed is the point). Note any hit that was off the mark or a miss.
+- Do it as its own recording and its own video (start the recorder and the phone again, with the same 3 handle taps
+  at the start and end), so the analysis runs on it separately.
+
 ## Collect
 - `~/Documents/Recordings/session-….tbrec` (the one that grew).
 - The phone video (`.mov`/`.mp4`).
@@ -59,12 +78,23 @@ End with 3 handle taps, then stop the video and stop the recording.
 Keep the raw files until the fit is done, then keep only the CSV result (Mac disk is tight).
 
 ## Analyse
+Run each recording (drop hits, then rally hits) through the timing script. It also writes the two files that
+`tools/wall_speed_fit.py` reads, with the same hit numbering (hit N there is shot N here):
 ```bash
 python3 tools/wall_speed_analyze.py ~/Documents/Recordings/session-….tbrec drill.mov \
     --distance 4.0 --phone-to-contact 1.0 \
-    --effort "E M H E M H ... (all shots, in order)" --exclude 7,23 --csv wall_speed.csv
+    --effort "E M H E M H ... (all shots, in order)" --exclude 7,23 --csv wall_speed.csv \
+    --session-csv drill_session.csv --truth-csv drill_truth.csv
+
+python3 tools/wall_speed_fit.py drill_session.csv drill_truth.csv      # add --gyro-scale 0.5 for firmware 1.5
 ```
-Check it first without real data: `python3 tools/wall_speed_analyze.py --selftest`.
+Check the timing script first without real data: `python3 tools/wall_speed_analyze.py --selftest`.
+
+Which fit to trust:
+- **Drop recording:** the current-formula fit (model A) is the only meaningful one. Its radius is the number to compare with 1.15.
+- **Rally recording:** the impulse model (B) can only be judged here. Compare its leave-one-out error with A's, and
+  distrust a B whose radius is far from A's or has a huge error bar: that means the two constants are not separable.
+- The session CSV holds the raw gyro. The fit's `--gyro-scale` must match what you used here.
 
 ## Reading the result
 - **Matched shots.** The first line should show nearly every IMU impact paired with a pop. If many are lost, the audio
