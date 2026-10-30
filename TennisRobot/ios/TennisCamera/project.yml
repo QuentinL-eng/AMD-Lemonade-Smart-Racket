@@ -24,6 +24,8 @@ targets:
     platform: iOS
     sources:
       - path: Sources
+        excludes:
+          - "**/*sync-conflict*"   # Syncthing conflict copies
     settings:
       base:
         PRODUCT_BUNDLE_IDENTIFIER: com.tennisrobot.camera
