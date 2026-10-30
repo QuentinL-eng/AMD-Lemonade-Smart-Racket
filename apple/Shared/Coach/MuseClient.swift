@@ -20,11 +20,11 @@ enum MuseError: LocalizedError {
 
 @MainActor
 struct MuseClient: MuseTransport {
-    /// The app's own `muse` edge function. The Meta API key lives only in the server's secrets.
+    /// The app's own `muse` edge function. The Baseten key and the served model live only in the server's secrets.
     let endpoint: URL
     let publishableKey: String
     let accessToken: String
-    var model = "muse-spark-1.3"
+    var model = "muse-spark-open"
     var session: URLSession = .shared
 
     func complete(messages: [[String: Any]], tools: [[String: Any]]) async throws -> [String: Any] {
@@ -35,7 +35,7 @@ struct MuseClient: MuseTransport {
         request.setValue(publishableKey, forHTTPHeaderField: "apikey")
         request.setValue("application/json", forHTTPHeaderField: "Content-Type")
         var body: [String: Any] = ["model": model, "messages": messages,
-                                   "max_completion_tokens": 2048, "reasoning_effort": "low"]
+                                   "max_completion_tokens": 4096]
         if !tools.isEmpty { body["tools"] = tools; body["tool_choice"] = "auto" }
         request.httpBody = try JSONSerialization.data(withJSONObject: body)
         // No automatic retries: rate limits and network errors immediately use the local fallback.
