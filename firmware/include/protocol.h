@@ -20,7 +20,7 @@
 #define TB_SUMMARY_UUID  "7E5B000B-6B1D-4D8E-9C1A-7E5B7E5B0001"  // TBShotSummary, notify
 
 #define TB_FW_MAJOR 1
-#define TB_FW_MINOR 6
+#define TB_FW_MINOR 7
 
 #define TB_SAMPLES_PER_PACKET 8
 
