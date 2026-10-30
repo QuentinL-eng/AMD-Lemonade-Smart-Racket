@@ -68,10 +68,14 @@ static volatile bool streaming = true;   // stream whenever a client subscribes
 // High-g goes on the wire as H3LIS 12-bit counts at ±400 g (195 mg/count), so the sensor's whole ±320 g fits.
 // Fixed since 1.6: the coarser step is below the sensor's noise (~0.35 g at rest).
 static const uint8_t h3Range = 3;        // 0 = 100 g, 1 = 200 g, 3 = 400 g
-// ±4000 dps by default: fast swings pass 2000 dps, and every packet flags its units. TB_CMD_GYRO_RANGE can still
-// select ±2000.
-static volatile bool gyro4000Wanted = true;    // requested by the app (TB_CMD_GYRO_RANGE)
-static volatile bool gyro4000 = true;          // what the IMU is set to; changed by the sampler between packets
+// ±4000 dps is OFF (1.8). With CTRL6 set to ±4000 the rates still came out 2x too high on 1.5, 1.6 and 1.7: against
+// the robot arm's poses, the accelerometer's gravity, the speed in 240 fps video, and an at-rest noise floor (in raw
+// counts) identical to the ±2000 setting, which says the sensor stays at ±2000 while the packets claim ±4000. Until a
+// bench rotation test shows true ±4000, the range is pinned to ±2000 so the units on the wire are right; the
+// ceiling is then the real 2000 dps (34.9 rad/s per axis). TB_CMD_GYRO_RANGE requests for ±4000 are ignored.
+static const bool GYRO_4000_ALLOWED = false;
+static volatile bool gyro4000Wanted = GYRO_4000_ALLOWED;    // requested by the app (TB_CMD_GYRO_RANGE)
+static volatile bool gyro4000 = GYRO_4000_ALLOWED;          // what the IMU is set to; changed by the sampler between packets
 static volatile uint32_t imuResets = 0;        // times the watchdog found the IMU had lost its settings
 static volatile uint8_t streamMode = TB_STREAM_RAW;
 
@@ -353,7 +357,7 @@ class ServerCallbacks : public NimBLEServerCallbacks {
     NimBLEDevice::startAdvertising();
     if (NimBLEDevice::getServer()->getConnectedCount() == 0) {
       xQueueReset(packetQueue);
-      gyro4000Wanted = true;    // back to the default, whatever the last app chose
+      gyro4000Wanted = GYRO_4000_ALLOWED;    // back to the default, whatever the last app chose
       streamMode = TB_STREAM_RAW;   // the next app may not know about impact mode (captured windows stay queued)
     }
   }
@@ -367,7 +371,7 @@ class ControlCallbacks : public NimBLECharacteristicCallbacks {
       case TB_CMD_START_STREAM: streaming = true; break;
       case TB_CMD_STOP_STREAM: streaming = false; break;
       case TB_CMD_GYRO_RANGE:
-        if (v.size() >= 2 && (v[1] == 0 || v[1] == 1)) gyro4000Wanted = v[1] == 1;
+        if (v.size() >= 2 && (v[1] == 0 || v[1] == 1)) gyro4000Wanted = GYRO_4000_ALLOWED && v[1] == 1;
         break;
       case TB_CMD_STREAM_MODE:
         if (v.size() >= 2 && v[1] <= TB_STREAM_IMPACTS_ACKED) {
