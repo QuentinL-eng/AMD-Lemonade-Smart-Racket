@@ -1,0 +1,22 @@
+{
+  "ground_truth": "Eight forehands, user statement",
+  "n": 8,
+  "live_class_counts": {
+    "forehand": 3,
+    "backhand": 4,
+    "serve": 1,
+    "volley": 0
+  },
+  "correct": 3,
+  "live_accuracy": 0.375,
+  "firmware_from_device_log": "1.6",
+  "gyro4000_flag": true,
+  "gyro_correction_for_sensor_features": 0.5,
+  "prior_user_reported_version": "1.8 or newer; superseded by saved device link log",
+  "windows_received": 8,
+  "summaries_received": 8,
+  "lost_windows": 0,
+  "calibration_note": "Recovered preferences contain a custom calibrated matrix; no taught forehand sign is saved. Earlier default-mount nonzero-sign bound is hypothetical, not an observed live classification result.",
+  "speed_note": "Live displayed speeds are estimates, not measured reference speeds. Known gyro bug also affects their scale.",
+  "acceptance_met": false
+}

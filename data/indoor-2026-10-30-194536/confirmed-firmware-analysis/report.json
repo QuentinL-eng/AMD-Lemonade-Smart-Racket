@@ -1,0 +1,266 @@
+{
+  "source_file": "/Users/quentinlynch/Projects/Hardware/Smart Racket/data/indoor-2026-10-30-194536/session-2026-10-30T194536-racket.csv",
+  "source_sha256": "4e57349f651b731dc82847d325e0942a4ab22040ae88548c3c00a4ebeff7777b",
+  "source_format": "App raw sensor CSV, inferred 448-sample impact windows",
+  "provenance": "real_racket",
+  "firmware_reported_by_user": "1.6, verified in phone link log",
+  "gyro_scale": 0.5,
+  "sample_count": 3584,
+  "labeled_hits": 8,
+  "shot_type": "forehand",
+  "pace": "medium to low, user reported",
+  "setting": "indoors",
+  "dataset_role": "Separate validation session; not used to fit classification thresholds or model weights",
+  "feature_version": "stroke-350pre-60post-v1",
+  "feature_shape": [
+    8,
+    410
+  ],
+  "quality": {
+    "complete_windows": 8,
+    "passes_12ms_gap_policy": 8,
+    "inter_window_gaps": "Intentional unrecorded time between impact windows, not missing samples inside hits",
+    "starting_orientation_exported": false,
+    "firmware_version_exported": false,
+    "maximum_absolute_gyro_axis_rad_s": 21.88685,
+    "scale_note": "Scale follows user-reported firmware. Link metadata is needed to confirm device version/range; no scale was chosen by classification score."
+  },
+  "events": [
+    {
+      "hit": 1,
+      "samples": 448,
+      "window_start_sensor_s": 51.7176,
+      "window_end_sensor_s": 52.1646,
+      "capture_contact_sensor_s": 52.1016,
+      "refined_contact_sensor_s": 52.1056,
+      "refined_local_index": 388,
+      "largest_internal_gap_ms": 1.300000000000523,
+      "high_g_peak_g": 28.668316134715692,
+      "gyro_axis_peak_rad_s": [
+        14.06905,
+        19.85845,
+        9.7249
+      ],
+      "swing_deg": 111.44850990882591,
+      "pre_contact_gyro_sensor_rad_s": [
+        11.104931249999998,
+        11.34464375,
+        1.5528374999999999
+      ],
+      "pre_contact_gyro_racket_y_rad_s": -11.104931249999998,
+      "forehand_face_sign_under_default_mount": -1,
+      "starting_orientation_available": false,
+      "shot_type": "forehand",
+      "label_source": "User statement in chat"
+    },
+    {
+      "hit": 2,
+      "samples": 448,
+      "window_start_sensor_s": 54.1126,
+      "window_end_sensor_s": 54.5596,
+      "capture_contact_sensor_s": 54.4966,
+      "refined_contact_sensor_s": 54.4966,
+      "refined_local_index": 384,
+      "largest_internal_gap_ms": 1.4000000000038426,
+      "high_g_peak_g": 30.498648330704757,
+      "gyro_axis_peak_rad_s": [
+        14.5192,
+        17.5906,
+        4.0047
+      ],
+      "swing_deg": 106.466927802557,
+      "pre_contact_gyro_sensor_rad_s": [
+        13.62009375,
+        8.336075000000001,
+        0.2767
+      ],
+      "pre_contact_gyro_racket_y_rad_s": -13.62009375,
+      "forehand_face_sign_under_default_mount": -1,
+      "starting_orientation_available": false,
+      "shot_type": "forehand",
+      "label_source": "User statement in chat"
+    },
+    {
+      "hit": 3,
+      "samples": 448,
+      "window_start_sensor_s": 57.6026,
+      "window_end_sensor_s": 58.0496,
+      "capture_contact_sensor_s": 57.9866,
+      "refined_contact_sensor_s": 57.9866,
+      "refined_local_index": 384,
+      "largest_internal_gap_ms": 1.5000000000000568,
+      "high_g_peak_g": 24.7158173039048,
+      "gyro_axis_peak_rad_s": [
+        10.96365,
+        7.7082,
+        2.92345
+      ],
+      "swing_deg": 119.63246901683677,
+      "pre_contact_gyro_sensor_rad_s": [
+        10.916418749999998,
+        5.520918749999999,
+        0.8197249999999999
+      ],
+      "pre_contact_gyro_racket_y_rad_s": -10.916418749999998,
+      "forehand_face_sign_under_default_mount": -1,
+      "starting_orientation_available": false,
+      "shot_type": "forehand",
+      "label_source": "User statement in chat"
+    },
+    {
+      "hit": 4,
+      "samples": 448,
+      "window_start_sensor_s": 60.5756,
+      "window_end_sensor_s": 61.0226,
+      "capture_contact_sensor_s": 60.9596,
+      "refined_contact_sensor_s": 60.9596,
+      "refined_local_index": 384,
+      "largest_internal_gap_ms": 1.4000000000038426,
+      "high_g_peak_g": 17.568407013727796,
+      "gyro_axis_peak_rad_s": [
+        7.93805,
+        10.7657,
+        3.41725
+      ],
+      "swing_deg": 96.21884208026174,
+      "pre_contact_gyro_sensor_rad_s": [
+        7.785337500000001,
+        -8.69245625,
+        -2.66788125
+      ],
+      "pre_contact_gyro_racket_y_rad_s": -7.785337500000001,
+      "forehand_face_sign_under_default_mount": -1,
+      "starting_orientation_available": false,
+      "shot_type": "forehand",
+      "label_source": "User statement in chat"
+    },
+    {
+      "hit": 5,
+      "samples": 448,
+      "window_start_sensor_s": 64.9096,
+      "window_end_sensor_s": 65.3566,
+      "capture_contact_sensor_s": 65.2936,
+      "refined_contact_sensor_s": 65.2936,
+      "refined_local_index": 384,
+      "largest_internal_gap_ms": 1.300000000000523,
+      "high_g_peak_g": 29.00588130017773,
+      "gyro_axis_peak_rad_s": [
+        12.51105,
+        8.9118,
+        3.3672
+      ],
+      "swing_deg": 115.66621369414557,
+      "pre_contact_gyro_sensor_rad_s": [
+        -12.4028875,
+        3.7125500000000007,
+        -0.60328125
+      ],
+      "pre_contact_gyro_racket_y_rad_s": 12.4028875,
+      "forehand_face_sign_under_default_mount": 1,
+      "starting_orientation_available": false,
+      "shot_type": "forehand",
+      "label_source": "User statement in chat"
+    },
+    {
+      "hit": 6,
+      "samples": 448,
+      "window_start_sensor_s": 66.3796,
+      "window_end_sensor_s": 66.8266,
+      "capture_contact_sensor_s": 66.7636,
+      "refined_contact_sensor_s": 66.7676,
+      "refined_local_index": 388,
+      "largest_internal_gap_ms": 1.4000000000038426,
+      "high_g_peak_g": 39.46137098479981,
+      "gyro_axis_peak_rad_s": [
+        12.5089,
+        14.5671,
+        5.9203
+      ],
+      "swing_deg": 99.43140314386231,
+      "pre_contact_gyro_sensor_rad_s": [
+        -7.5276625,
+        8.97940625,
+        2.38771875
+      ],
+      "pre_contact_gyro_racket_y_rad_s": 7.5276625,
+      "forehand_face_sign_under_default_mount": 1,
+      "starting_orientation_available": false,
+      "shot_type": "forehand",
+      "label_source": "User statement in chat"
+    },
+    {
+      "hit": 7,
+      "samples": 448,
+      "window_start_sensor_s": 69.0346,
+      "window_end_sensor_s": 69.4816,
+      "capture_contact_sensor_s": 69.4186,
+      "refined_contact_sensor_s": 69.4186,
+      "refined_local_index": 384,
+      "largest_internal_gap_ms": 1.300000000000523,
+      "high_g_peak_g": 27.102194099371363,
+      "gyro_axis_peak_rad_s": [
+        11.10415,
+        6.7919,
+        3.86205
+      ],
+      "swing_deg": 92.28452180294572,
+      "pre_contact_gyro_sensor_rad_s": [
+        -11.048925,
+        -3.02386875,
+        3.03981875
+      ],
+      "pre_contact_gyro_racket_y_rad_s": 11.048925,
+      "forehand_face_sign_under_default_mount": 1,
+      "starting_orientation_available": false,
+      "shot_type": "forehand",
+      "label_source": "User statement in chat"
+    },
+    {
+      "hit": 8,
+      "samples": 448,
+      "window_start_sensor_s": 71.5436,
+      "window_end_sensor_s": 71.9906,
+      "capture_contact_sensor_s": 71.9276,
+      "refined_contact_sensor_s": 71.9276,
+      "refined_local_index": 384,
+      "largest_internal_gap_ms": 1.600000000010482,
+      "high_g_peak_g": 40.12548504379729,
+      "gyro_axis_peak_rad_s": [
+        15.2961,
+        21.88685,
+        7.01535
+      ],
+      "swing_deg": 104.25533039598614,
+      "pre_contact_gyro_sensor_rad_s": [
+        -11.04945,
+        6.97174375,
+        0.7779562499999999
+      ],
+      "pre_contact_gyro_racket_y_rad_s": 11.04945,
+      "forehand_face_sign_under_default_mount": 1,
+      "starting_orientation_available": false,
+      "shot_type": "forehand",
+      "label_source": "User statement in chat"
+    }
+  ],
+  "fixed_face_sign_diagnostic": {
+    "scope": "Default mounting, existing rules with a nonzero taught sign; not automatic sign=0 mode",
+    "long_swing_events": 8,
+    "forehand_candidates_by_taught_sign": {
+      "-1": 4,
+      "1": 4
+    },
+    "best_possible_forehands_with_any_single_taught_sign": 4,
+    "note": "Pose-dependent branches can reduce this upper bound; this is not an observed app accuracy score"
+  },
+  "classification_accuracy": null,
+  "accuracy_limit": "Exact live shot typing needs each starting quaternion or the live .shots.jsonl summaries. Dynamic window starts are not valid stationary tilt measurements.",
+  "companion_files": [
+    "session-2026-10-30T194536-racket.shots.jsonl",
+    "session-2026-10-30T194536-racket.link.json"
+  ],
+  "acceptance": {
+    "all_four_types_95_percent_demonstrated": false,
+    "ball_speed_validated": false
+  }
+}

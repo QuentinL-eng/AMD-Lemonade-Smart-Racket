@@ -1,0 +1,30 @@
+event_id,candidate,frame,shot_type,reviewer,method,uncertainty_frames,note
+1,3,5017,forehand,Codex visual review,SAM 3.1 proposal plus source frame review,2,Right-handed self-fed indoor forehand; contact timing approximate within blur bracket
+2,4,6142,forehand,Codex visual review,SAM 3.1 proposal plus source frame review,2,Right-handed self-fed indoor forehand; contact timing approximate within blur bracket
+3,5,7392,forehand,Codex visual review,SAM 3.1 proposal plus source frame review,2,Right-handed self-fed indoor forehand; contact timing approximate within blur bracket
+4,6,8587,forehand,Codex visual review,SAM 3.1 proposal plus source frame review,2,Right-handed self-fed indoor forehand; contact timing approximate within blur bracket
+5,7,9621,forehand,Codex visual review,SAM 3.1 proposal plus source frame review,2,Right-handed self-fed indoor forehand; contact timing approximate within blur bracket
+6,8,10825,forehand,Codex visual review,SAM 3.1 proposal plus source frame review,2,Right-handed self-fed indoor forehand; contact timing approximate within blur bracket
+7,9,12083,forehand,Codex visual review,SAM 3.1 proposal plus source frame review,2,Right-handed self-fed indoor forehand; contact timing approximate within blur bracket
+8,10,13042,forehand,Codex visual review,SAM 3.1 proposal plus source frame review,2,Right-handed self-fed indoor forehand; contact timing approximate within blur bracket
+9,11,15315,forehand,Codex visual review,SAM 3.1 proposal plus source frame review,2,Right-handed self-fed indoor forehand; contact timing approximate within blur bracket
+10,12,16600,forehand,Codex visual review,SAM 3.1 proposal plus source frame review,2,Right-handed self-fed indoor forehand; contact timing approximate within blur bracket
+11,13,17826,forehand,Codex visual review,Source frame review; SAM lost racket near contact,2,Right-handed self-fed indoor forehand; contact timing approximate within blur bracket
+12,14,18859,forehand,Codex visual review,SAM 3.1 proposal plus source frame review,2,Right-handed self-fed indoor forehand; contact timing approximate within blur bracket
+13,15,20030,forehand,Codex visual review,SAM 3.1 proposal plus source frame review,2,Right-handed self-fed indoor forehand; contact timing approximate within blur bracket
+14,16,21305,forehand,Codex visual review,SAM 3.1 proposal plus source frame review,2,Right-handed self-fed indoor forehand; contact timing approximate within blur bracket
+15,17,22404,forehand,Codex visual review,SAM 3.1 proposal plus source frame review,2,Right-handed self-fed indoor forehand; contact timing approximate within blur bracket
+16,18,23871,forehand,Codex visual review,SAM 3.1 proposal plus source frame review,2,Right-handed self-fed indoor forehand; contact timing approximate within blur bracket
+17,19,25123,forehand,Codex visual review,SAM 3.1 proposal plus source frame review,2,Right-handed self-fed indoor forehand; contact timing approximate within blur bracket
+18,20,26396,forehand,Codex visual review,SAM 3.1 proposal plus source frame review,2,Right-handed self-fed indoor forehand; contact timing approximate within blur bracket
+19,21,27634,forehand,Codex visual review,SAM 3.1 proposal plus source frame review,2,Right-handed self-fed indoor forehand; contact timing approximate within blur bracket
+20,22,29180,forehand,Codex visual review,SAM 3.1 proposal plus source frame review,2,Right-handed self-fed indoor forehand; contact timing approximate within blur bracket
+21,23,30348,forehand,Codex visual review,SAM 3.1 proposal plus source frame review,2,Right-handed self-fed indoor forehand; contact timing approximate within blur bracket
+22,24,31686,forehand,Codex visual review,SAM 3.1 proposal plus source frame review,2,Right-handed self-fed indoor forehand; contact timing approximate within blur bracket
+23,25,32882,forehand,Codex visual review,SAM 3.1 proposal plus source frame review,2,Right-handed self-fed indoor forehand; contact timing approximate within blur bracket
+24,26,34009,forehand,Codex visual review,SAM 3.1 proposal plus source frame review,2,Right-handed self-fed indoor forehand; contact timing approximate within blur bracket
+25,27,35345,forehand,Codex visual review,Source frame review; SAM lost racket near contact,2,Right-handed self-fed indoor forehand; contact timing approximate within blur bracket
+26,28,36676,forehand,Codex visual review,SAM 3.1 proposal plus source frame review,2,Right-handed self-fed indoor forehand; contact timing approximate within blur bracket
+27,29,38107,forehand,Codex visual review,Source frame review; SAM lost racket near contact,2,Right-handed self-fed indoor forehand; contact timing approximate within blur bracket
+28,30,39244,forehand,Codex visual review,SAM 3.1 proposal plus source frame review,2,Right-handed self-fed indoor forehand; contact timing approximate within blur bracket
+29,31,43075,forehand,Codex visual review,SAM 3.1 proposal plus source frame review,2,Right-handed self-fed indoor forehand; contact timing approximate within blur bracket

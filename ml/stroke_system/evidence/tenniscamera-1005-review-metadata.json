@@ -1,0 +1,42 @@
+{
+  "session": "data/Tennis Camera/10-29-26-1005",
+  "reviewer": "Codex visual review, not a human reviewer",
+  "reviewed_forehands": 29,
+  "other_strokes_in_reviewed_set": 0,
+  "reviewed_candidate_range": [
+    3,
+    31
+  ],
+  "excluded_intervals": [
+    {
+      "video_seconds": [
+        0,
+        18
+      ],
+      "reason": "Setup and synchronization taps; no verified tennis strokes"
+    },
+    {
+      "video_seconds": [
+        181,
+        185.7
+      ],
+      "reason": "Camera handling; no verified tennis stroke"
+    }
+  ],
+  "manual_contact_frames_when_SAM_lost_racket": {
+    "13": 17826,
+    "27": 35345,
+    "29": 38107
+  },
+  "contact_time_uncertainty_frames": 2,
+  "source_files_sha256": {
+    "data/Tennis Camera/10-29-26-1005/video.mov": "ef748326d888fec45c0b727a126949b526b0c2091ad238b074792f0589a7dc32",
+    "data/Tennis Camera/10-29-26-1005/video_frames.bin": "4c492bde90c9fbb840899f9d29d06bb006440ef7d2e568ca43c8f29d25fa7e9f",
+    "data/Tennis Camera/10-29-26-1005/imu_aligned.npz": "6df6492b53a1e071cb1c9f01c0e2d05cdf16c63b4ee845ebfb6845dad59df3f8"
+  },
+  "gyro_scale": 0.5,
+  "sam_requests_completed": 62,
+  "sam_processed_frame_prompt_pairs": 15566,
+  "sam_unique_source_frames_approx": 7783,
+  "limits": "29 confirmed contacts reviewed around SAM proposals plus a coarse whole-video census; no claim of exhaustive frame-by-frame detection ground truth."
+}

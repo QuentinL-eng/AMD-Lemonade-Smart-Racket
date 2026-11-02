@@ -1,0 +1,91 @@
+{
+  "gyro_scale": 0.5,
+  "reviewed_labels_sha256": "6cc95b8edda87934a774f129ece68012ef0d593e11c08363358b0e2783653c5c",
+  "production_source_sha256": {
+    "apple/RacketKit/Sources/RacketKit/ShotAnalyzer.swift": "4c0e72c27b0c5215bfc3a4a30db59591de27b2120e480cd33f43aa26504002e0",
+    "firmware/src/shot.cpp": "ff143270b7aba6fe85ed251dafb228d417683e30220b06e3c6b185e7b5ad18df"
+  },
+  "legacy_clock_matching": {
+    "seed_offset_s": 0.35,
+    "search_radius_s": 0.12,
+    "method": "Largest locally complete three-sample high-g jump near each video contact; no stroke labels used",
+    "matched_contacts": 29
+  },
+  "acceptance": {
+    "own_racket_all_strokes_95_percent_demonstrated": false,
+    "reasons": [
+      "This independent video contains confirmed forehands only",
+      "No held-out backhand, serve or volley recall is available",
+      "Small single-session sample; no ball-speed reference"
+    ]
+  },
+  "source_session": "data/Tennis Camera/10-29-26-1005",
+  "conditional_classification": {
+    "taught_sign_from_room": {
+      "correct": 28,
+      "n": 29,
+      "accuracy": 0.9655172413793104,
+      "wilson95": [
+        0.8282410893529976,
+        0.9938869433859677
+      ],
+      "per_class": {
+        "forehand": {
+          "n": 29,
+          "correct": 28
+        },
+        "backhand": {
+          "n": 0,
+          "correct": 0
+        },
+        "serve": {
+          "n": 0,
+          "correct": 0
+        },
+        "volley": {
+          "n": 0,
+          "correct": 0
+        }
+      },
+      "scope": "Classification given video-matched contact; video timing helps find the contact, so this is not sensor-only end-to-end accuracy"
+    },
+    "learn_sign_during_session": {
+      "correct": 28,
+      "n": 29,
+      "accuracy": 0.9655172413793104,
+      "wilson95": [
+        0.8282410893529976,
+        0.9938869433859677
+      ],
+      "per_class": {
+        "forehand": {
+          "n": 29,
+          "correct": 28
+        },
+        "backhand": {
+          "n": 0,
+          "correct": 0
+        },
+        "serve": {
+          "n": 0,
+          "correct": 0
+        },
+        "volley": {
+          "n": 0,
+          "correct": 0
+        }
+      },
+      "scope": "Classification given video-matched contact; video timing helps find the contact, so this is not sensor-only end-to-end accuracy"
+    }
+  },
+  "raw_stream_replay": {
+    "detections": 33,
+    "matched_verified_strokes": 29,
+    "correctly_typed_verified_strokes": 28,
+    "verified_stroke_detection_recall": 1.0,
+    "correctly_typed_fraction_of_verified_strokes": 0.9655172413793104,
+    "note": "Replay on received raw BLE samples, motion path only; cannot measure missing embedded samples or microphone-assisted live detections",
+    "unmatched_detections": 4
+  },
+  "review_metadata": "tenniscamera-1005-review-metadata.json"
+}

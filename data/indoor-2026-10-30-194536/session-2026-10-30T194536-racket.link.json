@@ -1,0 +1,19 @@
+{
+  "firmware" : "1.6",
+  "gyro4000dps" : true,
+  "highGRange" : 3,
+  "impactMode" : false,
+  "link" : {
+    "backlogWindows" : 0,
+    "duplicateWindows" : 0,
+    "lostPackets" : 0,
+    "lostWindows" : 0,
+    "packets" : 0,
+    "packetsAt4000dps" : 0,
+    "resendRequests" : 0,
+    "summaries" : 8,
+    "windows" : 8
+  },
+  "racketDroppedPackets" : 0,
+  "seconds" : 35.407313108444214
+}
