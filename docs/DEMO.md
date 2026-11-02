@@ -1,3 +1,6 @@
+> **Historical.** The first live-demo script. The current 3-minute demo is planned in
+> [video/SHOOT_PLAN.md](../video/SHOOT_PLAN.md).
+
 # Demo script (3 minutes)
 
 **Before going on:** Mac app open full screen on the projector, racket connected (or Simulator as backup), Llama
