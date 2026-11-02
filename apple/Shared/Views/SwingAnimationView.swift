@@ -11,13 +11,13 @@ struct SwingShow: Equatable {
     var after: ShotSimulator.Parameters
     var beforeBall: (kmh: Double, rpm: Double)
     var afterBall: (kmh: Double, rpm: Double)
-    var backhand: Bool
+    var stroke: ShotType
     var mode: Mode = .auto
 
     var hasChange: Bool { before != after }
 
     static func == (a: SwingShow, b: SwingShow) -> Bool {
-        a.before == b.before && a.after == b.after && a.backhand == b.backhand && a.mode == b.mode
+        a.before == b.before && a.after == b.after && a.stroke == b.stroke && a.mode == b.mode
     }
 
     /// Fixed timing (same for every film): 2.6 s per half, contact 1.1 s in, 0.16x slow motion.
@@ -40,6 +40,7 @@ final class SwingStage: NSObject, SCNSceneRendererDelegate, @unchecked Sendable 
     private let ball = SCNNode()
     private let trail = SCNNode()
     private let ghost = SCNNode()
+    private let floor = SwingStage.grid()
     private let lock = NSLock()
     private var show: SwingShow
     private var start = CACurrentMediaTime()
@@ -58,8 +59,6 @@ final class SwingStage: NSObject, SCNSceneRendererDelegate, @unchecked Sendable 
         camera.camera = SCNCamera()
         camera.camera?.zNear = 0.05
         camera.camera?.zFar = 30
-        camera.position = SCNVector3(-0.75, 0.7, 1.45)
-        camera.look(at: SCNVector3(0.05, -0.08, -0.45))
         scene.rootNode.addChildNode(camera)
 
         let key = SCNNode()
@@ -79,7 +78,7 @@ final class SwingStage: NSObject, SCNSceneRendererDelegate, @unchecked Sendable 
         rim.position = SCNVector3(-0.8, 0.6, -1.6)
         [key, fill, rim].forEach(scene.rootNode.addChildNode)
 
-        scene.rootNode.addChildNode(Self.grid())
+        scene.rootNode.addChildNode(floor)
         racket.addChildNode(RacketScene.loadDetailedRacket() ?? Self.simpleRacket())
         let ballMat = SCNMaterial()
         ballMat.diffuse.contents = PlatformColor(red: 0.85, green: 0.93, blue: 0.25, alpha: 1)
@@ -94,6 +93,15 @@ final class SwingStage: NSObject, SCNSceneRendererDelegate, @unchecked Sendable 
         ball.geometry = sphere
         ball.addChildNode(seam)
         [ghost, trail, racket, ball].forEach(scene.rootNode.addChildNode)
+        frame(show.stroke)
+    }
+
+    /// Camera and floor for the stroke's fixed shape (a serve is framed from the side, high).
+    private func frame(_ stroke: ShotType) {
+        let shape = SwingTemplate.shape(stroke)
+        camera.simdPosition = shape.camera
+        camera.look(at: SCNVector3(shape.target))
+        floor.simdPosition = SIMD3(0, shape.floorY, 0)
     }
 
     /// Fit the whole swing (about 2.2 m wide, 1.2 m tall) in the card: wide cards fit the height, narrow ones the width.
@@ -106,7 +114,10 @@ final class SwingStage: NSObject, SCNSceneRendererDelegate, @unchecked Sendable 
 
     func update(_ new: SwingShow) {
         lock.lock(); defer { lock.unlock() }
-        if new.before != show.before || new.after != show.after || new.mode != show.mode { start = CACurrentMediaTime() }
+        if new.before != show.before || new.after != show.after || new.mode != show.mode || new.stroke != show.stroke {
+            start = CACurrentMediaTime()
+        }
+        if new.stroke != show.stroke { ghostKey = nil; frame(new.stroke) }
         show = new
     }
 
@@ -120,19 +131,19 @@ final class SwingStage: NSObject, SCNSceneRendererDelegate, @unchecked Sendable 
         let (show, clock) = clock()
         let (changed, t) = show.frame(clock)
         let params = changed ? show.after : show.before
-        let pose = SwingTemplate.pose(params, t: t, backhand: show.backhand)
+        let pose = SwingTemplate.pose(params, t: t, stroke: show.stroke)
         racket.simdTransform = pose.racket
 
         // the string bed's path so far; in the changed half, the player's own swing stays as a ghost
         let points = stride(from: -0.32, through: min(t, 0.32), by: 0.0075).map {
-            SwingTemplate.pose(params, t: $0, backhand: show.backhand).bed
+            SwingTemplate.pose(params, t: $0, stroke: show.stroke).bed
         }
         trail.geometry = Self.tube(points, radius: 0.008, color: Self.accent)
         let ghostParams: ShotSimulator.Parameters? = changed ? show.before : nil
         if ghostParams != ghostKey {
             ghostKey = ghostParams
             ghost.geometry = ghostParams.flatMap { p in
-                Self.tube(stride(from: -0.32, through: 0.32, by: 0.0075).map { SwingTemplate.pose(p, t: $0, backhand: show.backhand).bed },
+                Self.tube(stride(from: -0.32, through: 0.32, by: 0.0075).map { SwingTemplate.pose(p, t: $0, stroke: show.stroke).bed },
                           radius: 0.006, color: PlatformColor(red: 0.49, green: 0.51, blue: 0.42, alpha: 0.7))
             }
         }
@@ -145,7 +156,7 @@ final class SwingStage: NSObject, SCNSceneRendererDelegate, @unchecked Sendable 
             ball.simdOrientation = simd_quatf(angle: 0, axis: SIMD3(0, 1, 0))
         } else {
             ball.simdPosition = pose.normal * Float(b.kmh / 3.6 * t)
-            let contact = SwingTemplate.pose(params, t: 0, backhand: show.backhand)
+            let contact = SwingTemplate.pose(params, t: 0, stroke: show.stroke)
             ball.simdOrientation = simd_quatf(angle: -Float(b.rpm / 60 * 2 * .pi * t), axis: contact.up)
         }
         ball.opacity = t > 0 ? CGFloat(1 - t / SwingTemplate.ballShown) : 1
@@ -194,7 +205,7 @@ final class SwingStage: NSObject, SCNSceneRendererDelegate, @unchecked Sendable 
     /// Floor lines: a fixed reference for "up".
     private static func grid() -> SCNNode {
         var verts: [SCNVector3] = [], index: [Int32] = []
-        let y: Float = -0.75, half: Float = 3, step: Float = 0.25
+        let y: Float = 0, half: Float = 3, step: Float = 0.25
         for i in stride(from: -half, through: half, by: step) {
             for (a, b) in [(SIMD3(i, y, -half), SIMD3(i, y, half)), (SIMD3(-half, y, i), SIMD3(half, y, i))] {
                 index += [Int32(verts.count), Int32(verts.count + 1)]

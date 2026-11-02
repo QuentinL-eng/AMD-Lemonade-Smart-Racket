@@ -1,7 +1,7 @@
 # Swing film: Muse directs, the renderer draws
 
 A swing film shows **your swing**, then **the change Muse recommends**, then the estimated effect. In the app it is a
-live 3D animation on the What-if screen (Insights → Muse → What if): it loops your average forehand or backhand and
+live 3D animation on the What-if screen (Insights → Muse → What if): it loops your average forehand, backhand, serve or volley and
 the changed swing in slow motion, follows the sliders as you move them, and **Show me the best change** has Muse pick
 and test the change, which then sets the sliders and the title. `video/` renders the same thing as an 8-second clip.
 Every film looks the same because Muse never makes pixels. Muse (Meta's Muse Spark, through the Meta Model API)
@@ -32,7 +32,7 @@ No phone camera, no photos, no body model. The arm is a fixed pivot; only the ra
 
 | Field | Limit |
 |---|---|
-| `stroke` | `forehand`, or `backhand` in the app (the forehand template, mirrored) |
+| `stroke` | `forehand` (clip); in the app also `backhand` (mirrored), `serve` (overhead arc) and `volley` (short punch) |
 | `swing_percent` | −15…15, or 0 |
 | `face_deg` | −6…6, or 0 (+ opens the face) |
 | `path_deg` | −10…10, or 0 (+ is more low-to-high) |

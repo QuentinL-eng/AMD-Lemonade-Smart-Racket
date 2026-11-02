@@ -93,7 +93,7 @@ struct WhatIfView: View {
         let after = WhatIf.apply(deltas, to: base.parameters)
         let b = ShotSimulator.simulate(base.parameters, model: impact), a = ShotSimulator.simulate(after, model: impact)
         let show = SwingShow(before: base.parameters, after: after, beforeBall: (b.ballSpeedKmh, b.spinRPM),
-                             afterBall: (a.ballSpeedKmh, a.spinRPM), backhand: type == .backhand, mode: mode)
+                             afterBall: (a.ballSpeedKmh, a.spinRPM), stroke: type, mode: mode)
         let current = film.flatMap { $0.deltas == deltas && $0.stroke == type ? $0 : nil }
         return VStack(alignment: .leading, spacing: 10) {
             SwingAnimationView(show: show, title: current?.title, mode: $mode)

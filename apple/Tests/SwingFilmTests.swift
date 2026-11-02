@@ -39,8 +39,8 @@ final class SwingFilmTests: XCTestCase {
 
     func testTemplatePutsTheStringsOnTheBallAtContact() {
         let p = ShotSimulator.Parameters(swingSpeedKmh: 100, pathAngleDeg: 10, faceAngleDeg: 3, contactXcm: 1, contactYcm: -2)
-        for backhand in [false, true] {
-            let pose = SwingTemplate.pose(p, t: 0, backhand: backhand)
+        for stroke in SwingFilm.strokes {
+            let pose = SwingTemplate.pose(p, t: 0, stroke: stroke)
             let butt = SIMD3<Float>(pose.racket.columns.3.x, pose.racket.columns.3.y, pose.racket.columns.3.z)
             let r = SIMD3<Float>(pose.racket.columns.0.x, pose.racket.columns.0.y, pose.racket.columns.0.z)
             let across = SIMD3<Float>(pose.racket.columns.1.x, pose.racket.columns.1.y, pose.racket.columns.1.z)
@@ -48,7 +48,12 @@ final class SwingFilmTests: XCTestCase {
             XCTAssertLessThan(simd_length(contact), 1e-4)                      // ball at the origin
             XCTAssertEqual(simd_determinant(pose.racket), 1, accuracy: 1e-4)   // a rotation, not a mirror
             XCTAssertGreaterThan(pose.normal.x, 0.9)                           // face toward the target
+            var open = p; open.faceAngleDeg += 5
+            XCTAssertGreaterThan(SwingTemplate.pose(open, t: 0, stroke: stroke).normal.y, pose.normal.y, "\(stroke)")
         }
+        // the serve meets the ball overhead: the shoulder pivot sits below contact
+        let serve = SwingTemplate.pose(p, t: -0.05, stroke: .serve)
+        XCTAssertLessThan(serve.bed.y, 0)
     }
 
     /// Muse tests a change, tries an untested one, gets the reasons back, then makes the tested film.

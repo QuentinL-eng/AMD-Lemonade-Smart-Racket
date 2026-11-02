@@ -12,8 +12,8 @@ struct SwingFilm: Equatable {
     var cue: String
     var why: String
 
-    /// Strokes the swing template can draw (a backhand is the forehand mirrored).
-    static let strokes: [ShotType] = [.forehand, .backhand]
+    /// Strokes the swing template can draw.
+    static let strokes: [ShotType] = [.forehand, .backhand, .serve, .volley]
 
     enum Limits {
         /// Largest change, then smallest visible change, per lever.
@@ -176,11 +176,36 @@ struct SwingFilmDirector {
 /// arm) turns the racket through contact; only the five racket numbers (speed, path, face, contact across/along)
 /// shape it. The ball sits at the origin at contact and the target is +x. Metres, y up.
 enum SwingTemplate {
-    static let pivotToHead: Float = 1.1          // shoulder to string-bed centre at contact
     static let bedFromButt: Float = 0.512        // string-bed centre, as in RacketScene
-    static let maxTurn: Float = 2.0              // radians either side of contact
     static let ballRadius: Float = 0.0335
     static let ballShown = 0.11                  // real seconds the ball stays after contact (no flight is modelled)
+
+    /// The fixed geometry of one stroke. Only the racket numbers change between players.
+    struct Shape {
+        var reach: Float                         // pivot (shoulder) to string-bed centre at contact
+        var maxTurn: Float                       // radians either side of contact
+        var side: SIMD3<Float>                   // roughly pivot -> head at contact, before the path tilts it
+        var faceTurnsRacket: Bool                // serve: face angle tilts the whole racket about the swing axis
+        var camera: SIMD3<Float>
+        var target: SIMD3<Float>
+        var floorY: Float
+    }
+
+    static func shape(_ stroke: ShotType) -> Shape {
+        switch stroke {
+        // overhead: the racket drops behind the back, comes up and over, contact at full reach above the shoulder
+        case .serve: Shape(reach: 1.15, maxTurn: 2.6, side: SIMD3(0, 1, 0), faceTurnsRacket: true,
+                           camera: SIMD3(-0.55, -0.45, 2.9), target: SIMD3(0.05, -0.6, 0), floorY: -2.45)
+        // short punch: a compact turn in front of the body
+        case .volley: Shape(reach: 0.85, maxTurn: 0.7, side: SIMD3(0, 0, 1), faceTurnsRacket: false,
+                            camera: SIMD3(-0.6, 0.5, 1.25), target: SIMD3(0.05, -0.05, -0.3), floorY: -0.9)
+        // the forehand on the other side of the body, seen from that side
+        case .backhand: Shape(reach: 1.1, maxTurn: 2.0, side: SIMD3(0, 0, -1), faceTurnsRacket: false,
+                              camera: SIMD3(-0.75, 0.7, -1.45), target: SIMD3(0.05, -0.08, 0.45), floorY: -0.75)
+        default: Shape(reach: 1.1, maxTurn: 2.0, side: SIMD3(0, 0, 1), faceTurnsRacket: false,
+                       camera: SIMD3(-0.75, 0.7, 1.45), target: SIMD3(0.05, -0.08, -0.45), floorY: -0.75)
+        }
+    }
 
     struct Pose {
         var racket: simd_float4x4                // racket frame: x toward the tip, y across, z face normal; origin at the butt
@@ -189,20 +214,30 @@ enum SwingTemplate {
         var up: SIMD3<Float>                     // out of the swing plane, for the spin axis
     }
 
-    /// Racket pose `t` real seconds from contact. A backhand is the same swing on the other side of the body.
-    static func pose(_ p: ShotSimulator.Parameters, t: Double, backhand: Bool) -> Pose {
+    /// Racket pose `t` real seconds from contact.
+    static func pose(_ p: ShotSimulator.Parameters, t: Double, stroke: ShotType) -> Pose {
+        let shape = shape(stroke)
         let path = Float(p.pathAngleDeg) * .pi / 180, face = Float(p.faceAngleDeg) * .pi / 180
-        let e1 = SIMD3<Float>(0, 0, backhand ? -1 : 1)                   // pivot -> head at contact
         let e2 = SIMD3<Float>(cos(path), sin(path), 0)                   // head travel at contact
+        let e1 = simd_normalize(shape.side - simd_dot(shape.side, e2) * e2) // pivot -> head at contact
         var n = simd_normalize(simd_cross(e1, e2))
         if n.y < 0 { n = -n }
-        let omega = Float(p.swingSpeedKmh / 3.6) / pivotToHead
-        let phi = maxTurn * tanh(omega * Float(t) / maxTurn)
-        let r = cos(phi) * e1 + sin(phi) * e2                            // racket long axis
+        let R = shape.reach
+        let omega = Float(p.swingSpeedKmh / 3.6) / R
+        let phi = shape.maxTurn * tanh(omega * Float(t) / shape.maxTurn)
+        var r = cos(phi) * e1 + sin(phi) * e2                            // racket long axis
         let tangent = -sin(phi) * e1 + cos(phi) * e2
-        let normal = cos(face) * tangent + sin(face) * n                 // + opens the face
+        var normal: SIMD3<Float>
+        if shape.faceTurnsRacket {
+            // a vertical swing plane: opening the face leans the racket back about the swing axis
+            let tilt = simd_quatf(angle: face, axis: simd_cross(e2, e1))
+            r = tilt.act(r)
+            normal = tilt.act(tangent)
+        } else {
+            normal = cos(face) * tangent + sin(face) * n                 // + opens the face
+        }
         let across = simd_cross(normal, r)
-        let head = -pivotToHead * e1 + pivotToHead * r
+        let head = -R * e1 + R * (cos(phi) * e1 + sin(phi) * e2)
         // place the racket so the ball, at the origin at contact, meets the strings at the measured point
         let bed = head - (Float(p.contactXcm) * across + Float(p.contactYcm) * r) / 100
         let butt = bed - bedFromButt * r
