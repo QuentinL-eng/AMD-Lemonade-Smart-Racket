@@ -1,7 +1,7 @@
 import CoreBluetooth
 import Foundation
 
-/// Minimal BLE client for the Tennis Buddy racket (protocol: firmware/include/protocol.h). It forwards the
+/// Minimal BLE client for the Tennis Buddee racket (protocol: firmware/include/protocol.h). It forwards the
 /// raw notifications, stamped on arrival with the camera's clock, and decodes nothing: conversion to physical
 /// units happens offline, where the packet's flags and the status packet say which scales applied.
 final class RacketLink: NSObject, @unchecked Sendable {

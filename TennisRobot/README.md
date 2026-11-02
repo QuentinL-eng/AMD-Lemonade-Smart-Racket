@@ -51,7 +51,7 @@ hardwired E-stop on the controller's safety circuit is the only reliable stop.
 The racket frame is defined with its origin at the butt cap, **+Z up the shaft**,
 **+Y out of the string bed**, and **+X across the strings**. The designated
 contact point is `racket.impact_point_m` in that frame (default
-`[0, 0, 0.52]`, the 52 cm string-bed centre used by the Tennis Buddy racket).
+`[0, 0, 0.52]`, the 52 cm string-bed centre used by the Tennis Buddee racket).
 The planner solves for the **flange pose** that puts *that point* on the ball:
 
 ```
@@ -129,7 +129,7 @@ camera or arm, which is the fastest way to tune thresholds and inspect a shot.
 | **Camera** | A UVC camera with manual exposure, or an iPhone 16 running the bundled app. For a real ball, aim for **global shutter, ≥240 fps, short exposure**, and at least ~5 px of ball radius at the commit point. A 30 fps webcam cannot see a 10 m/s ball clearly enough; see [`docs/FEASIBILITY.md`](docs/FEASIBILITY.md). |
 | **iPhone 16 + Windows PC** | Alternative sensor/host for the iPhone path. The phone captures and detects; the PC runs the 3D pipeline. USB-C is tunnelled with `iproxy`; Ethernet is also supported. See [`docs/REMOTE_IPHONE.md`](docs/REMOTE_IPHONE.md). |
 | **Epson C8 + RC700-E** | Executes the swing. The C8-B901S has 901 mm reach and a 3 kg nominal / 8 kg maximum payload (per Epson's page); check your exact model, payload and inertia with the racket and mount. RC+ 7/8 and SPEL+ are used for the socket server. |
-| **Racket + mount** | Defaults match the Tennis Buddy racket (686 mm, 325 g, string-bed centre 520 mm from the butt). The mount and the designated impact point must be measured. |
+| **Racket + mount** | Defaults match the Tennis Buddee racket (686 mm, 325 g, string-bed centre 520 mm from the butt). The mount and the designated impact point must be measured. |
 | **E-stop, guarding, ball machine** | Required before any powered test. See [`docs/SAFETY.md`](docs/SAFETY.md). |
 
 ## Run against hardware
@@ -179,5 +179,5 @@ person inside the reach of the arm or the racket. Read
 
 ## License
 
-MIT, as part of the Smart Racket / Tennis Buddy repository. See the repository
+MIT, as part of the Smart Racket / Tennis Buddee repository. See the repository
 root `LICENSE.md`.

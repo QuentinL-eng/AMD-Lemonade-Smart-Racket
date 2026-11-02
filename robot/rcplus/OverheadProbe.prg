@@ -1,0 +1,50 @@
+Function main
+    Integer f
+    Robot 1
+    TLSet 1, XY(0,450,0,90,0,180)
+    Tool 1
+    f=FreeFile
+    WOpen "tb_overhead_reach.txt" As #f
+    P900=XY(0,-600,900,90,-90,0)
+    Print #f, "-600 900", TargetOK(P900), TargetOK(P900 /B), PAgl(P900,1), PAgl(P900,2), PAgl(P900,3), PAgl(P900,4), PAgl(P900,5), PAgl(P900,6)
+    P900=XY(0,-600,950,90,-90,0)
+    Print #f, "-600 950", TargetOK(P900), TargetOK(P900 /B), PAgl(P900,1), PAgl(P900,2), PAgl(P900,3), PAgl(P900,4), PAgl(P900,5), PAgl(P900,6)
+    P900=XY(0,-600,1000,90,-90,0)
+    Print #f, "-600 1000", TargetOK(P900), TargetOK(P900 /B), PAgl(P900,1), PAgl(P900,2), PAgl(P900,3), PAgl(P900,4), PAgl(P900,5), PAgl(P900,6)
+    P900=XY(0,-600,1050,90,-90,0)
+    Print #f, "-600 1050", TargetOK(P900), TargetOK(P900 /B), PAgl(P900,1), PAgl(P900,2), PAgl(P900,3), PAgl(P900,4), PAgl(P900,5), PAgl(P900,6)
+    P900=XY(0,-600,1100,90,-90,0)
+    Print #f, "-600 1100", TargetOK(P900), TargetOK(P900 /B), PAgl(P900,1), PAgl(P900,2), PAgl(P900,3), PAgl(P900,4), PAgl(P900,5), PAgl(P900,6)
+    P900=XY(0,-650,900,90,-90,0)
+    Print #f, "-650 900", TargetOK(P900), TargetOK(P900 /B), PAgl(P900,1), PAgl(P900,2), PAgl(P900,3), PAgl(P900,4), PAgl(P900,5), PAgl(P900,6)
+    P900=XY(0,-650,950,90,-90,0)
+    Print #f, "-650 950", TargetOK(P900), TargetOK(P900 /B), PAgl(P900,1), PAgl(P900,2), PAgl(P900,3), PAgl(P900,4), PAgl(P900,5), PAgl(P900,6)
+    P900=XY(0,-650,1000,90,-90,0)
+    Print #f, "-650 1000", TargetOK(P900), TargetOK(P900 /B), PAgl(P900,1), PAgl(P900,2), PAgl(P900,3), PAgl(P900,4), PAgl(P900,5), PAgl(P900,6)
+    P900=XY(0,-650,1050,90,-90,0)
+    Print #f, "-650 1050", TargetOK(P900), TargetOK(P900 /B), PAgl(P900,1), PAgl(P900,2), PAgl(P900,3), PAgl(P900,4), PAgl(P900,5), PAgl(P900,6)
+    P900=XY(0,-650,1100,90,-90,0)
+    Print #f, "-650 1100", TargetOK(P900), TargetOK(P900 /B), PAgl(P900,1), PAgl(P900,2), PAgl(P900,3), PAgl(P900,4), PAgl(P900,5), PAgl(P900,6)
+    P900=XY(0,-700,900,90,-90,0)
+    Print #f, "-700 900", TargetOK(P900), TargetOK(P900 /B), PAgl(P900,1), PAgl(P900,2), PAgl(P900,3), PAgl(P900,4), PAgl(P900,5), PAgl(P900,6)
+    P900=XY(0,-700,950,90,-90,0)
+    Print #f, "-700 950", TargetOK(P900), TargetOK(P900 /B), PAgl(P900,1), PAgl(P900,2), PAgl(P900,3), PAgl(P900,4), PAgl(P900,5), PAgl(P900,6)
+    P900=XY(0,-700,1000,90,-90,0)
+    Print #f, "-700 1000", TargetOK(P900), TargetOK(P900 /B), PAgl(P900,1), PAgl(P900,2), PAgl(P900,3), PAgl(P900,4), PAgl(P900,5), PAgl(P900,6)
+    P900=XY(0,-700,1050,90,-90,0)
+    Print #f, "-700 1050", TargetOK(P900), TargetOK(P900 /B), PAgl(P900,1), PAgl(P900,2), PAgl(P900,3), PAgl(P900,4), PAgl(P900,5), PAgl(P900,6)
+    P900=XY(0,-700,1100,90,-90,0)
+    Print #f, "-700 1100", TargetOK(P900), TargetOK(P900 /B), PAgl(P900,1), PAgl(P900,2), PAgl(P900,3), PAgl(P900,4), PAgl(P900,5), PAgl(P900,6)
+    P900=XY(0,-750,900,90,-90,0)
+    Print #f, "-750 900", TargetOK(P900), TargetOK(P900 /B), PAgl(P900,1), PAgl(P900,2), PAgl(P900,3), PAgl(P900,4), PAgl(P900,5), PAgl(P900,6)
+    P900=XY(0,-750,950,90,-90,0)
+    Print #f, "-750 950", TargetOK(P900), TargetOK(P900 /B), PAgl(P900,1), PAgl(P900,2), PAgl(P900,3), PAgl(P900,4), PAgl(P900,5), PAgl(P900,6)
+    P900=XY(0,-750,1000,90,-90,0)
+    Print #f, "-750 1000", TargetOK(P900), TargetOK(P900 /B), PAgl(P900,1), PAgl(P900,2), PAgl(P900,3), PAgl(P900,4), PAgl(P900,5), PAgl(P900,6)
+    P900=XY(0,-750,1050,90,-90,0)
+    Print #f, "-750 1050", TargetOK(P900), TargetOK(P900 /B), PAgl(P900,1), PAgl(P900,2), PAgl(P900,3), PAgl(P900,4), PAgl(P900,5), PAgl(P900,6)
+    P900=XY(0,-750,1100,90,-90,0)
+    Print #f, "-750 1100", TargetOK(P900), TargetOK(P900 /B), PAgl(P900,1), PAgl(P900,2), PAgl(P900,3), PAgl(P900,4), PAgl(P900,5), PAgl(P900,6)
+    Close #f
+    Print "Overhead reach complete"
+Fend

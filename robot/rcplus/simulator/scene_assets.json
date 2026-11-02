@@ -1,0 +1,16 @@
+{
+  "native_format_preserved": true,
+  "absolute_source_paths_require_relocation_in_RCPlus": true,
+  "assets": [
+    {
+      "file": "SimObjects.dat",
+      "source": "D:\\EpsonRC70\\Simulator\\Simulator\\SimObjects.dat",
+      "sha256": "e15162d065c374120cc24dbfe9c97c959bb8339861aa41a19e7a82248e42d918"
+    },
+    {
+      "file": "Robot Arm Test Setup.xv3",
+      "source": "C:\\Users\\qslma\\Downloads\\Robot Arm Test Setup.xv3",
+      "sha256": "593967683aa331edfd918df1891837f674a4ee99e608066ca077fc702ed023b5"
+    }
+  ]
+}

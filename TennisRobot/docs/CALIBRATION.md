@@ -163,7 +163,7 @@ Measure:
    real assembly.
 3. **Impact point:** the intended contact point measured from the butt, in the
    racket frame. The default `[0, 0, 0.52]` is the 520 mm string-bed centre from
-   the Tennis Buddy racket. Verify it on the physical racket; if the chosen point
+   the Tennis Buddee racket. Verify it on the physical racket; if the chosen point
    is off-centre, record the lateral offset in `impact_point_m[0]`.
 
 The face normal must point out of the **same side** of the strings that the

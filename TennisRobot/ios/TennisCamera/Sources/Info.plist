@@ -23,7 +23,7 @@
 	<key>LSRequiresIPhoneOS</key>
 	<true/>
 	<key>NSBluetoothAlwaysUsageDescription</key>
-	<string>TennisCamera connects to the Tennis Buddy racket so its motion sensor data is recorded on the same clock as the camera.</string>
+	<string>TennisCamera connects to the Tennis Buddee racket so its motion sensor data is recorded on the same clock as the camera.</string>
 	<key>UIFileSharingEnabled</key>
 	<true/>
 	<key>LSSupportsOpeningDocumentsInPlace</key>
