@@ -117,8 +117,8 @@ words on camera or in captions.
 | drills that track themselves | lessons, training plan |
 | Strava for tennis / Play together | |
 
-> Fix before filming the phone: the app still shows "Muse coach", "Ask coach about…"
-> and "built-in coach". Rename them or those screens will contradict the video.
+> App screens now say "Muse", "Ask Muse" and "built-in engine" (Nov 2). Film from a build that includes
+> that change, or the screens will contradict the video.
 
 ## Numbers to capture (they replace sample data in `src/config/copy.ts`)
 

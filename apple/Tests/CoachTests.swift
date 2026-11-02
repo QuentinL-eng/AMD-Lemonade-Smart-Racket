@@ -240,7 +240,7 @@ final class CoachFallbackTests: XCTestCase {
         model.museEnabled = true
         let text = await model.summarize(SessionRecord())
         XCTAssertEqual(text, "No shots recorded yet. Start a session and hit a few balls.")
-        XCTAssertEqual(model.engineName, "Built-in analysis")
+        XCTAssertEqual(model.engineName, "Built-in engine")
         XCTAssertNotNil(model.lastFallbackReason)
         XCTAssertFalse(model.isWorking)
     }
@@ -257,7 +257,7 @@ final class CoachFallbackTests: XCTestCase {
         model.museEnabled = false
         _ = await model.summarize(SessionRecord())
         XCTAssertEqual(fake.requests.count, 1)
-        XCTAssertEqual(model.engineName, "Built-in analysis")
+        XCTAssertEqual(model.engineName, "Built-in engine")
     }
 }
 

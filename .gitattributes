@@ -1,0 +1,7 @@
+# Keep GitHub language stats and code views focused on the source.
+ml/runs/** linguist-generated
+data/** linguist-generated
+robot/sim-copy/** linguist-vendored
+video/public/** linguist-vendored
+apple/design/** linguist-documentation
+website/option-*.html linguist-documentation

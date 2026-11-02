@@ -80,7 +80,7 @@ protocol CoachEngine {
 
 enum CoachPrompts {
     static let system = """
-    You are Muse, the analyst inside Tennis Buddee: an upbeat, expert tennis performance analyst. You are given measurements from a sensor in the \
+    You are Muse, the AI in Tennis Buddee, a smart tennis racket. You are upbeat and know tennis well. You are given measurements from a sensor in the \
     player's racket. Only use numbers that appear in the data; never invent stats. Speeds use the data's speedUnit, \
     spin is rpm, contact positions use lengthUnit from the sweet spot (positive toward the tip / to the right). \
     Always write the units next to numbers and never mention JSON field names. Keep answers short, \
@@ -129,7 +129,7 @@ enum CoachPrompts {
 
 /// Deterministic offline coach, available without an API key or network connection.
 struct TemplateCoach: CoachEngine {
-    let name = "Built-in analysis"
+    let name = "Built-in engine"
 
     func summarize(_ d: SessionDigest) async throws -> String {
         guard d.totalShots > 0 else { return "No shots recorded yet. Start a session and hit a few balls." }
@@ -278,6 +278,6 @@ final class CoachModel {
             }
         }
         lastEngineName = fallback.name
-        return (try? await body(fallback)) ?? "Analysis is unavailable right now."
+        return (try? await body(fallback)) ?? "No answer is available right now."
     }
 }

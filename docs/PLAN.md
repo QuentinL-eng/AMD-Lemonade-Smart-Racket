@@ -1,4 +1,8 @@
-# Tennis Buddee: Hackathon Plan
+> **Historical.** This is the plan from the first build day. The hardware, AI model and protocol have changed
+> since (LSM6DSV320X IMU, Meta Muse Spark, on-racket shot analysis). Current state: [README](../README.md),
+> [wiring](WIRING.md), [firmware](../firmware/README.md), [BLE protocol](../firmware/include/protocol.h).
+
+# Tennis Buddy: Hackathon Plan
 
 **Time:** 12:18 to 6:00 (about 5.5 hours). **Team:** CS (apps), EE (wiring + firmware), ME (hardware + calibration + data).
 **Requirement:** fork an open-source project ([AahanPrajapati/Smart-Tennis-Racket](https://github.com/AahanPrajapati/Smart-Tennis-Racket), MIT) and add a **trick** and a **treat**.

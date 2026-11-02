@@ -1,3 +1,6 @@
+> **Historical.** The first live-demo script. The current 3-minute demo is planned in
+> [video/SHOOT_PLAN.md](../video/SHOOT_PLAN.md).
+
 # Demo script (3 minutes)
 
 **Before going on:** Mac app open full screen on the projector, racket connected (or Simulator as backup), signed in
@@ -14,7 +17,7 @@ on the Mac and iPhone (Muse needs the network), Watch on the presenter's non-pla
    - Mention the hardware: two IMUs (gyro + 200 g accelerometer) streaming 1,000 samples/s from inside the handle.
 3. **The treat: analytics (60 s).**
    - End the session on the Watch → History: shot mix, impact heat map per stroke, speed over the session.
-   - Tap **Analyze session**: Muse Spark (Meta) pulls the session through tools and writes the report.
+   - Tap **Ask Muse**: Muse Spark (Meta) pulls the session through tools and writes the report.
    - Insights → Muse → ask "What's my weakest stroke?" and "Plan my next drill". Muse calls the tools live
      (shots, racket sensors, notes, the what-if simulator); point out the "Muse remembered…" line.
 4. **How accurate? (30 s).** Show the slide comparing app numbers with 240 fps slow-mo measurements.

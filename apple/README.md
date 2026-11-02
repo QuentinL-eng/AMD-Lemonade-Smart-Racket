@@ -19,13 +19,13 @@ The project file is generated from `project.yml`. After adding or removing files
 The app starts on the **Simulator** data source: a virtual racket that swings and hits every few seconds, so every
 screen works without hardware. Switch to the real racket from the connection menu on the Live tab or in the Racket tab.
 
-## Muse
+## Muse Spark
 
 Muse runs through the `muse` Supabase edge function (`backend/supabase/functions/muse`), which holds the Meta API key
 as a server secret; the app never contains or asks for a key. Muse online needs a signed-in account
 (Racket → Account) and can be turned off with **Use Muse online** in Insights → Muse.
 Muse sends questions and requested shot/session statistics to Meta. Health data and session notes are excluded.
-Any Muse error, or being signed out, uses the deterministic built-in analysis, and the UI shows the engine that answered.
+Any Muse error, or being signed out, uses the deterministic built-in engine, and the UI shows the engine that answered.
 Deploy once: `supabase secrets set META_API_KEY=... --project-ref birutnqxduzwldvymeun` then
 `supabase functions deploy muse --project-ref birutnqxduzwldvymeun`.
 No local language model is downloaded or loaded.

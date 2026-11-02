@@ -21,7 +21,7 @@ struct CoachCard: View {
                     Button {
                         Task { session.coachSummary = await coach.summarize(session) }
                     } label: {
-                        Label(session.coachSummary.isEmpty ? "Analyze session" : "Regenerate", systemImage: "sparkles")
+                        Label(session.coachSummary.isEmpty ? "Ask Muse" : "Regenerate", systemImage: "sparkles")
                     }
                     .buttonStyle(.borderedProminent)
                     .foregroundStyle(.black)
@@ -368,16 +368,16 @@ struct CoachScreen: View {
 
     private var museSettings: some View {
         @Bindable var coach = coach
-        return GroupBox("Analysis engine") {
+        return GroupBox("Answer engine") {
             VStack(alignment: .leading, spacing: 12) {
                 Toggle("Use Muse online", isOn: $coach.museEnabled)
                     .disabled(!coach.museAvailable || coach.isWorking)
                 Text(coach.museAvailable
-                     ? "Muse sends your question and the shot data, racket readings and notes it asks for to Meta. Health data and session notes are excluded; turn off Muse notes under Memory."
-                     : "Sign in under Account to use Muse online. Until then the built-in analysis answers offline.")
+                     ? "Muse sends your question and the shot data, racket readings and player notes it asks for to Meta. Health data and session notes are excluded; turn off player notes under Memory."
+                     : "Sign in under Account to use Muse online. Until then the built-in engine answers offline.")
                     .font(.caption).foregroundStyle(.secondary)
                 if let reason = coach.lastFallbackReason {
-                    Text("Using the built-in analysis: \(reason)").font(.caption).foregroundStyle(.secondary)
+                    Text("Using the built-in engine: \(reason)").font(.caption).foregroundStyle(.secondary)
                 }
             }
             .frame(maxWidth: .infinity, alignment: .leading)

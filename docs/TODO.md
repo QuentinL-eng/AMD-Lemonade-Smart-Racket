@@ -20,6 +20,5 @@ Don't skip these: they're what make the demo numbers believable.
 - [ ] **Collect ~100+ labelled clips and retrain** (`tools/collect_clips.py`, then `python3 ml/train.py --real data/impacts`).
       The shipped weights are trained on synthetic sound only.
 - [x] **App:** RacketBLE subscribes to the verdict characteristic and the Live view shows it (not yet run against a real racket).
-- [ ] **Run on the real devices:** install on the iPhone and Watch from Xcode, load Llama on the iPhone over good
-      Wi-Fi, and check iCloud sync from iPhone → Mac.
+- [ ] **Run on the real devices:** install on the iPhone and Watch from Xcode, sign in so Muse Spark answers, and check iCloud sync from iPhone → Mac.
 - [ ] **Record a backup demo session** (and a short screen recording) in case Bluetooth misbehaves on stage.

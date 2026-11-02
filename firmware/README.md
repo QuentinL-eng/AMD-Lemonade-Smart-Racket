@@ -2,7 +2,7 @@
 
 Seeed XIAO ESP32C3 + LSM6DSV320X (on an ST STEVAL-MKI251A adapter). Reads gyro, ±16 g and ±320 g accel at 1 kHz
 and streams samples over BLE as
-"Tennis Buddy". Pin map and protocol: [../docs/PLAN.md](../docs/PLAN.md).
+"Tennis Buddy". Pin map: [../docs/WIRING.md](../docs/WIRING.md). Protocol: [include/protocol.h](include/protocol.h).
 
 The INMP441 mic feeds an on-device ML model that reports sweet spot / % off-centre for each hit (serial `SHOT …`
 lines and BLE characteristic `…0005`). Docs: [../ml/README.md](../ml/README.md).

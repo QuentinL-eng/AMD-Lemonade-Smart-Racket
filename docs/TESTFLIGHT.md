@@ -13,7 +13,7 @@ Upload a new build: `tools/testflight.sh` (archives the iPhone + Watch app and u
   Simulator mode so you can try every screen. The Apple Watch app taps your wrist for each shot and runs a tennis workout.
 - **What to Test:** Open the Live tab and press Start Session; the simulated racket hits a shot every few seconds.
   End the session, then check History and Insights. Sign in under Racket → Account, then in Insights → Muse try
-  "Analyze session", "Plan my next drill" and What if → "Show me the best change". On Apple Watch, start a session
+  "Ask Muse", "Plan my next drill" and What if → "Show me the best change". On Apple Watch, start a session
   from the watch.
 - **Feedback Email:** your email
 - **Privacy Policy URL:** https://github.com/QuentinL-eng/Tennis-Buddy-Smart-Racket/blob/main/docs/PRIVACY.md

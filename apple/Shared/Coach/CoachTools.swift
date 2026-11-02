@@ -347,7 +347,7 @@ final class CoachTools {
     // MARK: Memory
 
     private func requireMemory() throws -> CoachMemory {
-        guard let memory else { throw ToolError.invalid("The player has turned off Muse notes.") }
+        guard let memory else { throw ToolError.invalid("The player has turned off notes for Muse.") }
         return memory
     }
 
