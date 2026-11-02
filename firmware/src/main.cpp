@@ -1,4 +1,4 @@
-// Tennis Buddy racket firmware.
+// Tennis Buddee racket firmware.
 //
 // Reads the LSM6DSV320X (gyro + low-g accel + high-g accel, on a STEVAL-MKI251A) at 1 kHz. In raw mode every
 // sample is streamed over BLE; in impact mode (TB_CMD_STREAM_MODE) the racket detects hits itself (impact.cpp)
@@ -54,6 +54,7 @@ static const uint32_t TAP_GAP_MS = 450;          // a tap this soon after the pr
 static const int32_t TAP_MAX_JOLT_MG = 12000;    // near the ±16 g rail: a ball impact, not a tap
 static const float TAP_MAX_GYRO_DPS = 150.0f;    // rotation this fast means a swing is under way
 static const uint32_t TAP_SWING_HOLD_MS = 300;   // ... and taps are ignored until it has been calm this long
+static const uint32_t TAP_RALLY_HOLD_MS = 2500;  // no taps this soon after a ball hit: a rally is still going
 static const int TAP_MAX_COUNT = 5;
 
 struct TapEvent {
@@ -117,6 +118,7 @@ static volatile int64_t unixAtBootMs = 0;      // from TB_CMD_SET_TIME; 0 = unkn
 static volatile uint32_t lastActiveMs = 0;     // last swing or hit, for "idle" (flash erases wait for it)
 static const uint32_t POSE_INTERVAL_MS = 33;
 static volatile uint32_t tapGestures = 0, tapsRejected = 0;
+static uint32_t lastHitTapMs = 0;   // last ball hit, on tapStep's clock (micros() / 1000); sampler task only
 static bool micOk = false;
 
 // ---- I2C helpers ----
@@ -178,8 +180,8 @@ static int16_t toH3Wire(int16_t raw) {
 }
 
 // Runs once per sample on the low-g accel (raw ±16 g LSBs) and the fastest gyro axis. Single taps from
-// tap.cpp are accepted only when the racket is calm, then grouped: the gesture is queued once no further tap
-// has arrived for TAP_GAP_MS.
+// tap.cpp are accepted only when the racket is calm and no rally is under way, then grouped: the gesture is
+// queued once no further tap has arrived for TAP_GAP_MS. A swing or hit while a gesture is open drops it.
 static void tapStep(const int16_t *a, float gyroDps, uint32_t t_us) {
   static uint32_t lastFastMs = 0, lastTapMs = 0;
   static uint8_t count = 0;
@@ -187,13 +189,18 @@ static void tapStep(const int16_t *a, float gyroDps, uint32_t t_us) {
   static uint16_t seq = 0;
   const uint32_t now = t_us / 1000;
   if (gyroDps > TAP_MAX_GYRO_DPS) lastFastMs = now;
+  const bool busy = now - lastFastMs < TAP_SWING_HOLD_MS || now - lastHitTapMs < TAP_RALLY_HOLD_MS;
+  if (busy && count > 0) {
+    tapsRejected += count;
+    count = 0;
+  }
 
   TapResult r;
   uint32_t t0 = micros();
   // LSM ±16 g: 0.488 mg/LSB = 61/125.
   if (tapPush(a[0] * 61 / 125, a[1] * 61 / 125, a[2] * 61 / 125, t_us, r)) {
     uint32_t dt = micros() - t0;
-    if (now - lastFastMs < TAP_SWING_HOLD_MS || r.jolt_mg > TAP_MAX_JOLT_MG) {
+    if (busy || r.jolt_mg > TAP_MAX_JOLT_MG) {
       tapsRejected++;
     } else {
       if (count == 0 || r.jolt_mg > ev.jolt_mg) {
@@ -306,6 +313,7 @@ static void samplerTask(void *) {
       if (r & IMPACT_HIT) {
         xQueueSend(hitQueue, &hit, 0);
         lastActiveMs = millis();
+        lastHitTapMs = t / 1000;
       }
       if (r & IMPACT_WINDOW) {
         int64_t unix0 = unixAtBootMs;
@@ -559,7 +567,7 @@ static bool sendBacklog(bool acked) {
 void setup() {
   Serial.begin(115200);
   delay(1500);  // give USB serial time to attach
-  Serial.println("\n=== Tennis Buddy firmware " + String(TB_FW_MAJOR) + "." + String(TB_FW_MINOR) + " ===");
+  Serial.println("\n=== Tennis Buddee firmware " + String(TB_FW_MAJOR) + "." + String(TB_FW_MINOR) + " ===");
 
   Wire.begin(PIN_SDA, PIN_SCL);
   Wire.setClock(400000);

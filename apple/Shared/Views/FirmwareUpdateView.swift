@@ -21,7 +21,12 @@ struct FirmwareUpdateSection: View {
                     if let image = model.bundledFirmware, image.isNewer(than: installed), let version = image.version {
                         Button("Update to \(version)", systemImage: "arrow.down.circle") { pending = image }
                     } else if model.firmwareUpdate == .idle {
-                        Text("Firmware \(installed) is the latest").foregroundStyle(.secondary)
+                        if MotionFirmware.hasKnownGyroScaleBug(installed) {
+                            Text("This version has a sensor-scaling fault. Install an app build with corrected racket firmware, or select a corrected firmware file.")
+                                .font(.footnote).foregroundStyle(.orange)
+                        } else {
+                            Text("Firmware \(installed) matches the version bundled with this app").foregroundStyle(.secondary)
+                        }
                     }
                     Button("Install from file…", systemImage: "doc") { pickingFile = true }
                 }

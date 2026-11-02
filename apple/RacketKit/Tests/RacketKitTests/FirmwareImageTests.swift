@@ -15,4 +15,23 @@ final class FirmwareImageTests: XCTestCase {
         XCTAssertFalse(image.isNewer(than: "2.0"))
         XCTAssertFalse(FirmwareImage(data: Data(), version: nil).isNewer(than: "1.0"))
     }
+
+    func testBundledFirmwareMatchesSourceVersionAndImageHash() throws {
+        let repo = URL(fileURLWithPath: #filePath).deletingLastPathComponent().deletingLastPathComponent()
+            .deletingLastPathComponent().deletingLastPathComponent().deletingLastPathComponent()
+        let resources = repo.appendingPathComponent("apple/Shared/Resources")
+        let image = try Data(contentsOf: resources.appendingPathComponent("RacketFirmware.bin"))
+        let metadata = try JSONDecoder().decode([String: String].self,
+                       from: Data(contentsOf: resources.appendingPathComponent("RacketFirmware.json")))
+        let header = try String(contentsOf: repo.appendingPathComponent("firmware/include/protocol.h"), encoding: .utf8)
+        func value(_ name: String) throws -> String {
+            let line = try XCTUnwrap(header.split(separator: "\n").first { $0.hasPrefix("#define \(name) ") })
+            return try XCTUnwrap(line.split(whereSeparator: \.isWhitespace).last).description
+        }
+        let version = try "\(value("TB_FW_MAJOR")).\(value("TB_FW_MINOR"))"
+        XCTAssertEqual(metadata["version"], version, "Rebuild the app's firmware bundle after changing firmware")
+        XCTAssertEqual(metadata["sha256"], FirmwareImage.sha256(image))
+        XCTAssertTrue(FirmwareImage(data: image, version: version).looksValid)
+        XCTAssertFalse(MotionFirmware.hasKnownGyroScaleBug(try XCTUnwrap(metadata["version"])))
+    }
 }

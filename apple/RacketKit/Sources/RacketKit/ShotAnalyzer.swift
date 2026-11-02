@@ -14,8 +14,30 @@ public struct ImpactModel: Codable, Sendable, Equatable {
     public var acorCenter: Float = 0.42
     /// Fraction of brushing speed that becomes ball surface speed.
     public var spinGain: Float = 0.7
+    /// Ball speed from the racket's speed loss at contact (`ShotAnalyzer.impulseBallSpeed`) instead of the
+    /// still-ball formula. Off until a wall-speed test (docs/WALL_SPEED_TEST.md) fits `impulseGain`.
+    public var useImpulseBallSpeed: Bool = false
+    /// k = e/(1+e) · m_eff/m_ball in v_out = V + k·ΔV (assumed m_eff 0.25 kg, e 0.43 → ≈1.3; fit with
+    /// tools/wall_speed_fit.py). Clamped to 0...4 when used.
+    public var impulseGain: Float = 1.3
 
     public init() {}
+
+    private enum CodingKeys: String, CodingKey {
+        case lateralGain, longitudinalGain, joltDeadband, acorCenter, spinGain, useImpulseBallSpeed, impulseGain
+    }
+
+    // Saved models predate some fields: missing keys keep their defaults.
+    public init(from decoder: Decoder) throws {
+        let c = try decoder.container(keyedBy: CodingKeys.self)
+        lateralGain = try c.decodeIfPresent(Float.self, forKey: .lateralGain) ?? lateralGain
+        longitudinalGain = try c.decodeIfPresent(Float.self, forKey: .longitudinalGain) ?? longitudinalGain
+        joltDeadband = try c.decodeIfPresent(Float.self, forKey: .joltDeadband) ?? joltDeadband
+        acorCenter = try c.decodeIfPresent(Float.self, forKey: .acorCenter) ?? acorCenter
+        spinGain = try c.decodeIfPresent(Float.self, forKey: .spinGain) ?? spinGain
+        useImpulseBallSpeed = try c.decodeIfPresent(Bool.self, forKey: .useImpulseBallSpeed) ?? useImpulseBallSpeed
+        impulseGain = try c.decodeIfPresent(Float.self, forKey: .impulseGain) ?? impulseGain
+    }
 }
 
 public struct ShotAnalyzer: Sendable {
@@ -137,7 +159,14 @@ public struct ShotAnalyzer: Sendable {
 
         // ---- Ball speed ----
         let e = model.acorCenter * max(0.55, 1 - 0.035 * distance)
-        let vBall = calibrationMode ? 0 : e * Self.incomingBallMs + (1 + e) * vRacket
+        let vBallStill = e * Self.incomingBallMs + (1 + e) * vRacket
+        let postSamples = min(n, i0 + 30) - max(0, i0 + 12)
+        let impulse2 = Self.impulseBallSpeed(wPre: wPre, wPost: wPost, postSamples: postSamples,
+                                             radius: profile.effectiveRadiusM, gain: model.impulseGain)
+        features.racketDropMs = impulse2.drop
+        features.ballSpeedImpulseMs = impulse2.speed
+        let vBall: Float = calibrationMode ? 0
+            : (model.useImpulseBallSpeed ? (impulse2.speed ?? vBallStill) : vBallStill)
 
         // ---- Spin: brushing speed along the strings ----
         let along = vDir - simd_dot(vDir, hitNormal) * hitNormal
@@ -161,6 +190,24 @@ public struct ShotAnalyzer: Sendable {
             peakG: Double(peakG),
             gyroSaturated: saturated,
             features: features)
+    }
+
+    /// Ball speed from momentum: the sweet spot loses ΔV = r·(ω_pre − ω_post) at contact and m_eff·ΔV =
+    /// m_ball·(v_out + u); eliminating the unknown incoming speed u with the ACOR relation gives v_out = V + k·ΔV.
+    /// ω is the rotation across the shaft only, as for `vRacket`. Only the sweet spot's speed along the face normal
+    /// matters for the bounce; this uses the full across-shaft speed (not projected yet).
+    /// Returns `speed` nil (use the still-ball formula) when there is no post window, no drop, or a non-finite result.
+    static func impulseBallSpeed(wPre: SIMD3<Float>, wPost: SIMD3<Float>, postSamples: Int,
+                                 radius r: Float, gain: Float) -> (speed: Float?, drop: Float?) {
+        guard postSamples > 0 else { return (nil, nil) }
+        let pre = simd_length(SIMD2(wPre.y, wPre.z)), post = simd_length(SIMD2(wPost.y, wPost.z))
+        let drop = r * (pre - post)
+        let k = max(0, min(4, gain))
+        guard drop.isFinite else { return (nil, nil) }
+        guard drop > 0 else { return (nil, drop) }
+        let v = r * pre + k * drop
+        guard v.isFinite else { return (nil, drop) }
+        return (min(90, v), drop)
     }
 
     /// Degrees the racket turned in the `swingSpan` before sample `i0`. Uses sample times, so gaps in a raw stream

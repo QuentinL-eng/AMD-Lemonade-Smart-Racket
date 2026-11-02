@@ -146,13 +146,13 @@ final class TennisScoreTests: XCTestCase {
 final class TapSideTests: XCTestCase {
     func testGestureMapping() {
         XCTAssertEqual(ScoreCommand.from(count: 2, side: .wide), .won)
-        XCTAssertEqual(ScoreCommand.from(count: 1, side: .narrow), .lost)
+        XCTAssertEqual(ScoreCommand.from(count: 2, side: .narrow), .lost)
         XCTAssertEqual(ScoreCommand.from(count: 3, side: nil), .undo)
         XCTAssertEqual(ScoreCommand.from(count: 4, side: .wide), .undo)
         XCTAssertNil(ScoreCommand.from(count: 1, side: .wide))
-        XCTAssertNil(ScoreCommand.from(count: 2, side: .narrow))
-        XCTAssertEqual(ScoreCommand.from(count: 2, side: nil), .won)
-        XCTAssertEqual(ScoreCommand.from(count: 1, side: nil), .lost)
+        XCTAssertNil(ScoreCommand.from(count: 1, side: .narrow))
+        XCTAssertNil(ScoreCommand.from(count: 1, side: nil))
+        XCTAssertNil(ScoreCommand.from(count: 2, side: nil), "an unclear side scores nothing")
     }
 
     func testFitIgnoresSignAndNoise() throws {

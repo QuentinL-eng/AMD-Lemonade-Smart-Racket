@@ -1,4 +1,5 @@
 import Foundation
+import CryptoKit
 
 /// Racket firmware the apps can install over BLE. firmware/tools/bundle_for_app.sh puts the current build
 /// in the app as RacketFirmware.bin plus RacketFirmware.json ({ "version": "1.2" }).
@@ -19,11 +20,17 @@ public struct FirmwareImage: Sendable {
               let data = try? Data(contentsOf: bin),
               let meta = try? JSONDecoder().decode([String: String].self, from: Data(contentsOf: json)),
               let version = meta["version"] else { return nil }
-        return FirmwareImage(data: data, version: version)
+        if let expected = meta["sha256"], Self.sha256(data) != expected.lowercased() { return nil }
+        let image = FirmwareImage(data: data, version: version)
+        return image.looksValid ? image : nil
     }
 
     /// ESP32 app images start with magic byte 0xE9; catches picking the wrong file.
     public var looksValid: Bool { data.count > 1024 && data.first == 0xE9 }
+
+    static func sha256(_ data: Data) -> String {
+        SHA256.hash(data: data).map { String(format: "%02x", $0) }.joined()
+    }
 
     /// True if this image is newer than the racket's reported version ("1.10" is newer than "1.9").
     public func isNewer(than installed: String) -> Bool {

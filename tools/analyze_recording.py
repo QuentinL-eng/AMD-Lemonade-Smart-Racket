@@ -1,5 +1,5 @@
 #!/usr/bin/env python3
-"""Inspect a Tennis Buddy raw recording (.tbrec) or its CSV export.
+"""Inspect a Tennis Buddee raw recording (.tbrec) or its CSV export.
 
 Prints sample rate, gaps, sensor ranges and detected impacts, and optionally plots them.
 

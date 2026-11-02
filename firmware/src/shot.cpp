@@ -3,6 +3,11 @@
 #include <math.h>
 #include <string.h>
 
+// Ball speed from the racket's speed loss at contact instead of the still-ball formula (mirrors
+// ImpactModel.useImpulseBallSpeed / impulseGain). Off until a wall-speed test fits the gain.
+static const bool USE_IMPULSE_BALL_SPEED = false;
+static const float IMPULSE_GAIN = 1.3f;
+
 // Mirrors the Swift code step by step (same order of operations where it matters), so the parity test can hold the
 // two to tight tolerances. Racket frame: x toward the tip, y across the face, z face normal.
 
@@ -275,6 +280,16 @@ bool shotAnalyze(const ShotConfig &cfg, const ImpactWindow &win, bool gyro4000, 
   float e = m.acorCenter * fmaxf(0.55f, 1 - 0.035f * distance);
   const float incomingBallMs = 0;
   float vBall = e * incomingBallMs + (1 + e) * vRacket;
+  // ShotAnalyzer.impulseBallSpeed (ImpactModel.useImpulseBallSpeed): v_out = V + k*dV from the sweet spot's speed
+  // drop at contact. Only the speed along the face normal matters for the bounce; not projected yet. Off by default.
+  if (USE_IMPULSE_BALL_SPEED) {
+    int postLo = i0 + 12 > 0 ? i0 + 12 : 0, postHi = i0 + 30 < n ? i0 + 30 : n;
+    float pre = sqrtf(wPre.y * wPre.y + wPre.z * wPre.z), post = sqrtf(wPost.y * wPost.y + wPost.z * wPost.z);
+    float drop = m.effectiveRadiusM * (pre - post);
+    float k = fminf(4.0f, fmaxf(0.0f, IMPULSE_GAIN));
+    float v = m.effectiveRadiusM * pre + k * drop;
+    if (postHi > postLo && drop > 0 && isfinite(v)) vBall = fminf(90.0f, v);
+  }
 
   // Spin: brushing speed along the strings.
   V3 along = sub(vDir, mul(hitNormal, dot(vDir, hitNormal)));

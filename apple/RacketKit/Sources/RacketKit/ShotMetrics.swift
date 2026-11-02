@@ -49,6 +49,11 @@ public struct ImpactFeatures: Codable, Sendable, Equatable {
     public var verticalSpin: Float?
     /// Degrees the racket turned in the 350 ms before contact; volleys are short swings. Optional like `spinAxisY`.
     public var swingDeg: Float?
+    /// Sweet-spot speed lost at contact, r·(|ω_pre| − |ω_post|) across the shaft, m/s. Optional like `spinAxisY`.
+    public var racketDropMs: Float?
+    /// Ball speed from that drop (`ShotAnalyzer.impulseBallSpeed`), m/s; nil when it falls back. Recorded whether
+    /// or not `ImpactModel.useImpulseBallSpeed` is on, so recordings can compare both estimates.
+    public var ballSpeedImpulseMs: Float?
 
     public init(rollRatio: Float, ringNorm: Float, jolt: Float, impulse: Float, spinAxisY: Float? = nil) {
         self.rollRatio = rollRatio

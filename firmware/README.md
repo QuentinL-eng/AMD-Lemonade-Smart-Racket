@@ -1,4 +1,4 @@
-# Tennis Buddy firmware (EE)
+# Tennis Buddee firmware (EE)
 
 Seeed XIAO ESP32C3 + LSM6DSV320X (on an ST STEVAL-MKI251A adapter). Reads gyro, ±16 g and ±320 g accel at 1 kHz
 and streams samples over BLE as

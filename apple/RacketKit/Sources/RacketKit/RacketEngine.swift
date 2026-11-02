@@ -44,6 +44,8 @@ public final class RacketEngine: @unchecked Sendable {
     public var onShot: ((ShotMetrics) -> Void)?
     /// Raw (sensor-frame) samples for the recorder, delivered on the engine queue.
     public var onRaw: (([IMUSample]) -> Void)?
+    /// Raw data plus per-impact pose/configuration for exact offline replay.
+    public var onRecordingEvent: ((RecordingEvent) -> Void)?
 
     private let queue = DispatchQueue(label: "tennisbuddy.engine", qos: .userInitiated)
     private var _calibration: Calibration = .default
@@ -152,6 +154,7 @@ public final class RacketEngine: @unchecked Sendable {
 
     private func process(_ batch: [IMUSample]) {
         onRaw?(batch)
+        onRecordingEvent?(.samples(batch))
         let cal = sourceCalibration ?? _calibration
         for raw in batch {
             stillSamples.append(raw)
@@ -248,9 +251,10 @@ public final class RacketEngine: @unchecked Sendable {
 
     private func process(_ window: ImpactWindow) {
         onRaw?(window.samples)
+        let cal = sourceCalibration ?? _calibration
+        onRecordingEvent?(.impact(window: window, calibration: cal, profile: analyzer.profile, model: analyzer.model, calibrationMode: _calibrationMode))
         // The racket already sent this shot; the window is only for the recording.
         if summarized.remove(window.key) != nil { return }
-        let cal = sourceCalibration ?? _calibration
         lastShotTime = window.samples[min(window.impactIndex, window.samples.count - 1)].time
         guard let shot = Self.shot(window: window, calibration: cal, analyzer: analyzer,
                                    calibrationMode: _calibrationMode, date: Date()) else { return }
