@@ -12,7 +12,7 @@ const EXPLODE = [40, 100] as const;
 const LABEL_START = 105;
 const LABEL_EVERY = 36;
 
-const Part: React.FC<{ group?: CadGroup; offset?: [number, number, number]; glow?: number; ghost?: boolean }> = ({ group, offset = [0, 0, 0], glow = 0, ghost }) => {
+export const Part: React.FC<{ group?: CadGroup; offset?: [number, number, number]; glow?: number; ghost?: boolean }> = ({ group, offset = [0, 0, 0], glow = 0, ghost }) => {
   if (!group) return null;
   return (
     <group position={offset}>

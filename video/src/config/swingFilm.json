@@ -1,0 +1,37 @@
+{
+  "model": "muse-spark-1.3",
+  "stroke": "forehand",
+  "sampleCount": 14,
+  "estimated": true,
+  "source": "sample",
+  "deltas": {
+    "swing_percent": 10.0,
+    "face_deg": 0.0,
+    "path_deg": 5.0,
+    "contact_x_cm": 0.0,
+    "contact_y_cm": 0.0
+  },
+  "title": "Brush Faster Forward",
+  "cue": "Swing quicker and brush up the back of the ball",
+  "why": "This pairs pace with spin for heavier rally balls you can feel at once",
+  "before": {
+    "swingKmh": 107.75650598974474,
+    "pathDeg": 6.395528616694736,
+    "faceDeg": 2.3966295376899835,
+    "contactXcm": -0.3707142857142857,
+    "contactYcm": -2.1264285714285713,
+    "ballKmh": 166.36839339333392,
+    "spinRpm": 416.5151286289856,
+    "spinType": "flat"
+  },
+  "after": {
+    "swingKmh": 118.53215658871922,
+    "pathDeg": 11.395528616694737,
+    "faceDeg": 2.3966295376899835,
+    "contactXcm": -0.3707142857142857,
+    "contactYcm": -2.1264285714285713,
+    "ballKmh": 181.32790619464646,
+    "spinRpm": 1027.6330213328804,
+    "spinType": "topspin"
+  }
+}

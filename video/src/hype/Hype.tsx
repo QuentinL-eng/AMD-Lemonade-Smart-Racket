@@ -11,7 +11,7 @@ import { Glasses, Watch } from '../scenes/Devices';
 
 const FPS = 30;
 export const BEAT = (FPS * 60) / hype.song.bpm; // frames per beat (~18.95)
-const f = (beat: number) => Math.round(beat * BEAT);
+export const f = (beat: number) => Math.round(beat * BEAT);
 export const hypeFrames = f(hype.beats);
 
 type V3 = [number, number, number];
@@ -22,28 +22,28 @@ const Shot: React.FC<{ at: number[] | readonly number[]; children: React.ReactNo
 );
 
 /** 1 on each beat, decaying fast: drives pulses and flashes. */
-const pulse = (frame: number, every = 1) => Math.exp(-((frame % (BEAT * every)) / BEAT) * 6);
+export const pulse = (frame: number, every = 1) => Math.exp(-((frame % (BEAT * every)) / BEAT) * 6);
 
 /** Slam-in: overshooting scale + quick fade, starting at local frame `start`. */
-const useSlam = (start: number) => {
+export const useSlam = (start: number) => {
   const frame = useCurrentFrame();
   const s = spring({ frame: frame - start, fps: FPS, config: { damping: 11, stiffness: 220 } });
   const shake = frame >= start && frame < start + 5 ? Math.sin(frame * 9.1) * 6 : 0;
   return { opacity: frame < start ? 0 : Math.min(1, (frame - start) / 3), transform: `translate(${shake}px, ${-shake / 2}px) scale(${1.5 - 0.5 * s})` };
 };
 
-const Big: React.FC<{ children: React.ReactNode; size?: number; color?: string; style?: React.CSSProperties }> = ({ children, size = 170, color = colors.text, style }) => (
+export const Big: React.FC<{ children: React.ReactNode; size?: number; color?: string; style?: React.CSSProperties }> = ({ children, size = 170, color = colors.text, style }) => (
   <div style={{ fontFamily: fonts.display, fontWeight: 800, fontSize: size, lineHeight: 0.95, letterSpacing: -3, color, textTransform: 'uppercase', ...style }}>{children}</div>
 );
-const Small: React.FC<{ children: React.ReactNode; style?: React.CSSProperties }> = ({ children, style }) => (
+export const Small: React.FC<{ children: React.ReactNode; style?: React.CSSProperties }> = ({ children, style }) => (
   <div style={{ fontFamily: fonts.sans, fontWeight: 600, fontSize: 40, color: colors.muted, letterSpacing: 1, ...style }}>{children}</div>
 );
-const Center: React.FC<{ children: React.ReactNode; style?: React.CSSProperties }> = ({ children, style }) => (
+export const Center: React.FC<{ children: React.ReactNode; style?: React.CSSProperties }> = ({ children, style }) => (
   <AbsoluteFill style={{ justifyContent: 'center', alignItems: 'center', textAlign: 'center', ...style }}>{children}</AbsoluteFill>
 );
 
 // ---------- 1. Ball bouncing on the beat, words slam in ----------
-const Ball: React.FC<{ spin: number }> = ({ spin }) => (
+export const Ball: React.FC<{ spin: number }> = ({ spin }) => (
   <svg width={110} height={110} viewBox="-55 -55 110 110" style={{ transform: `rotate(${spin}deg)` }}>
     <circle r={52} fill="#D9EE3F" />
     <path d="M -38 -36 C -10 -12, -10 12, -38 36" stroke="#F4F7E6" strokeWidth={6} fill="none" />
@@ -221,7 +221,7 @@ const Finale: React.FC = () => {
 };
 
 // ---------- finish: grain, downbeat flash, music ----------
-const Grain: React.FC = () => {
+export const Grain: React.FC = () => {
   const frame = useCurrentFrame();
   return (
     <svg width={1920} height={1080} style={{ position: 'absolute', inset: 0, opacity: 0.09, mixBlendMode: 'overlay', pointerEvents: 'none' }}>

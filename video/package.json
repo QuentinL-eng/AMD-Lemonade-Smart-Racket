@@ -13,7 +13,14 @@
     "typecheck": "tsc --noEmit",
     "timeline": "node scripts/print-timeline.mjs",
     "render:song": "npm run assets && remotion render RevealSong out/reveal-song.mp4",
-    "render:hype": "npm run assets && remotion render Hype out/hype.mp4"
+    "render:hype": "npm run assets && remotion render Hype out/hype.mp4",
+    "footage": "node scripts/cut-footage.mjs",
+    "footage:robot": "node scripts/cut-footage.mjs rh-",
+    "songs": "node scripts/prep-songs.mjs",
+    "render:robot": "npm run assets && remotion render RobotHype out/robot-hype.mp4",
+    "render:build": "npm run assets && remotion render BuildLog out/build-log.mp4",
+    "render:swing": "npm run assets && remotion render EverySwing out/every-swing.mp4",
+    "render:possessed": "npm run assets && remotion render Possessed out/possessed.mp4"
   },
   "dependencies": {
     "@react-three/fiber": "9.2.0",

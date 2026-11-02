@@ -3,6 +3,10 @@
 ## Music
 
 - `keep-it-movin.mp3`: "Keep It Movin'" by Jahdean, supplied by the project owner.
+- `ten.mp3`: "Ten" by Anno Domini Beats, supplied by the project owner (RobotHype).
+- `comin-wit-it.wav`: section of "Comin Wit It" by Anno Domini Beats, supplied by the project owner (BuildLog).
+- `not-my-first-rodeo.wav`: section of "Not My First Rodeo" by Dyalla, supplied by the project owner (EverySwing).
+- `whoop.wav`: section of "Whoop" by Anno Domini Beats, supplied by the project owner (Possessed).
 
 ## Sound effects (Pixabay Content License: free for commercial use, no attribution required)
 

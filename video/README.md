@@ -8,6 +8,11 @@ UI, plus slots for real footage. No AI-generated video.
 | `Reveal` | ~60 s | CGI only, crossfades |
 | `RevealSong` | 1:08 | CGI only, hard cuts on the beat of "Keep It Movin'". The X post |
 | `Demo` | 2:57 | Hackathon submission (limit 3:00). CGI + footage slots |
+| `Hype` | 0:30 | X hype clip, CGI only, on "Keep It Movin'" |
+| `RobotHype` | 0:27 | X clip from the 2026-10-29 robot-arm session: real footage cut against CGI, on "Ten" |
+| `BuildLog` | 0:26 | X clip: the build as a six-step how-to (bench, robot, court footage + CGI), on "Comin Wit It" |
+| `EverySwing` | 0:29 | X clip: on court under a HUD, a CGI swing, the app; tagline "Be better.", on "Not My First Rodeo" |
+| `Possessed` | 0:27 | Halloween X clip: "this racket is possessed... by an AI", on "Whoop" |
 | `Scenes/scene-*` | each beat | Iterate on one scene at a time |
 
 ## Run
@@ -23,7 +28,47 @@ npm run render:song     # -> out/reveal-song.mp4
 npm run render:demo     # -> out/demo.mp4
 npm run timeline -- RevealSong   # timecodes (and bars) of any cut
 npm run frames          # key frames of every scene -> out/review/
+node scripts/stills.mjs RobotHype 150 372 716   # several frames, one bundle -> out/review/
 ```
+
+### RobotHype (robot-arm footage + CGI)
+
+Needs `public/audio/ten.mp3` (licensed, git-ignored) and the cut footage:
+
+```bash
+FFMPEG=path/to/ffmpeg npm run footage:robot   # marketing/Videos -> public/footage/rh-*.mp4 (+ plate stills)
+npm run render:robot                          # -> out/robot-hype.mp4
+```
+
+`scripts/cut-footage.mjs` lists every clip (source, in point, speed, crop). It de-squeezes the
+anamorphic Sony clips, tone-maps the iPhone HLG clips to SDR and crops portrait to 16:9, so the
+composition only ever plays small 30 fps SDR files. Copy, clip names and beat positions are in
+`src/config/robotHype.ts`. The song's tempo (126.0) and drop (38.095 s) were measured from the drums;
+`analyze-song.mjs` reads this track as 125.3, which drifts by the drop.
+
+Real-to-CGI hand-offs: whip-pan cuts with matching framing (the CAD arm from the handle side, like
+the real shot), CGI composited over the real room (the same clip blurred, or a still of it), one grade,
+grain and vignette over both, and the strung blue `Racket` drawn in the CAD arm's grip (`racket="blue"`).
+
+### BuildLog, EverySwing, Possessed
+
+Same footage + CGI treatment, sharing `src/hype/kit.tsx` (beat clock, grade, clips, whips, ducking)
+and `src/hype/pieces.tsx` (word shots, the CAD handle, the CGI racket finale). Each needs its song
+section and its clips:
+
+```bash
+FFMPEG=path/to/ffmpeg npm run songs            # marketing/Music -> public/audio/*.wav (sections, built-in drops)
+FFMPEG=path/to/ffmpeg npm run footage -- bt- ev- hw-
+npm run render:build                           # -> out/build-log.mp4
+npm run render:swing                           # -> out/every-swing.mp4
+npm run render:possessed                       # -> out/possessed.mp4
+```
+
+`scripts/prep-songs.mjs` holds each song's measured tempo and the downbeat the clip starts on.
+"Comin Wit It" and "Whoop" run flat out, so the first two bars play through a low-pass and the full
+mix drops on beat 8; "Not My First Rodeo" (92 BPM, not the 157.7 a plain onset comb reports) has its
+own drop. Copy and beats are in `src/config/buildLog.ts`, `everySwing.ts` and `possessed.ts`. The
+on-court racket is red, so those CGI shots use `<Racket finish="red" />`.
 
 ## Where to edit
 
@@ -67,14 +112,23 @@ Part groups (what moves and gets labelled) are the regex rules at the top of
 
 ### The racket
 
-`src/components/Racket.tsx` builds a generic, unbranded racket procedurally from real
-dimensions (the `D` table at the top: head size, beam width/depth, throat arm path,
-16x19 strings). The frame is a rounded tube swept along its centreline, like a moulded
-carbon frame. Change colours/finish in the materials block there. To check the shape
-after editing, render the model sheet (0 face-on, 1 side, 2 hero, 3 throat close-up):
+`src/lib/racketMesh.ts` builds a generic, unbranded racket procedurally from real
+dimensions (the `D` table at the top: head size and shape, throat, 16x19 strings, grip).
+The frame is one surface: the shaft, both throat arms and the hoop (whose bottom is the
+bridge) are signed distance fields of a rounded-box beam swept along a centreline, joined
+in the face-on outline with a smooth minimum (so the throat gets real fillets without the
+beam swelling), given depth with rounded edges and meshed with surface nets (~0.7 s, once
+per tab). Beam sizes vary along the frame (deeper through the throat, a slimmer bridge), and
+the head has a string groove with a grommet/bumper strip and a grommet at every string.
+The handle is an octagonal grip with the spiral overgrip overlap, finishing tape, a collar
+into the shaft and a butt cap. `src/components/Racket.tsx` holds the paint (`PAINT`: frame
+colour plus a panel on one throat arm, like the red on-court racket) and the materials.
+To check the shape after editing, render the model sheet (`VIEWS` in
+`src/scenes/dev/RacketSheet.tsx`: face-on, side, hero, throat close-ups, head top, handle,
+each finish):
 
 ```bash
-npx remotion still racket-sheet out/review/sheet.png --frame=0
+node scripts/stills.mjs racket-sheet 0 1 2 3 4 5 6 7 8 9 10   # -> out/review/
 ```
 
  The opening shot's camera moves

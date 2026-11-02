@@ -1,12 +1,13 @@
 import React from 'react';
 import { AbsoluteFill, interpolate, useCurrentFrame } from 'remotion';
-import { Stage3D } from '../components/Stage3D';
+import { Stage3D, useRedraw } from '../components/Stage3D';
 import { Backdrop, Kicker, Title } from '../components/ui';
 import { colors } from '../config/brand';
 import { copy } from '../config/copy';
 import { enter, lerp, ramp } from '../lib/anim';
 import { useCad, type CadGroup } from '../lib/models';
-import type * as THREE from 'three';
+import * as THREE from 'three';
+import { Racket, RACKET_LENGTH } from '../components/Racket';
 
 // CAD is in mm, Z up (Onshape). J1 (base yaw) = centre of the turret on top of the base.
 const J1: [number, number] = [56, 22];
@@ -73,10 +74,52 @@ const Shoulder: React.FC<{ color?: THREE.Color }> = ({ color }) => {
   );
 };
 
+/**
+ * The Epson C8 rig from the Onshape assembly, scaled to scene units and stood on a grid.
+ * `angle` turns everything above the base about J1; children are placed in CAD space (mm).
+ */
+// The CAD racket (`Body1`) is a bare hoop. `racket="blue"` draws the strung procedural racket
+// in its place: same 833 mm length, centred on the CAD one, head toward CAD -Y, face along X.
+const CAD_RACKET = { center: [-545, -212.5, 871] as [number, number, number], length: 833 };
+const RACKET_TO_CAD = new THREE.Euler().setFromRotationMatrix(
+  new THREE.Matrix4().makeBasis(new THREE.Vector3(0, 0, 1), new THREE.Vector3(0, -1, 0), new THREE.Vector3(1, 0, 0)),
+);
+
+export const RobotArm: React.FC<{ angle: number; glow?: number; racketGlow?: number; grid?: boolean; racket?: 'cad' | 'blue'; children?: React.ReactNode }> = ({ angle, glow = 0, racketGlow = 0, grid = true, racket = 'cad', children }) => {
+  const cad = useCad('robot');
+  useRedraw([cad]); // loaded inside the canvas, so ask it to draw once the CAD arrives
+  if (!cad) return null;
+  return (
+    <group position={[-0.9, 0, 0]}>
+      {grid && <gridHelper args={[14, 28, colors.track, '#1a1d14']} position={[0, (-28 - cad.center.z) * SCALE, 0]} />}
+      <group scale={SCALE} rotation={[-Math.PI / 2, 0, 0]}>
+        <group position={cad.center.clone().negate().toArray()}>
+          <Group group={cad.groups.base} glow={glow} />
+          <Group group={cad.groups.uno} glow={glow} />
+          <Group group={cad.groups.rig} glow={glow} />
+          <group position={[J1[0], J1[1], 0]} rotation={[0, 0, angle]}>
+            <group position={[-J1[0], -J1[1], 0]}>
+              {cad.groups.shoulder ? <Group group={cad.groups.shoulder} glow={glow} /> : <Shoulder color={cad.groups.base?.meshes[0].color} />}
+              <Group group={cad.groups.swing} glow={glow} />
+              {racket === 'cad' ? (
+                <Group group={cad.groups.racket} glow={Math.max(glow, racketGlow)} />
+              ) : (
+                <group position={CAD_RACKET.center} rotation={RACKET_TO_CAD} scale={CAD_RACKET.length / RACKET_LENGTH}>
+                  <Racket finish="blue" glow={Math.max(glow, racketGlow)} />
+                </group>
+              )}
+            </group>
+          </group>
+          {children}
+        </group>
+      </group>
+    </group>
+  );
+};
+
 // The Epson C8 test rig from the Onshape assembly, swinging the racket into balls.
 export const RobotLab: React.FC = () => {
   const frame = useCurrentFrame();
-  const cad = useCad('robot');
   const angle = swingAngle(frame);
   const orbit = interpolate(frame, [0, 240], [-0.9, -0.35]);
   const cam: [number, number, number] = [Math.sin(orbit) * 7.4, 1.6, Math.cos(orbit) * 7.4];
@@ -93,31 +136,14 @@ export const RobotLab: React.FC = () => {
   return (
     <Backdrop glow={0.08}>
       <Stage3D camera={cam} target={[-0.2, 0.4, 0]} fov={36}>
-        {cad && (
-          <group position={[-0.9, 0, 0]}>
-            <gridHelper args={[14, 28, colors.track, '#1a1d14']} position={[0, (-28 - cad.center.z) * SCALE, 0]} />
-            <group scale={SCALE} rotation={[-Math.PI / 2, 0, 0]}>
-              <group position={cad.center.clone().negate().toArray()}>
-                <Group group={cad.groups.base} />
-                <Group group={cad.groups.uno} />
-                <Group group={cad.groups.rig} />
-                <group position={[J1[0], J1[1], 0]} rotation={[0, 0, angle]}>
-                  <group position={[-J1[0], -J1[1], 0]}>
-                    {cad.groups.shoulder ? <Group group={cad.groups.shoulder} /> : <Shoulder color={cad.groups.base?.meshes[0].color} />}
-                    <Group group={cad.groups.swing} />
-                    <Group group={cad.groups.racket} glow={flash * 0.8} />
-                  </group>
-                </group>
-                {frame > c - 24 && (
-                  <mesh position={ball}>
-                    <sphereGeometry args={[34, 32, 32]} />
-                    <meshStandardMaterial color="#D9EE3F" roughness={0.9} emissive="#D9EE3F" emissiveIntensity={0.15} />
-                  </mesh>
-                )}
-              </group>
-            </group>
-          </group>
-        )}
+        <RobotArm angle={angle} racketGlow={flash * 0.8}>
+          {frame > c - 24 && (
+            <mesh position={ball}>
+              <sphereGeometry args={[34, 32, 32]} />
+              <meshStandardMaterial color="#D9EE3F" roughness={0.9} emissive="#D9EE3F" emissiveIntensity={0.15} />
+            </mesh>
+          )}
+        </RobotArm>
       </Stage3D>
       <AbsoluteFill style={{ padding: '110px 120px', alignItems: 'flex-end' }}>
         <div style={{ width: 620, display: 'flex', flexDirection: 'column', gap: 14 }}>
