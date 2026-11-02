@@ -46,6 +46,7 @@
 		51110641B09E243EA61CAAA3 /* AppleSignInChallenge.swift in Sources */ = {isa = PBXBuildFile; fileRef = 2FB650E789B25A3DC1BC3772 /* AppleSignInChallenge.swift */; };
 		54D0A472AD32FB216A2612B9 /* InsightsView.swift in Sources */ = {isa = PBXBuildFile; fileRef = F12AAA9C083779C5F7C4404A /* InsightsView.swift */; };
 		56845969B9D79319EBC7FC59 /* RacketKit in Frameworks */ = {isa = PBXBuildFile; productRef = DDAE53CB46C98158C43FF1C1 /* RacketKit */; };
+		5B7ED368B11894FC0BE5385A /* SwingFilm.swift in Sources */ = {isa = PBXBuildFile; fileRef = DC3B382A5B3D765E48B4CB77 /* SwingFilm.swift */; };
 		62EBDCA9C808702796A63F85 /* HistoryView.swift in Sources */ = {isa = PBXBuildFile; fileRef = 5A34DFC69F764025C289A856 /* HistoryView.swift */; };
 		6378233C7A0268790A47CF6C /* Components.swift in Sources */ = {isa = PBXBuildFile; fileRef = 7E790DB056785306E5A4E26C /* Components.swift */; };
 		63A302D121580BFFF4E9551D /* AppleSignInChallenge.swift in Sources */ = {isa = PBXBuildFile; fileRef = 2FB650E789B25A3DC1BC3772 /* AppleSignInChallenge.swift */; };
@@ -60,6 +61,7 @@
 		8229E1CA9A14DDE5D1A7E3AE /* MWDATCore in Frameworks */ = {isa = PBXBuildFile; productRef = ECE6263EB1969F99BC3EBB99 /* MWDATCore */; };
 		854651AB575F52DB7C6F69DB /* Supabase in Frameworks */ = {isa = PBXBuildFile; productRef = A89730073F6D55E1C7C7204C /* Supabase */; };
 		886B779B6E84BAB7928FFEBD /* RacketView.swift in Sources */ = {isa = PBXBuildFile; fileRef = 8F73C9942056B6F82D381273 /* RacketView.swift */; };
+		89814F2BDE67847C6AEA5C16 /* SwingFilm.swift in Sources */ = {isa = PBXBuildFile; fileRef = DC3B382A5B3D765E48B4CB77 /* SwingFilm.swift */; };
 		89E375132CC6F3B9CDE4BDF0 /* CoachTools.swift in Sources */ = {isa = PBXBuildFile; fileRef = 47587C1A3ADFF8D79D0B943F /* CoachTools.swift */; };
 		8A96015274E29EFE642A942E /* ScoreAnnouncer.swift in Sources */ = {isa = PBXBuildFile; fileRef = A9C75A9CE4F4D5E84133CF54 /* ScoreAnnouncer.swift */; };
 		8C2766DA9FE6AE1A97F2A1A0 /* CoachTests.swift in Sources */ = {isa = PBXBuildFile; fileRef = E971EC74EF10F92834614F3D /* CoachTests.swift */; };
@@ -84,7 +86,9 @@
 		B3CFD141A4E340EC768454FE /* FirmwareUpdateView.swift in Sources */ = {isa = PBXBuildFile; fileRef = 032EE97EB7178A0FC98058FD /* FirmwareUpdateView.swift */; };
 		B7C4A843D654C85CF41833D9 /* FirmwareUpdateView.swift in Sources */ = {isa = PBXBuildFile; fileRef = 032EE97EB7178A0FC98058FD /* FirmwareUpdateView.swift */; };
 		BB68AD1A639395ED9C11FE15 /* CoachModel.swift in Sources */ = {isa = PBXBuildFile; fileRef = 99B37449F16667305BA65652 /* CoachModel.swift */; };
+		BC1AC7B00B8B973E7CF6332E /* SwingFilmTests.swift in Sources */ = {isa = PBXBuildFile; fileRef = 28E712C75BA3CEACB41CFC19 /* SwingFilmTests.swift */; };
 		BF00CAFD82192A4713D19ED9 /* Info.sync-conflict-20261027-204109-GC6FYOE.plist in Resources */ = {isa = PBXBuildFile; fileRef = 31B4851C1B388FB90B5E9AEC /* Info.sync-conflict-20261027-204109-GC6FYOE.plist */; };
+		BFBCAE2D21CC72D4A679AA4D /* SwingFilm.swift in Sources */ = {isa = PBXBuildFile; fileRef = DC3B382A5B3D765E48B4CB77 /* SwingFilm.swift */; };
 		C520ADDD7496A77DC1BD599B /* Assets.xcassets in Resources */ = {isa = PBXBuildFile; fileRef = C9D172411555FD246D6484F7 /* Assets.xcassets */; };
 		C57AA38341143B9C02A8AAD6 /* MuseCoach.swift in Sources */ = {isa = PBXBuildFile; fileRef = A95212CDD7E03E99DE2060E5 /* MuseCoach.swift */; };
 		C6BEF6F26E632D614AAD425D /* WhatIf.swift in Sources */ = {isa = PBXBuildFile; fileRef = 54A828E7A08D24E4BBBC9A6A /* WhatIf.swift */; };
@@ -104,8 +108,10 @@
 		E656B9C4C14FCBF2B563203F /* SharedSessionView.swift in Sources */ = {isa = PBXBuildFile; fileRef = 718D6AFC3060101468F35101 /* SharedSessionView.swift */; };
 		E657A6B2910FAA7615245B8C /* RacketFirmware.json in Resources */ = {isa = PBXBuildFile; fileRef = EAC10B9BA8B384E61A13C06C /* RacketFirmware.json */; };
 		E98F385A75F9EAEE893C4E8B /* TapCalibrationView.swift in Sources */ = {isa = PBXBuildFile; fileRef = 39FA88E51FD976A8351A6535 /* TapCalibrationView.swift */; };
+		EBAA1118DC5363A274E67F41 /* SwingAnimationView.swift in Sources */ = {isa = PBXBuildFile; fileRef = 87E34991DFA0617BF8C41329 /* SwingAnimationView.swift */; };
 		EBC61CC12A3CE428AD72951E /* InsightsModel.swift in Sources */ = {isa = PBXBuildFile; fileRef = ECE60961EC627EB1B2573766 /* InsightsModel.swift */; };
 		ECB995620E0135240B69EA6F /* LiveView.swift in Sources */ = {isa = PBXBuildFile; fileRef = F7FE1568EBF1F305C6ADF3C4 /* LiveView.swift */; };
+		EDD754BC72D3120FBCC7883F /* SwingAnimationView.swift in Sources */ = {isa = PBXBuildFile; fileRef = 87E34991DFA0617BF8C41329 /* SwingAnimationView.swift */; };
 		EEA0C59DD2FC726D13B23FAC /* Info.sync-conflict-20261027-201221-GC6FYOE.plist in Resources */ = {isa = PBXBuildFile; fileRef = 836E5AF465B4B1929E2B5ED9 /* Info.sync-conflict-20261027-201221-GC6FYOE.plist */; };
 		F25C383A73292364294A4BFF /* Components.swift in Sources */ = {isa = PBXBuildFile; fileRef = 7E790DB056785306E5A4E26C /* Components.swift */; };
 		F4B8561C42C11C591B8CE156 /* WatchBridge.swift in Sources */ = {isa = PBXBuildFile; fileRef = 848E320738AD43BEA253A649 /* WatchBridge.swift */; };
@@ -147,6 +153,7 @@
 		214D03CD0141E5D33E2C1284 /* TennisBuddy-macOS.app */ = {isa = PBXFileReference; explicitFileType = wrapper.application; includeInIndex = 0; path = "TennisBuddy-macOS.app"; sourceTree = BUILT_PRODUCTS_DIR; };
 		236FFE32A5D82A97C42CC0DF /* GlassesHUD.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = GlassesHUD.swift; sourceTree = "<group>"; };
 		28DF7CF160993EBAA8F2EB65 /* GLBLoader.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = GLBLoader.swift; sourceTree = "<group>"; };
+		28E712C75BA3CEACB41CFC19 /* SwingFilmTests.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = SwingFilmTests.swift; sourceTree = "<group>"; };
 		2F2019504077756E640617FE /* TennisBuddyApp.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = TennisBuddyApp.swift; sourceTree = "<group>"; };
 		2FB650E789B25A3DC1BC3772 /* AppleSignInChallenge.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = AppleSignInChallenge.swift; sourceTree = "<group>"; };
 		31B4851C1B388FB90B5E9AEC /* Info.sync-conflict-20261027-204109-GC6FYOE.plist */ = {isa = PBXFileReference; lastKnownFileType = text.plist; path = "Info.sync-conflict-20261027-204109-GC6FYOE.plist"; sourceTree = "<group>"; };
@@ -173,6 +180,7 @@
 		7E790DB056785306E5A4E26C /* Components.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = Components.swift; sourceTree = "<group>"; };
 		836E5AF465B4B1929E2B5ED9 /* Info.sync-conflict-20261027-201221-GC6FYOE.plist */ = {isa = PBXFileReference; lastKnownFileType = text.plist; path = "Info.sync-conflict-20261027-201221-GC6FYOE.plist"; sourceTree = "<group>"; };
 		848E320738AD43BEA253A649 /* WatchBridge.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = WatchBridge.swift; sourceTree = "<group>"; };
+		87E34991DFA0617BF8C41329 /* SwingAnimationView.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = SwingAnimationView.swift; sourceTree = "<group>"; };
 		8C2996C9D860A31050356262 /* MemoryView.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = MemoryView.swift; sourceTree = "<group>"; };
 		8F73C9942056B6F82D381273 /* RacketView.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = RacketView.swift; sourceTree = "<group>"; };
 		93FF9841989C788B5B2C46D4 /* AppModel.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = AppModel.swift; sourceTree = "<group>"; };
@@ -187,6 +195,7 @@
 		D301DF1565F9F1034A3E3B45 /* InsightsModelTests.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = InsightsModelTests.swift; sourceTree = "<group>"; };
 		D4FEDDDA8021F41075F44461 /* WatchApp.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = WatchApp.swift; sourceTree = "<group>"; };
 		D7AF058FB24A66BF261A3613 /* AccountModel.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = AccountModel.swift; sourceTree = "<group>"; };
+		DC3B382A5B3D765E48B4CB77 /* SwingFilm.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = SwingFilm.swift; sourceTree = "<group>"; };
 		E2C677F14C8214171007F688 /* BackendConfig.plist */ = {isa = PBXFileReference; lastKnownFileType = text.plist; path = BackendConfig.plist; sourceTree = "<group>"; };
 		E8A6CA4F7A3ACAA4D0A9F9E4 /* TennisBuddy-iOS.app */ = {isa = PBXFileReference; includeInIndex = 0; lastKnownFileType = wrapper.application; path = "TennisBuddy-iOS.app"; sourceTree = BUILT_PRODUCTS_DIR; };
 		E971EC74EF10F92834614F3D /* CoachTests.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = CoachTests.swift; sourceTree = "<group>"; };
@@ -294,6 +303,7 @@
 				490440BE4772F79F23F88592 /* RacketSkinView.swift */,
 				8F73C9942056B6F82D381273 /* RacketView.swift */,
 				39F2F74C107A7D5F69D1DAFF /* ScoreView.swift */,
+				87E34991DFA0617BF8C41329 /* SwingAnimationView.swift */,
 				39FA88E51FD976A8351A6535 /* TapCalibrationView.swift */,
 				631AE84D17CB5BF53BA7E88F /* WhatIfView.swift */,
 			);
@@ -334,6 +344,7 @@
 				47587C1A3ADFF8D79D0B943F /* CoachTools.swift */,
 				7E13B818CB23D8733395B203 /* MuseClient.swift */,
 				A95212CDD7E03E99DE2060E5 /* MuseCoach.swift */,
+				DC3B382A5B3D765E48B4CB77 /* SwingFilm.swift */,
 				54A828E7A08D24E4BBBC9A6A /* WhatIf.swift */,
 			);
 			path = Coach;
@@ -376,6 +387,7 @@
 				E971EC74EF10F92834614F3D /* CoachTests.swift */,
 				4FF8FDF2FFBFD51C15660DFC /* ConsumerFeatureTests.swift */,
 				D301DF1565F9F1034A3E3B45 /* InsightsModelTests.swift */,
+				28E712C75BA3CEACB41CFC19 /* SwingFilmTests.swift */,
 			);
 			path = Tests;
 			sourceTree = "<group>";
@@ -615,6 +627,8 @@
 				42CE072E77A2A7DDB612E52F /* ScoreView.swift in Sources */,
 				9C9B32A4B14014387AAF2B3E /* SharedSessionView.swift in Sources */,
 				24A10F85D9E15C0C2E6EB092 /* SocialModels.swift in Sources */,
+				EDD754BC72D3120FBCC7883F /* SwingAnimationView.swift in Sources */,
+				89814F2BDE67847C6AEA5C16 /* SwingFilm.swift in Sources */,
 				0136976E6EEE868451134E30 /* SyncedStore.swift in Sources */,
 				E98F385A75F9EAEE893C4E8B /* TapCalibrationView.swift in Sources */,
 				9941A2CD7E5BE18F509CC16A /* TennisBuddyApp.swift in Sources */,
@@ -641,6 +655,8 @@
 				117FB391373D2548F66FB7C9 /* Records.swift in Sources */,
 				E087C594C150518A07848381 /* ScoreAnnouncer.swift in Sources */,
 				0CB6145C1331DF98B4CBEF8A /* SocialModels.swift in Sources */,
+				5B7ED368B11894FC0BE5385A /* SwingFilm.swift in Sources */,
+				BC1AC7B00B8B973E7CF6332E /* SwingFilmTests.swift in Sources */,
 				C6BEF6F26E632D614AAD425D /* WhatIf.swift in Sources */,
 			);
 			runOnlyForDeploymentPostprocessing = 0;
@@ -678,6 +694,8 @@
 				F4D3258438561EE80DBF3D90 /* ScoreView.swift in Sources */,
 				E656B9C4C14FCBF2B563203F /* SharedSessionView.swift in Sources */,
 				2FDD375CDBD93DA6E5D24A38 /* SocialModels.swift in Sources */,
+				EBAA1118DC5363A274E67F41 /* SwingAnimationView.swift in Sources */,
+				BFBCAE2D21CC72D4A679AA4D /* SwingFilm.swift in Sources */,
 				9333B8A680C26C215AC8C20D /* SyncedStore.swift in Sources */,
 				17A2D3BEB6B3516A3B652482 /* TapCalibrationView.swift in Sources */,
 				010997E40C3E9BBAD1916A0A /* TennisBuddyApp.swift in Sources */,

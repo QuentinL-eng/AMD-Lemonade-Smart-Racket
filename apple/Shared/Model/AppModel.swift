@@ -1,8 +1,10 @@
+import CoreTransferable
 import Foundation
 import Observation
 import RacketKit
 import SwiftData
 import simd
+import UniformTypeIdentifiers
 #if canImport(UIKit)
 import UIKit
 #endif
@@ -79,6 +81,10 @@ final class AppModel {
     var effectiveTapCalibration: TapCalibration { tapCalibration ?? .fromRacket(calibration) }
     /// What the last handle tap did, for the on-screen confirmation.
     var lastTapFeedback: TapFeedback?
+    /// When the last shot came in. Score taps are ignored for `rallyHold` after it, so taps don't fire mid-rally.
+    private var lastShotDate: Date?
+    /// Matches the racket's TAP_RALLY_HOLD_MS (firmware 1.9+), and covers older firmware that doesn't hold.
+    static let rallyHold: TimeInterval = 2.5
     /// Set by the tap calibration sheet: taps go there instead of the score.
     var onCalibrationTap: ((RacketProtocol.TapGesture) -> Void)?
     var onMatchChangeForWatch: ((ScoreTracker?) -> Void)?
@@ -186,7 +192,7 @@ final class AppModel {
         engine.onLive = { [weak self] state in self?.receiveLive(state) }
         engine.onShot = { [weak self] shot in self?.handle(shot) }
         let recorder = recorder
-        engine.onRaw = { batch in recorder.append(batch) }
+        engine.onRecordingEvent = { event in recorder.append(event) }
 
         refreshRecordings()
         let stored = UserDefaults.standard.string(forKey: "sourceKind").flatMap(SourceKind.init(rawValue:))
@@ -398,7 +404,7 @@ final class AppModel {
     func startMatch(rules: MatchRules) {
         match = ScoreTracker(rules: rules)
         lastTapFeedback = nil
-        announcer.say("New match. Double tap a wide side when you win a point, single tap a narrow side when you lose one.")
+        announcer.say("New match. Double tap a wide side when you win a point, double tap a narrow side when you lose one.")
     }
 
     func endMatch() {
@@ -435,21 +441,25 @@ final class AppModel {
         else { session.pointsLost = max(0, session.pointsLost + delta) }
     }
 
-    /// Handle taps: double tap on a wide side = point won, single tap on a narrow side = point lost,
-    /// triple tap = undo.
+    /// Handle taps: double tap on a wide side = point won, double tap on a narrow side = point lost,
+    /// triple tap = undo. Taps during a rally (within `rallyHold` of a shot) are ignored.
     private func handleTap(_ tap: RacketProtocol.TapGesture) {
         if let calibrate = onCalibrationTap {
             calibrate(tap)
             return
         }
         guard match != nil else { return }
-        let cal = effectiveTapCalibration
-        // Until the taps are calibrated the sides are a guess, so any side counts.
-        let side = cal.isCalibrated ? cal.classify(tap.direction)?.side : nil
+        if let last = lastShotDate, Date().timeIntervalSince(last) < Self.rallyHold {
+            // Quietly: speaking up mid-rally would be worse than the stray tap.
+            lastTapFeedback = TapFeedback(text: "Tap during a rally — ignored", recognized: false)
+            return
+        }
+        // Until the taps are calibrated the sides come from the racket calibration's guess.
+        let side = effectiveTapCalibration.classify(tap.direction)?.side
         guard let command = ScoreCommand.from(count: tap.count, side: side) else {
-            let what = tap.count == 1 ? "Single tap" : "Double tap"
-            lastTapFeedback = TapFeedback(text: "\(what) on \(side.map { $0.label.lowercased() } ?? "an unclear side") — not a score tap",
-                                          recognized: false)
+            // A single tap is most likely a stray knock, so only a clear attempt (a double tap) gets a reply.
+            guard tap.count == 2 else { return }
+            lastTapFeedback = TapFeedback(text: "Double tap on an unclear side — not scored", recognized: false)
             announcer.say("Didn't catch that.")
             return
         }
@@ -459,7 +469,7 @@ final class AppModel {
             lastTapFeedback = TapFeedback(text: "Double tap, wide side: point to you", recognized: true)
         case .lost:
             award(.opponent)
-            lastTapFeedback = TapFeedback(text: "Single tap, narrow side: point to your opponent", recognized: true)
+            lastTapFeedback = TapFeedback(text: "Double tap, narrow side: point to your opponent", recognized: true)
         case .undo:
             undoPoint()
             lastTapFeedback = TapFeedback(text: "Triple tap: last point undone", recognized: true)
@@ -506,6 +516,7 @@ final class AppModel {
             onDrillChangeForWatch?(drill)
         }
         lastShot = shot
+        lastShotDate = Date()
         shotFlashID = UUID()
         if let session = activeSession {
             let record = ShotRecord(metrics: shot)
@@ -537,6 +548,12 @@ final class AppModel {
         var racketDroppedPackets: UInt16?
         var seconds: Double
         var link: RacketBLE.LinkStats
+        var calibration: Calibration
+        var racketProfile: RacketProfile
+        var impactModel: ImpactModel
+        var forehandBodySign: Float
+        var calibrationMode: Bool
+        var missingImpactContexts: Int
     }
 
     private func startRecorder(in dir: URL, name: String) -> Bool {
@@ -552,7 +569,10 @@ final class AppModel {
         let s = racketStatus
         let log = LinkLog(firmware: s?.firmwareVersion, gyro4000dps: s?.gyro4000, highGRange: s?.h3lisRange,
                           impactMode: s?.impactMode, racketDroppedPackets: s?.droppedPackets,
-                          seconds: Date().timeIntervalSince(start.date), link: ble.linkStats() - start.stats)
+                          seconds: Date().timeIntervalSince(start.date), link: ble.linkStats() - start.stats,
+                          calibration: calibration, racketProfile: profile, impactModel: impactModel,
+                          forehandBodySign: profile.forehandBodySign, calibrationMode: calibrationMode,
+                          missingImpactContexts: recorder.missingImpactContexts)
         let encoder = JSONEncoder()
         encoder.outputFormatting = [.prettyPrinted, .sortedKeys]
         try? encoder.encode(log).write(to: url.deletingPathExtension().appendingPathExtension("link.json"))
@@ -607,13 +627,24 @@ final class AppModel {
             .sorted { $0.lastPathComponent > $1.lastPathComponent }
     }
 
-    func csvExport(for url: URL) -> URL? {
+    nonisolated static func csvExport(for url: URL) -> URL? {
         guard let data = try? Data(contentsOf: url) else { return nil }
         let csv = RecordingFormat.csv(RecordingFormat.decode(data))
         let out = FileManager.default.temporaryDirectory
             .appendingPathComponent(url.deletingPathExtension().lastPathComponent).appendingPathExtension("csv")
         try? csv.write(to: out, atomically: true, encoding: .utf8)
         return out
+    }
+
+    /// Keep the readable CSV together with the original samples and replay state. Nothing is converted until the
+    /// share actually happens: recordings reach hundreds of MB, and this runs while the list draws.
+    func recordingExports(for url: URL) -> [RecordingExport] {
+        var files = [RecordingExport(source: url, csv: true), RecordingExport(source: url, csv: false)]
+        for suffix in ["windows.jsonl", "shots.jsonl", "link.json"] {
+            let sidecar = url.deletingPathExtension().appendingPathExtension(suffix)
+            if FileManager.default.fileExists(atPath: sidecar.path) { files.append(RecordingExport(source: sidecar, csv: false)) }
+        }
+        return files
     }
 
     // MARK: - Persistence helpers
@@ -629,5 +660,19 @@ final class AppModel {
     private static func load<T: Decodable>(key: String) -> T? {
         guard let data = UserDefaults.standard.data(forKey: key) else { return nil }
         return try? JSONDecoder().decode(T.self, from: data)
+    }
+}
+
+/// One file of a recording's share bundle. The CSV is written when the share happens, off the main thread.
+struct RecordingExport: Transferable, Hashable {
+    let source: URL
+    let csv: Bool
+
+    static var transferRepresentation: some TransferRepresentation {
+        FileRepresentation(exportedContentType: .item) { item in
+            guard item.csv else { return SentTransferredFile(item.source) }
+            guard let out = AppModel.csvExport(for: item.source) else { throw CocoaError(.fileReadUnknown) }
+            return SentTransferredFile(out)
+        }
     }
 }

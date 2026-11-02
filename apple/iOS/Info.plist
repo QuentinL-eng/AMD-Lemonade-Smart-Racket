@@ -51,7 +51,7 @@
 		<string>$(DEVELOPMENT_TEAM)</string>
 	</dict>
 	<key>NSBluetoothAlwaysUsageDescription</key>
-	<string>Tennis Buddy connects to your racket's sensor and your glasses over Bluetooth.</string>
+	<string>Tennis Buddee connects to your racket's sensor and your glasses over Bluetooth.</string>
 	<key>NSBonjourServices</key>
 	<array>
 		<string>_bonjour._tcp</string>

@@ -12,19 +12,19 @@ enum MuseError: LocalizedError {
         switch self {
         case .invalidResponse: "Muse returned an incomplete response."
         case .http(let code): "Muse request failed (HTTP \(code))."
-        case .roundLimit: "Muse reached the coaching tool limit."
-        case .signInRequired: "Sign in to use the online coach."
+        case .roundLimit: "Muse reached its tool-call limit."
+        case .signInRequired: "Sign in to use Muse online."
         }
     }
 }
 
 @MainActor
 struct MuseClient: MuseTransport {
-    /// The app's own `muse` edge function. The Baseten key and the served model live only in the server's secrets.
+    /// The app's own `muse` edge function. The Meta API key and the served model live only in the server's secrets.
     let endpoint: URL
     let publishableKey: String
     let accessToken: String
-    var model = "muse-spark-open"
+    var model = "muse-spark-1.3"
     var session: URLSession = .shared
 
     func complete(messages: [[String: Any]], tools: [[String: Any]]) async throws -> [String: Any] {

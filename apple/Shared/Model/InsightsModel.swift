@@ -84,9 +84,10 @@ struct InsightsModel {
     private func window(previous: Bool) -> [InsightSession] {
         guard let days = period.days else { return previous ? [] : sessions }
         let length = TimeInterval(days) * 86_400
-        let end = now.addingTimeInterval(previous ? -length : 0)
-        let start = end.addingTimeInterval(-length)
-        return sessions.filter { $0.date > start && $0.date <= end }
+        // Plain seconds: Date's comparison operators segfault in this window on the macOS 27 runtime (tests crash too).
+        let end = now.timeIntervalSinceReferenceDate + (previous ? -length : 0)
+        let start = end - length
+        return sessions.filter { let t = $0.date.timeIntervalSinceReferenceDate; return t > start && t <= end }
     }
 
     private func shots(_ s: InsightSession) -> [ShotMetrics] {

@@ -32,6 +32,11 @@ struct RacketView: View {
                 if let s = model.racketStatus {
                     LabeledContent("Battery", value: s.batteryMillivolts > 2500 ? String(format: "%.2f V", Double(s.batteryMillivolts) / 1000) : "Not wired")
                     LabeledContent("Firmware", value: s.firmwareVersion)
+                    if MotionFirmware.hasKnownGyroScaleBug(s.firmwareVersion) {
+                        Label("Update racket firmware: this version can report incorrect shot types and speeds.",
+                              systemImage: "exclamationmark.triangle.fill")
+                            .font(.footnote).foregroundStyle(.orange)
+                    }
                     LabeledContent("IMU (LSM6DSV320X)", value: s.mpuOK && s.h3lisOK ? "OK" : "Not found")
                     LabeledContent("Dropped packets", value: "\(s.droppedPackets)")
                 }
@@ -124,8 +129,8 @@ struct RacketView: View {
                         Spacer()
                         Button("Replay", systemImage: "play.circle") { model.select(.replay, replay: url) }
                             .labelStyle(.iconOnly)
-                        if let csv = model.csvExport(for: url) {
-                            ShareLink(item: csv) { Image(systemName: "square.and.arrow.up") }
+                        ShareLink(items: model.recordingExports(for: url), preview: { SharePreview($0.csv ? "\($0.source.deletingPathExtension().lastPathComponent).csv" : $0.source.lastPathComponent) }) {
+                            Image(systemName: "square.and.arrow.up")
                         }
                     }
                 }

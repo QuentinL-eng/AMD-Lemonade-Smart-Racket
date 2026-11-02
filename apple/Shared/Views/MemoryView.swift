@@ -37,7 +37,7 @@ struct MemoryView: View {
             if notes.isEmpty {
                 Section {
                     ContentUnavailableView("Nothing remembered yet", systemImage: "brain",
-                        description: Text("Add habits, goals or past injuries, and the coach will take them into account."))
+                        description: Text("Add habits, goals or past injuries, and Muse will take them into account."))
                 }
             }
             ForEach(CoachNote.Category.allCases) { cat in
@@ -62,7 +62,7 @@ struct MemoryView: View {
             Text(note.text)
             HStack(spacing: 6) {
                 Text(note.updatedAt.formatted(date: .abbreviated, time: .omitted))
-                if note.addedByCoach { Label("Added by coach", systemImage: "sparkles") }
+                if note.addedByCoach { Label("Added by Muse", systemImage: "sparkles") }
             }
             .font(.caption).foregroundStyle(.secondary)
         }
@@ -91,7 +91,7 @@ private struct NoteEditor: View {
                     ForEach(CoachNote.Category.allCases) { Label($0.label, systemImage: $0.symbol).tag($0) }
                 }
                 if note.addedByCoach {
-                    Text("Added by the coach on \(note.createdAt.formatted(date: .abbreviated, time: .omitted)).")
+                    Text("Added by Muse on \(note.createdAt.formatted(date: .abbreviated, time: .omitted)).")
                         .font(.caption).foregroundStyle(.secondary)
                 }
                 Button("Delete note", role: .destructive) { context.delete(note); dismiss() }

@@ -1,7 +1,7 @@
 import RacketKit
 import SwiftUI
 
-/// Match score keeping. Points come from handle taps (double tap a wide side = won, single tap a narrow
+/// Match score keeping. Points come from handle taps (double tap a wide side = won, double tap a narrow
 /// side = lost, triple tap = undo), the buttons here, or the Watch.
 struct ScoreView: View {
     @Environment(AppModel.self) private var model
@@ -194,8 +194,10 @@ struct ScoreView: View {
         return VStack(alignment: .leading, spacing: 12) {
             Text("Score by tapping the handle").font(.headline)
             guideRow("2.circle.fill", "Double tap a wide side", "You won the point")
-            guideRow("1.circle.fill", "Single tap a narrow side", "Your opponent won it")
+            guideRow("2.circle.fill", "Double tap a narrow side", "Your opponent won it")
             guideRow("3.circle.fill", "Triple tap anywhere", "Undo the last point")
+            Text("Taps are ignored for a few seconds after each shot, so a rally can't score by accident.")
+                .font(.caption).foregroundStyle(.secondary)
             Divider()
             HStack {
                 Image(systemName: cal.isCalibrated ? "checkmark.seal.fill" : "exclamationmark.triangle.fill")

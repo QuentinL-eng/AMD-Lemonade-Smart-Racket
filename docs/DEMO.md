@@ -1,7 +1,7 @@
 # Demo script (3 minutes)
 
-**Before going on:** Mac app open full screen on the projector, racket connected (or Simulator as backup), Llama
-loaded on the Mac and iPhone, Watch on the presenter's non-playing wrist, a ball and a hanging blanket or a partner.
+**Before going on:** Mac app open full screen on the projector, racket connected (or Simulator as backup), signed in
+on the Mac and iPhone (Muse needs the network), Watch on the presenter's non-playing wrist, a ball and a hanging blanket or a partner.
 
 1. **The fork (15 s).** "We forked an open-source smart racket that sent one acceleration number over Wi-Fi and lit a
    red or green LED. We kept its idea and rebuilt everything around it." Show `legacy/` and the fork badge on GitHub.
@@ -14,8 +14,9 @@ loaded on the Mac and iPhone, Watch on the presenter's non-playing wrist, a ball
    - Mention the hardware: two IMUs (gyro + 200 g accelerometer) streaming 1,000 samples/s from inside the handle.
 3. **The treat: analytics (60 s).**
    - End the session on the Watch → History: shot mix, impact heat map per stroke, speed over the session.
-   - Tap **Coach me**: Llama 3.2 3B, an open-weights model, writes the session report **on the device, offline**.
-   - Insights → ask "What's my weakest stroke?" and "Plan my next drill".
+   - Tap **Analyze session**: Muse Spark (Meta) pulls the session through tools and writes the report.
+   - Insights → Muse → ask "What's my weakest stroke?" and "Plan my next drill". Muse calls the tools live
+     (shots, racket sensors, notes, the what-if simulator); point out the "Muse remembered…" line.
 4. **How accurate? (30 s).** Show the slide comparing app numbers with 240 fps slow-mo measurements.
 
 **If Bluetooth fails:** Racket tab → Recorder → replay a recorded session (it plays exactly like the live racket), or

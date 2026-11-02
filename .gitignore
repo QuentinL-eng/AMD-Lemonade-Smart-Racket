@@ -49,3 +49,20 @@ backend/supabase/.temp/
 
 # Licensed song for RevealSong: supplied by the owner, not redistributable in this public repo
 video/public/audio/keep-it-movin.mp3
+# Licensed song for RobotHype ("Ten", Anno Domini Beats): supplied by the owner
+video/public/audio/ten.mp3
+# Licensed songs for BuildLog, EverySwing and Possessed (supplied by the owner) and the sections
+# scripts/prep-songs.mjs cuts from them
+marketing/Music/
+video/public/audio/comin-wit-it.wav
+video/public/audio/not-my-first-rodeo.wav
+video/public/audio/whoop.wav
+
+# Robot day-one outputs: executed RC+ logs and playback (~1 GB, one AVI over GitHub's 100 MB
+# limit) and the rejected tool-space illustration. Kept locally; regenerate with robot/*.py.
+robot/recordings/
+robot/generated/
+# Epson's RC+ API manual and STEP exports with Epson's C8 model: not ours to publish.
+# (Handle CAD lives in video/cad/handle.step.)
+robot/rcplus/api_reference.txt
+marketing/*.step

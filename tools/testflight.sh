@@ -2,7 +2,7 @@
 # Archive the iPhone app (with the Watch app) and upload it to TestFlight.
 #   tools/testflight.sh            # archive + upload
 #   tools/testflight.sh archive    # archive only
-# Needs: the App Store Connect app record for com.kellamadams.tennisbuddy, and Xcode signed in to team B8QLYC5T9U.
+# Needs: the App Store Connect app record for com.quentinlynch.tennisbuddy, and Xcode signed in to team 3KJ46YFZM9.
 # App Store Connect bumps the build number automatically (manageAppVersionAndBuildNumber).
 set -euo pipefail
 cd "$(dirname "$0")/../apple"

@@ -1,4 +1,4 @@
-# Tennis Buddy: Hackathon Plan
+# Tennis Buddee: Hackathon Plan
 
 **Time:** 12:18 to 6:00 (about 5.5 hours). **Team:** CS (apps), EE (wiring + firmware), ME (hardware + calibration + data).
 **Requirement:** fork an open-source project ([AahanPrajapati/Smart-Tennis-Racket](https://github.com/AahanPrajapati/Smart-Tennis-Racket), MIT) and add a **trick** and a **treat**.
@@ -11,7 +11,7 @@
 
 How we extend the original project:
 
-| Original "future enhancement" | Tennis Buddy |
+| Original "future enhancement" | Tennis Buddee |
 |---|---|
 | Mobile app for real-time graphs | iPhone, Mac and Watch apps |
 | ML to classify strokes | Forehand / backhand / serve / volley detection |
@@ -134,7 +134,7 @@ Fallback if MLX won't run in our iOS app: llama.cpp with a GGUF build.
 
 ## 5. Schedule
 
-| Time | EE | ME | CS (+ Claude) |
+| Time | EE | ME | CS |
 |---|---|---|---|
 | 12:30–1:15 | Wire on the bench per the pin map; flash `firmware/`; check serial output | Measurements; tape a 3×3 grid on the strings; foam-wrap the battery | Plan, firmware, Xcode project, simulated racket |
 | 1:15–2:30 | Get BLE streaming to the app; fix dropouts | Install electronics in the handle; antenna flat against the flange | Live 3D racket on real data; recorder |

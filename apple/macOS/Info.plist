@@ -36,6 +36,6 @@
 	<key>LSApplicationCategoryType</key>
 	<string>public.app-category.sports</string>
 	<key>NSBluetoothAlwaysUsageDescription</key>
-	<string>Tennis Buddy connects to your racket's sensor over Bluetooth.</string>
+	<string>Tennis Buddee connects to your racket's sensor over Bluetooth.</string>
 </dict>
 </plist>

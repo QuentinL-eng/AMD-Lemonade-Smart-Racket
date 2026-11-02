@@ -165,7 +165,7 @@ final class CoachToolsTests: XCTestCase {
 final class MuseLoopTests: XCTestCase {
     final class Fake: MuseTransport {
         var requests: [([[String: Any]], [[String: Any]])] = []
-        var reply: [String: Any] = ["role": "assistant", "content": "A coaching answer."]
+        var reply: [String: Any] = ["role": "assistant", "content": "A Muse answer."]
         var toolRounds = 0
         var fail = false
         func complete(messages: [[String: Any]], tools: [[String: Any]]) async throws -> [String: Any] {
@@ -186,7 +186,7 @@ final class MuseLoopTests: XCTestCase {
         let tools = CoachTools(current: s, app: nil, sessions: { [s] })
         let coach = MuseCoach(client: fake, tools: tools)
         let text = try await coach.answer("How was my shot?", digest: SessionDigest(session: s))
-        XCTAssertEqual(text, "A coaching answer.")
+        XCTAssertEqual(text, "A Muse answer.")
         XCTAssertEqual(fake.requests.count, 2)
         let history = fake.requests[1].0
         XCTAssertTrue(history.contains { $0["reasoning_content"] as? String == "opaque test context" })
@@ -240,7 +240,7 @@ final class CoachFallbackTests: XCTestCase {
         model.museEnabled = true
         let text = await model.summarize(SessionRecord())
         XCTAssertEqual(text, "No shots recorded yet. Start a session and hit a few balls.")
-        XCTAssertEqual(model.engineName, "Built-in coach")
+        XCTAssertEqual(model.engineName, "Built-in analysis")
         XCTAssertNotNil(model.lastFallbackReason)
         XCTAssertFalse(model.isWorking)
     }
@@ -252,12 +252,12 @@ final class CoachFallbackTests: XCTestCase {
         model.setSignedIn(true)
         model.museEnabled = true
         let text = await model.summarize(SessionRecord())
-        XCTAssertEqual(text, "A coaching answer.")
+        XCTAssertEqual(text, "A Muse answer.")
         XCTAssertEqual(model.engineName, "Muse Spark · online")
         model.museEnabled = false
         _ = await model.summarize(SessionRecord())
         XCTAssertEqual(fake.requests.count, 1)
-        XCTAssertEqual(model.engineName, "Built-in coach")
+        XCTAssertEqual(model.engineName, "Built-in analysis")
     }
 }
 

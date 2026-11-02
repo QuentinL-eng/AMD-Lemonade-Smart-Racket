@@ -1,4 +1,4 @@
-# Tennis Buddy Xcode project. Regenerate after adding files:  cd apple && xcodegen
+# Tennis Buddee Xcode project. Regenerate after adding files:  cd apple && xcodegen
 name: TennisBuddy
 options:
   bundleIdPrefix: com.quentinlynch
@@ -66,7 +66,7 @@ targets:
         UIBackgroundModes: [bluetooth-central, bluetooth-peripheral, audio, remote-notification, processing, external-accessory]
         UISupportedExternalAccessoryProtocols: [com.meta.ar.wearable]
         BGTaskSchedulerPermittedIdentifiers: [com.quentinlynch.tennisbuddy.processing]
-        NSBluetoothAlwaysUsageDescription: Tennis Buddy connects to your racket's sensor and your glasses over Bluetooth.
+        NSBluetoothAlwaysUsageDescription: Tennis Buddee connects to your racket's sensor and your glasses over Bluetooth.
         NSLocalNetworkUsageDescription: Lets your phone find and talk to your glasses over Wi-Fi.
         NSBonjourServices: [_bonjour._tcp]
         MWDAT:
@@ -112,7 +112,7 @@ targets:
             CFBundleURLName: com.quentinlynch.tennisbuddy.auth
         LSApplicationCategoryType: public.app-category.sports
         ITSAppUsesNonExemptEncryption: false
-        NSBluetoothAlwaysUsageDescription: Tennis Buddy connects to your racket's sensor over Bluetooth.
+        NSBluetoothAlwaysUsageDescription: Tennis Buddee connects to your racket's sensor over Bluetooth.
     entitlements:
       path: macOS/TennisBuddy.entitlements
       properties:
@@ -146,8 +146,8 @@ targets:
         ITSAppUsesNonExemptEncryption: false
         WKCompanionAppBundleIdentifier: com.quentinlynch.tennisbuddy
         WKBackgroundModes: [workout-processing]
-        NSHealthShareUsageDescription: Tennis Buddy reads your heart rate and calories during a tennis session.
-        NSHealthUpdateUsageDescription: Tennis Buddy saves your tennis sessions as workouts in Apple Health.
+        NSHealthShareUsageDescription: Tennis Buddee reads your heart rate and calories during a tennis session.
+        NSHealthUpdateUsageDescription: Tennis Buddee saves your tennis sessions as workouts in Apple Health.
     entitlements:
       path: Watch/TennisBuddyWatch.entitlements
       properties:

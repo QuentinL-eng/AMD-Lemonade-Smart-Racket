@@ -21,7 +21,7 @@ struct CoachCard: View {
                     Button {
                         Task { session.coachSummary = await coach.summarize(session) }
                     } label: {
-                        Label(session.coachSummary.isEmpty ? "Coach me" : "Regenerate", systemImage: "sparkles")
+                        Label(session.coachSummary.isEmpty ? "Analyze session" : "Regenerate", systemImage: "sparkles")
                     }
                     .buttonStyle(.borderedProminent)
                     .foregroundStyle(.black)
@@ -32,7 +32,7 @@ struct CoachCard: View {
                 }
             }
         } label: {
-            Label("Coach", systemImage: "sparkles")
+            Label("Muse", systemImage: "sparkles")
         }
     }
 }
@@ -247,7 +247,7 @@ struct InsightsView: View {
     private var coachRow: some View {
         NavigationLink { CoachScreen() } label: {
             HStack {
-                Label("Coach", systemImage: "sparkles").font(.headline)
+                Label("Muse", systemImage: "sparkles").font(.headline)
                 Spacer()
                 Text("Ask, test what-ifs, plan drills").font(.caption).foregroundStyle(.secondary)
                 Image(systemName: "chevron.right").font(.caption).foregroundStyle(.tertiary)
@@ -263,7 +263,7 @@ struct InsightsView: View {
     }
 }
 
-/// Coach chat, drill planner and coach engine settings, pushed from the Insights page.
+/// Muse chat, drill planner and engine settings, pushed from the Insights page.
 struct CoachScreen: View {
     @Query(sort: \SessionRecord.startDate) private var sessions: [SessionRecord]
     @Environment(CoachModel.self) private var coach
@@ -276,13 +276,13 @@ struct CoachScreen: View {
         ScrollView {
             VStack(alignment: .leading, spacing: 20) {
                 toolRow("What if", "slider.horizontal.3", "Test a technique change on your swing") { WhatIfView() }
-                toolRow("Memory", "brain", "What the coach remembers about you") { MemoryView() }
+                toolRow("Memory", "brain", "What Muse remembers about you") { MemoryView() }
                 if let latest = sessions.last(where: { $0.summary.count > 0 }) { coachChat(latest) }
                 museSettings
             }
             .padding()
         }
-        .navigationTitle("Coach")
+        .navigationTitle("Muse")
     }
 
     private func toolRow<D: View>(_ title: String, _ symbol: String, _ detail: String,
@@ -356,7 +356,7 @@ struct CoachScreen: View {
                     .background(.fill.quaternary, in: .rect(cornerRadius: 10))
                 }
             }
-        } label: { Label("Coach", systemImage: "sparkles") }
+        } label: { Label("Muse", systemImage: "sparkles") }
     }
 
     private func ask(_ session: SessionRecord) {
@@ -368,16 +368,16 @@ struct CoachScreen: View {
 
     private var museSettings: some View {
         @Bindable var coach = coach
-        return GroupBox("Coach engine") {
+        return GroupBox("Analysis engine") {
             VStack(alignment: .leading, spacing: 12) {
                 Toggle("Use Muse online", isOn: $coach.museEnabled)
                     .disabled(!coach.museAvailable || coach.isWorking)
                 Text(coach.museAvailable
-                     ? "Muse sends your question and the shot data, racket readings and coach notes it asks for to Meta. Health data and session notes are excluded; turn off coach notes under Memory."
-                     : "Sign in under Account to use the online coach. Until then the built-in coach answers offline.")
+                     ? "Muse sends your question and the shot data, racket readings and notes it asks for to Meta. Health data and session notes are excluded; turn off Muse notes under Memory."
+                     : "Sign in under Account to use Muse online. Until then the built-in analysis answers offline.")
                     .font(.caption).foregroundStyle(.secondary)
                 if let reason = coach.lastFallbackReason {
-                    Text("Using the built-in coach: \(reason)").font(.caption).foregroundStyle(.secondary)
+                    Text("Using the built-in analysis: \(reason)").font(.caption).foregroundStyle(.secondary)
                 }
             }
             .frame(maxWidth: .infinity, alignment: .leading)

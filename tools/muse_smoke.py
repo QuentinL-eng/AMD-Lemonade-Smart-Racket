@@ -1,20 +1,22 @@
 #!/usr/bin/env python3
-"""Smoke-test the Baseten model behind the `muse` edge function.
+"""Smoke-test the Meta model behind the `muse` edge function.
 
 Checks that the model slug exists, that a plain reply works, and that a tool call round-trips
-(the coach needs this every turn). Reads BASETEN_API_KEY and BASETEN_MODEL from the environment.
-Usage: BASETEN_API_KEY=... BASETEN_MODEL=... python3 tools/baseten_smoke.py
+(the assistant needs this every turn). The key is MUSE_API_KEY from the environment or the repo's .env.
+Usage: python3 tools/muse_smoke.py   (MUSE_MODEL, MUSE_BASE_URL and EFFORT override the defaults)
 """
 import json
 import os
 import sys
 import urllib.request
 
-BASE = os.environ.get("BASETEN_BASE_URL", "https://inference.baseten.co/v1")
-KEY = os.environ.get("BASETEN_API_KEY")
-MODEL = os.environ.get("BASETEN_MODEL")
-if not KEY or not MODEL:
-    sys.exit("Set BASETEN_API_KEY and BASETEN_MODEL")
+from sam_prefill import api_key
+
+BASE = os.environ.get("MUSE_BASE_URL", "https://api.meta.ai/v1")
+KEY = api_key()
+MODEL = os.environ.get("MUSE_MODEL", "muse-spark-1.3")
+if not KEY:
+    sys.exit("Set MUSE_API_KEY in the environment or .env")
 
 TOOL = {"type": "function", "function": {
     "name": "get_live_state", "description": "Current swing and session numbers for the player.",
@@ -45,17 +47,17 @@ print("model listed:", MODEL in ids, f"({len(ids)} models)")
 if MODEL not in ids:
     print("available:", *[i for i in ids if "muse" in i.lower() or "meta" in i.lower()], sep="\n  ")
 
-plain = call("/chat/completions", {"model": MODEL, "max_completion_tokens": int(os.environ.get("MAXTOK", 64)),
+plain = call("/chat/completions", {"model": MODEL, "max_completion_tokens": int(os.environ.get("MAXTOK", 1024)),
                                    "messages": [{"role": "user", "content": "Say hi in five words."}]})
 show("plain", plain)
 
 messages = [{"role": "user", "content": "How was my last swing? Check the live state."}]
-first = call("/chat/completions", {"model": MODEL, "max_completion_tokens": int(os.environ.get("MAXTOK", 256)), "messages": messages,
+first = call("/chat/completions", {"model": MODEL, "max_completion_tokens": int(os.environ.get("MAXTOK", 1024)), "messages": messages,
                                    "tools": [TOOL], "tool_choice": "auto"})
 msg = first["choices"][0]["message"]
 calls = msg.get("tool_calls") or []
 print("tool call:", [c["function"]["name"] for c in calls] or "NONE", "finish:", first["choices"][0]["finish_reason"])
 if calls:
     messages += [msg, {"role": "tool", "tool_call_id": calls[0]["id"], "content": '{"racketSpeed_mph": 61, "contact": "center"}'}]
-    final = call("/chat/completions", {"model": MODEL, "max_completion_tokens": int(os.environ.get("MAXTOK", 256)), "messages": messages, "tools": [TOOL]})
+    final = call("/chat/completions", {"model": MODEL, "max_completion_tokens": int(os.environ.get("MAXTOK", 1024)), "messages": messages, "tools": [TOOL]})
     show("final", final)

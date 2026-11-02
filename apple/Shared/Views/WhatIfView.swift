@@ -13,6 +13,9 @@ struct WhatIfView: View {
     @State private var deltas = WhatIf.Deltas()
     @State private var asked = ""
     @State private var answer = ""
+    @State private var film: SwingFilm?
+    @State private var filmError = ""
+    @State private var mode = SwingShow.Mode.auto
     private var units: UnitSystem { UnitSystem(metric: useMetric) }
 
     private static let good = Color(red: 0.37, green: 0.86, blue: 0.54)
@@ -55,6 +58,7 @@ struct WhatIfView: View {
             if let base = WhatIf.baseline(session.shots, type: available.contains(stroke) ? stroke : available.first) {
                 let type = available.contains(stroke) ? stroke : available.first!
                 baselineCard(base, type: type, session: session)
+                if SwingFilm.strokes.contains(type) { swing(base, type: type) }
                 resultCard(base)
                 controls
                 askCard(session, type: type)
@@ -81,6 +85,27 @@ struct WhatIfView: View {
         .frame(maxWidth: .infinity, alignment: .leading)
         .padding(16)
         .background(.background.secondary, in: .rect(cornerRadius: 22))
+    }
+
+    /// The 3D swing: your average, then with the sliders' change. Shows Muse's film title while its change is set.
+    private func swing(_ base: WhatIf.Baseline, type: ShotType) -> some View {
+        let impact = model.impactModel
+        let after = WhatIf.apply(deltas, to: base.parameters)
+        let b = ShotSimulator.simulate(base.parameters, model: impact), a = ShotSimulator.simulate(after, model: impact)
+        let show = SwingShow(before: base.parameters, after: after, beforeBall: (b.ballSpeedKmh, b.spinRPM),
+                             afterBall: (a.ballSpeedKmh, a.spinRPM), backhand: type == .backhand, mode: mode)
+        let current = film.flatMap { $0.deltas == deltas && $0.stroke == type ? $0 : nil }
+        return VStack(alignment: .leading, spacing: 10) {
+            SwingAnimationView(show: show, title: current?.title, mode: $mode)
+            if let current {
+                VStack(alignment: .leading, spacing: 4) {
+                    Text(current.cue).font(.subheadline.weight(.semibold))
+                    Text(current.why).font(.caption).foregroundStyle(.secondary)
+                    Text("Picked and tested by Muse Spark (Meta)").font(.caption2).foregroundStyle(.tertiary)
+                }
+                .padding(.horizontal, 4)
+            }
+        }
     }
 
     private func stat(_ label: String, _ value: String) -> some View {
@@ -186,7 +211,17 @@ struct WhatIfView: View {
                      ("Find more pace", "speedometer", "What's the quickest way to add speed to my \(s)?"),
                      ("Cleaner contact", "scope", "How do I find the sweet spot more on my \(s)?")]
         return VStack(alignment: .leading, spacing: 12) {
-            Label("Ask the coach", systemImage: "sparkles").font(.headline)
+            Label("Ask Muse", systemImage: "sparkles").font(.headline)
+            if SwingFilm.strokes.contains(type) {
+                Button {
+                    showBestChange(session, type: type)
+                } label: {
+                    Label("Show me the best change", systemImage: "figure.tennis").frame(maxWidth: .infinity)
+                }
+                .buttonStyle(.borderedProminent).foregroundStyle(.black)
+                .disabled(coach.isWorking || !coach.museAvailable)
+                if !filmError.isEmpty { Text(filmError).font(.caption).foregroundStyle(.secondary) }
+            }
             Button {
                 ask("What if I \(WhatIf.describe(deltas, units: units)) on my \(s)?", session)
             } label: {
@@ -203,7 +238,7 @@ struct WhatIfView: View {
                 }
             }
             if coach.isWorking {
-                HStack { ProgressView().controlSize(.small); Text("The coach is testing changes…").foregroundStyle(.secondary) }
+                HStack { ProgressView().controlSize(.small); Text("Muse is testing changes…").foregroundStyle(.secondary) }
             }
             if !answer.isEmpty {
                 VStack(alignment: .leading, spacing: 6) {
@@ -221,6 +256,20 @@ struct WhatIfView: View {
         .background(.background.secondary, in: .rect(cornerRadius: 22))
     }
 
+    private func showBestChange(_ session: SessionRecord, type: ShotType) {
+        filmError = ""
+        Task {
+            switch await coach.swingFilm(session, stroke: type) {
+            case .success(let made):
+                film = made
+                mode = .auto
+                withAnimation { deltas = made.deltas }
+            case .failure(let error):
+                filmError = error.localizedDescription
+            }
+        }
+    }
+
     private func ask(_ question: String, _ session: SessionRecord) {
         guard !coach.isWorking else { return }
         asked = question
@@ -229,7 +278,7 @@ struct WhatIfView: View {
     }
 }
 
-/// "Coach remembered: …" under an answer, linking to the notes.
+/// "Muse remembered: …" under an answer, linking to the notes.
 struct RememberedNotes: View {
     @Environment(CoachModel.self) private var coach
 
@@ -237,7 +286,7 @@ struct RememberedNotes: View {
         if !coach.lastRemembered.isEmpty {
             NavigationLink { MemoryView() } label: {
                 Label {
-                    Text("Coach remembered: " + coach.lastRemembered.joined(separator: " · ")).font(.caption)
+                    Text("Muse remembered: " + coach.lastRemembered.joined(separator: " · ")).font(.caption)
                 } icon: { Image(systemName: "brain") }
             }
             .buttonStyle(.plain)

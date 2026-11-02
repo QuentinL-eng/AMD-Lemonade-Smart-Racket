@@ -1,4 +1,4 @@
-# Tennis Buddy apps (iPhone · Mac · Apple Watch)
+# Tennis Buddee apps (iPhone · Mac · Apple Watch)
 
 One SwiftUI codebase for iPhone and Mac (`Shared/`), a Watch companion (`Watch/`), and the `RacketKit` Swift
 package that does all the racket math (decoding, orientation, shot detection, physics, simulator, recorder).
@@ -19,13 +19,13 @@ The project file is generated from `project.yml`. After adding or removing files
 The app starts on the **Simulator** data source: a virtual racket that swings and hits every few seconds, so every
 screen works without hardware. Switch to the real racket from the connection menu on the Live tab or in the Racket tab.
 
-## Muse coach
+## Muse
 
 Muse runs through the `muse` Supabase edge function (`backend/supabase/functions/muse`), which holds the Meta API key
-as a server secret; the app never contains or asks for a key. Online coaching needs a signed-in account
-(Racket → Account) and can be turned off with **Use Muse online** in Insights → Coach.
+as a server secret; the app never contains or asks for a key. Muse online needs a signed-in account
+(Racket → Account) and can be turned off with **Use Muse online** in Insights → Muse.
 Muse sends questions and requested shot/session statistics to Meta. Health data and session notes are excluded.
-Any Muse error, or being signed out, uses the deterministic built-in coach, and the UI shows the engine that answered.
+Any Muse error, or being signed out, uses the deterministic built-in analysis, and the UI shows the engine that answered.
 Deploy once: `supabase secrets set META_API_KEY=... --project-ref birutnqxduzwldvymeun` then
 `supabase functions deploy muse --project-ref birutnqxduzwldvymeun`.
 No local language model is downloaded or loaded.
@@ -43,13 +43,13 @@ Tools (`Shared/Coach/CoachTools.swift`): `query_shots`, `compare_sessions`, `get
 `remember_note`. Summaries and drills still start from the session digest; questions don't: Muse gets only the
 question and fetches what it needs.
 
-**Coach memory** (`CoachNote`, synced in the same SwiftData/iCloud store): per-player notes such as habits, goals or
-past injuries, edited in Insights → Coach → Memory. With **Let Muse use these notes** on (the default), Muse can read
+**Muse memory** (`CoachNote`, synced in the same SwiftData/iCloud store): per-player notes such as habits, goals or
+past injuries, edited in Insights → Muse → Memory. With **Let Muse use these notes** on (the default), Muse can read
 them and add up to two per answer (240 characters each, 200 per player, duplicates skipped). Notes it adds are tagged
-"Added by coach" and listed under the answer. Notes, including injury notes, go to Meta when Muse reads them; turning
+"Added by Muse" and listed under the answer. Notes, including injury notes, go to Meta when Muse reads them; turning
 the switch off keeps them on the device.
 
-**What if** (Insights → Coach → What if): sliders for swing speed, face, path and contact on the player's average
+**What if** (Insights → Muse → What if): sliders for swing speed, face, path and contact on the player's average
 stroke, with the estimate recomputed on the device by the same baseline and `ShotSimulator` as `simulate_change`
 (`Shared/Coach/WhatIf.swift`), plus buttons that ask Muse about the change or to find the best one.
 Training data for this flow: `docs/WHATIF_DATASET.md`.
@@ -71,7 +71,7 @@ swift test --package-path apple/RacketKit
 xcodebuild -project apple/TennisBuddy.xcodeproj -scheme TennisBuddy-macOS -destination 'platform=macOS' CODE_SIGNING_ALLOWED=NO test
 ```
 
-The coach tests mock HTTP and model responses; an end-to-end API check requires your own key in the app.
+The Muse tests mock HTTP and model responses; an end-to-end API check requires your own key in the app.
 
 ## Layout
 
@@ -100,7 +100,7 @@ The coach tests mock HTTP and model responses; an end-to-end API check requires 
   a one-time accepted friend request, plus optional session codes. Google login, native Apple login, and the hosted database are configured. Native Apple sign-in uses
   the system sheet; the signed iPhone/Watch build and Apple provisioning entitlement were verified.
   A real device login still needs testing. See the setup guide for the Mac signing limitation. Watch shared scoring uses the paired iPhone.
-- **Insights:** existing UI retained pending the user's Claude design direction.
+- **Insights:** existing UI retained pending a design pass.
 - **Muse Spark:** already integrated; no local Llama model is loaded. Existing mock HTTP/fallback tests remain.
 
 The project generator excludes synchronizer conflict copies and the legacy Score/TapCalibration screens

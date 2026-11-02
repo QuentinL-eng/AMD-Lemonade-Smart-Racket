@@ -1,11 +1,13 @@
-// Muse Spark Open proxy, served by Baseten. The Baseten key lives only in this function's secrets
-// (BASETEN_API_KEY); the app authenticates with the signed-in user's Supabase session.
-// BASETEN_MODEL is the model slug from `GET https://inference.baseten.co/v1/models` (or a dedicated
-// deployment's OpenAI-compatible base URL via BASETEN_BASE_URL). BASETEN_REASONING_EFFORT is optional.
+// Muse Spark proxy, served by Meta's Model API (OpenAI-compatible). The Meta key lives only in this
+// function's secrets (META_API_KEY); the app authenticates with the signed-in user's Supabase session.
+// MUSE_MODEL defaults to muse-spark-1.3 (see `GET https://api.meta.ai/v1/models`). MUSE_BASE_URL points
+// at another OpenAI-compatible host; MUSE_REASONING_EFFORT (default "low") keeps replies fast.
 import { createClient } from "npm:@supabase/supabase-js@2";
 
-const BASE_URL = Deno.env.get("BASETEN_BASE_URL") ?? "https://inference.baseten.co/v1";
+const BASE_URL = Deno.env.get("MUSE_BASE_URL") ?? "https://api.meta.ai/v1";
 const ENDPOINT = `${BASE_URL}/chat/completions`;
+const MODEL = Deno.env.get("MUSE_MODEL") ?? "muse-spark-1.3";
+const EFFORT = Deno.env.get("MUSE_REASONING_EFFORT") ?? "low";
 const MAX_BODY_BYTES = 256 * 1024;
 
 const json = (body: unknown, status: number) =>
@@ -26,17 +28,16 @@ Deno.serve(async (req) => {
   try { input = JSON.parse(raw); } catch { return json({ error: "bad json" }, 400); }
   if (!Array.isArray(input.messages)) return json({ error: "messages required" }, 400);
 
-  const model = Deno.env.get("BASETEN_MODEL");
-  if (!model) return json({ error: "model not configured" }, 500);
+  const key = Deno.env.get("META_API_KEY");
+  if (!key) return json({ error: "model not configured" }, 500);
 
   // Only forward fields the app needs, with the model and limits pinned server-side.
   const body: Record<string, unknown> = {
-    model,
+    model: MODEL,
     messages: input.messages,
     max_completion_tokens: Math.min(Number(input.max_completion_tokens) || 4096, 4096),
   };
-  const effort = Deno.env.get("BASETEN_REASONING_EFFORT");
-  if (effort) body.reasoning_effort = effort;
+  if (EFFORT) body.reasoning_effort = EFFORT;
   if (Array.isArray(input.tools) && input.tools.length > 0) {
     body.tools = input.tools;
     body.tool_choice = "auto";
@@ -44,7 +45,7 @@ Deno.serve(async (req) => {
 
   const upstream = await fetch(ENDPOINT, {
     method: "POST",
-    headers: { Authorization: `Bearer ${Deno.env.get("BASETEN_API_KEY")}`, "Content-Type": "application/json" },
+    headers: { Authorization: `Bearer ${key}`, "Content-Type": "application/json" },
     body: JSON.stringify(body),
     signal: AbortSignal.timeout(40_000),
   }).catch(() => null);
