@@ -186,7 +186,7 @@ struct WhatIfView: View {
                      ("Find more pace", "speedometer", "What's the quickest way to add speed to my \(s)?"),
                      ("Cleaner contact", "scope", "How do I find the sweet spot more on my \(s)?")]
         return VStack(alignment: .leading, spacing: 12) {
-            Label("Ask the coach", systemImage: "sparkles").font(.headline)
+            Label("Ask Muse", systemImage: "sparkles").font(.headline)
             Button {
                 ask("What if I \(WhatIf.describe(deltas, units: units)) on my \(s)?", session)
             } label: {
@@ -203,7 +203,7 @@ struct WhatIfView: View {
                 }
             }
             if coach.isWorking {
-                HStack { ProgressView().controlSize(.small); Text("The coach is testing changes…").foregroundStyle(.secondary) }
+                HStack { ProgressView().controlSize(.small); Text("Muse is testing changes…").foregroundStyle(.secondary) }
             }
             if !answer.isEmpty {
                 VStack(alignment: .leading, spacing: 6) {
@@ -229,7 +229,7 @@ struct WhatIfView: View {
     }
 }
 
-/// "Coach remembered: …" under an answer, linking to the notes.
+/// "Muse remembered: …" under an answer, linking to the notes.
 struct RememberedNotes: View {
     @Environment(CoachModel.self) private var coach
 
@@ -237,7 +237,7 @@ struct RememberedNotes: View {
         if !coach.lastRemembered.isEmpty {
             NavigationLink { MemoryView() } label: {
                 Label {
-                    Text("Coach remembered: " + coach.lastRemembered.joined(separator: " · ")).font(.caption)
+                    Text("Muse remembered: " + coach.lastRemembered.joined(separator: " · ")).font(.caption)
                 } icon: { Image(systemName: "brain") }
             }
             .buttonStyle(.plain)

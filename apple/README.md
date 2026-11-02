@@ -19,13 +19,13 @@ The project file is generated from `project.yml`. After adding or removing files
 The app starts on the **Simulator** data source: a virtual racket that swings and hits every few seconds, so every
 screen works without hardware. Switch to the real racket from the connection menu on the Live tab or in the Racket tab.
 
-## Muse coach
+## Muse Spark
 
 Muse runs through the `muse` Supabase edge function (`backend/supabase/functions/muse`), which holds the Meta API key
 as a server secret; the app never contains or asks for a key. Online coaching needs a signed-in account
 (Racket → Account) and can be turned off with **Use Muse online** in Insights → Coach.
 Muse sends questions and requested shot/session statistics to Meta. Health data and session notes are excluded.
-Any Muse error, or being signed out, uses the deterministic built-in coach, and the UI shows the engine that answered.
+Any Muse error, or being signed out, uses the deterministic built-in engine, and the UI shows the engine that answered.
 Deploy once: `supabase secrets set META_API_KEY=... --project-ref birutnqxduzwldvymeun` then
 `supabase functions deploy muse --project-ref birutnqxduzwldvymeun`.
 No local language model is downloaded or loaded.
@@ -43,10 +43,10 @@ Tools (`Shared/Coach/CoachTools.swift`): `query_shots`, `compare_sessions`, `get
 `remember_note`. Summaries and drills still start from the session digest; questions don't: Muse gets only the
 question and fetches what it needs.
 
-**Coach memory** (`CoachNote`, synced in the same SwiftData/iCloud store): per-player notes such as habits, goals or
+**Muse memory** (`CoachNote`, synced in the same SwiftData/iCloud store): per-player notes such as habits, goals or
 past injuries, edited in Insights → Coach → Memory. With **Let Muse use these notes** on (the default), Muse can read
 them and add up to two per answer (240 characters each, 200 per player, duplicates skipped). Notes it adds are tagged
-"Added by coach" and listed under the answer. Notes, including injury notes, go to Meta when Muse reads them; turning
+"Added by Muse" and listed under the answer. Notes, including injury notes, go to Meta when Muse reads them; turning
 the switch off keeps them on the device.
 
 **What if** (Insights → Coach → What if): sliders for swing speed, face, path and contact on the player's average

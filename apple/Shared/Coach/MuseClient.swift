@@ -12,8 +12,8 @@ enum MuseError: LocalizedError {
         switch self {
         case .invalidResponse: "Muse returned an incomplete response."
         case .http(let code): "Muse request failed (HTTP \(code))."
-        case .roundLimit: "Muse reached the coaching tool limit."
-        case .signInRequired: "Sign in to use the online coach."
+        case .roundLimit: "Muse reached its tool limit."
+        case .signInRequired: "Sign in to use Muse online."
         }
     }
 }

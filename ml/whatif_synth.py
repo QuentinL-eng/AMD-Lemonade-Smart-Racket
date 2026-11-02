@@ -445,7 +445,7 @@ def answer_no_gain(stroke, objective, result, units):
     else:
         lead = f"I couldn't find a small change that helps your {stroke} here without costing something else."
     return (f"{lead} Even if you {change}, the estimate says {spin} and {speed}. "
-            f"That's a stroke rebuild, best done with a coach on court; for now, work on clean contact. Estimates only.")
+            f"That's a stroke rebuild, best done with a pro on court; for now, work on clean contact. Estimates only.")
 
 
 # ------------------------------------------------------------------------------------------------ conversations

@@ -80,7 +80,7 @@ protocol CoachEngine {
 
 enum CoachPrompts {
     static let system = """
-    You are Tennis Buddy, an upbeat, expert tennis coach. You are given measurements from a sensor in the \
+    You are Muse, the AI in Tennis Buddee, a smart tennis racket. You are upbeat and know tennis well. You are given measurements from a sensor in the \
     player's racket. Only use numbers that appear in the data; never invent stats. Speeds use the data's speedUnit, \
     spin is rpm, contact positions use lengthUnit from the sweet spot (positive toward the tip / to the right). \
     Always write the units next to numbers and never mention JSON field names. Keep answers short, \
@@ -129,7 +129,7 @@ enum CoachPrompts {
 
 /// Deterministic offline coach, available without an API key or network connection.
 struct TemplateCoach: CoachEngine {
-    let name = "Built-in coach"
+    let name = "Built-in engine"
 
     func summarize(_ d: SessionDigest) async throws -> String {
         guard d.totalShots > 0 else { return "No shots recorded yet. Start a session and hit a few balls." }
@@ -222,7 +222,7 @@ final class CoachModel {
     }
 
     private func run(session: SessionRecord, _ body: (CoachEngine) async throws -> String) async -> String {
-        guard !isWorking else { return "The coach is already answering. Please try again shortly." }
+        guard !isWorking else { return "Muse is already answering. Please try again shortly." }
         isWorking = true
         lastFallbackReason = nil
         lastRemembered = []
@@ -249,11 +249,11 @@ final class CoachModel {
                 lastEngineName = muse.name
                 return text
             } catch {
-                if Task.isCancelled { return "Coaching cancelled." }
+                if Task.isCancelled { return "Cancelled." }
                 lastFallbackReason = error.localizedDescription
             }
         }
         lastEngineName = fallback.name
-        return (try? await body(fallback)) ?? "The coach is unavailable right now."
+        return (try? await body(fallback)) ?? "No answer is available right now."
     }
 }
