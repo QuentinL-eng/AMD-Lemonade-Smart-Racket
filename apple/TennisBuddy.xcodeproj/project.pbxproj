@@ -20,6 +20,7 @@
 		0F8AFFC0DB5B3EBEA6B6F094 /* CoachModel.swift in Sources */ = {isa = PBXBuildFile; fileRef = 99B37449F16667305BA65652 /* CoachModel.swift */; };
 		10FB836BF67A7F6983A899D4 /* AppModel.swift in Sources */ = {isa = PBXBuildFile; fileRef = 93FF9841989C788B5B2C46D4 /* AppModel.swift */; };
 		117FB391373D2548F66FB7C9 /* Records.swift in Sources */ = {isa = PBXBuildFile; fileRef = 3F2C05509855869C61804935 /* Records.swift */; };
+		12E9272F24196C1CEF07A0B4 /* MuseScreen.swift in Sources */ = {isa = PBXBuildFile; fileRef = 19D6AA8108FC3EEE695C9792 /* MuseScreen.swift */; };
 		17A2D3BEB6B3516A3B652482 /* TapCalibrationView.swift in Sources */ = {isa = PBXBuildFile; fileRef = 39FA88E51FD976A8351A6535 /* TapCalibrationView.swift */; };
 		1841A606AC7BC27C12691B92 /* RacketKit in Frameworks */ = {isa = PBXBuildFile; productRef = A4E70D007D8B145569CBD58A /* RacketKit */; };
 		18ED092F8AD39F15C95F2472 /* AppModel.swift in Sources */ = {isa = PBXBuildFile; fileRef = 93FF9841989C788B5B2C46D4 /* AppModel.swift */; };
@@ -70,6 +71,7 @@
 		9442D992C56B69144EB0C2C7 /* RacketKit in Frameworks */ = {isa = PBXBuildFile; productRef = 3C7E414C80B1AC138671F159 /* RacketKit */; };
 		955E8EB26BBC5B100AB75A6B /* CoachTools.swift in Sources */ = {isa = PBXBuildFile; fileRef = 47587C1A3ADFF8D79D0B943F /* CoachTools.swift */; };
 		9941A2CD7E5BE18F509CC16A /* TennisBuddyApp.swift in Sources */ = {isa = PBXBuildFile; fileRef = 2F2019504077756E640617FE /* TennisBuddyApp.swift */; };
+		9ABDC6E52CFC9BE74BAAA8CF /* MuseScreen.swift in Sources */ = {isa = PBXBuildFile; fileRef = 19D6AA8108FC3EEE695C9792 /* MuseScreen.swift */; };
 		9C9B32A4B14014387AAF2B3E /* SharedSessionView.swift in Sources */ = {isa = PBXBuildFile; fileRef = 718D6AFC3060101468F35101 /* SharedSessionView.swift */; };
 		9D306744801A6F5AF71738FF /* AccountView.swift in Sources */ = {isa = PBXBuildFile; fileRef = 750EC5969F8A326324C4F2FF /* AccountView.swift */; };
 		9D99BFE7952F59F2664D23A6 /* RacketSkinView.swift in Sources */ = {isa = PBXBuildFile; fileRef = 490440BE4772F79F23F88592 /* RacketSkinView.swift */; };
@@ -148,6 +150,7 @@
 		032EE97EB7178A0FC98058FD /* FirmwareUpdateView.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = FirmwareUpdateView.swift; sourceTree = "<group>"; };
 		037371CBA2AEE6E7B73842E5 /* GlassesController.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = GlassesController.swift; sourceTree = "<group>"; };
 		0A9946B6CF4A383F80879D30 /* GlassesView.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = GlassesView.swift; sourceTree = "<group>"; };
+		19D6AA8108FC3EEE695C9792 /* MuseScreen.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = MuseScreen.swift; sourceTree = "<group>"; };
 		1EE34726185AA44404C5C313 /* CoachMemory.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = CoachMemory.swift; sourceTree = "<group>"; };
 		1F855F6F1292B3220B90A8FB /* TennisBuddyWatch.app */ = {isa = PBXFileReference; explicitFileType = wrapper.application; includeInIndex = 0; path = TennisBuddyWatch.app; sourceTree = BUILT_PRODUCTS_DIR; };
 		214D03CD0141E5D33E2C1284 /* TennisBuddy-macOS.app */ = {isa = PBXFileReference; explicitFileType = wrapper.application; includeInIndex = 0; path = "TennisBuddy-macOS.app"; sourceTree = BUILT_PRODUCTS_DIR; };
@@ -299,6 +302,7 @@
 				F12AAA9C083779C5F7C4404A /* InsightsView.swift */,
 				F7FE1568EBF1F305C6ADF3C4 /* LiveView.swift */,
 				8C2996C9D860A31050356262 /* MemoryView.swift */,
+				19D6AA8108FC3EEE695C9792 /* MuseScreen.swift */,
 				5CE7A86CCDEFE9D1F8502AC1 /* RacketSceneView.swift */,
 				490440BE4772F79F23F88592 /* RacketSkinView.swift */,
 				8F73C9942056B6F82D381273 /* RacketView.swift */,
@@ -619,6 +623,7 @@
 				29E2BC7EA9C31D4C0C78E366 /* MemoryView.swift in Sources */,
 				A29365338828346B2B9B6AD3 /* MuseClient.swift in Sources */,
 				65BA365DA7CAFE80010E4CBC /* MuseCoach.swift in Sources */,
+				12E9272F24196C1CEF07A0B4 /* MuseScreen.swift in Sources */,
 				044D7A721F0CE85DB86A97DA /* RacketSceneView.swift in Sources */,
 				F753195D0FE588BFD780C29E /* RacketSkinView.swift in Sources */,
 				1D917C4ECF632F4D057F0CBA /* RacketView.swift in Sources */,
@@ -686,6 +691,7 @@
 				4F30113C1078FA0BAD241D67 /* MemoryView.swift in Sources */,
 				E076ADEAA3E3106B85BC6181 /* MuseClient.swift in Sources */,
 				C57AA38341143B9C02A8AAD6 /* MuseCoach.swift in Sources */,
+				9ABDC6E52CFC9BE74BAAA8CF /* MuseScreen.swift in Sources */,
 				65D4F29ECD63B318321BBF4F /* RacketSceneView.swift in Sources */,
 				9D99BFE7952F59F2664D23A6 /* RacketSkinView.swift in Sources */,
 				886B779B6E84BAB7928FFEBD /* RacketView.swift in Sources */,

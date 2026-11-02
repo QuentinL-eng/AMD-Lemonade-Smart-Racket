@@ -180,6 +180,8 @@ final class CoachModel {
     var isWorking = false
     private(set) var lastEngineName: String?
     private(set) var lastFallbackReason: String?
+    /// Muse's last validated swing film, shown on the Muse home and set on the What-if sliders.
+    var lastFilm: SwingFilm?
     /// Notes Muse saved while producing the last answer, shown under it so nothing is remembered silently.
     private(set) var lastRemembered: [String] = []
     /// Online coaching is available while signed in (the server holds the Muse key).
@@ -239,6 +241,7 @@ final class CoachModel {
         do {
             let film = try await SwingFilmDirector(client: transport, tools: tools).direct(stroke)
             lastEngineName = "Muse Spark · online"
+            lastFilm = film
             return .success(film)
         } catch {
             return .failure(error)

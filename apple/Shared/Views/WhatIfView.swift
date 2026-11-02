@@ -2,8 +2,8 @@ import RacketKit
 import SwiftData
 import SwiftUI
 
-/// Change one thing about your average stroke and see what the racket model estimates, then ask the coach to
-/// find the best change. Same baseline and physics as Muse's `simulate_change` tool (`WhatIf`, `ShotSimulator`).
+/// Change one thing about your average stroke and see what the racket model estimates, or have Muse find the best
+/// change. Same baseline and physics as Muse's `simulate_change` tool (`WhatIf`, `ShotSimulator`).
 struct WhatIfView: View {
     @Query(sort: \SessionRecord.startDate) private var sessions: [SessionRecord]
     @Environment(CoachModel.self) private var coach
@@ -11,15 +11,14 @@ struct WhatIfView: View {
     @AppStorage(UnitSystem.storageKey) private var useMetric = false
     @State private var stroke = ShotType.forehand
     @State private var deltas = WhatIf.Deltas()
+    @State private var lever = Lever.speed
     @State private var asked = ""
     @State private var answer = ""
-    @State private var film: SwingFilm?
     @State private var filmError = ""
     @State private var mode = SwingShow.Mode.auto
     private var units: UnitSystem { UnitSystem(metric: useMetric) }
 
-    private static let good = Color(red: 0.37, green: 0.86, blue: 0.54)
-    private static let bad = Color(red: 1, green: 0.6, blue: 0.55)
+    enum Lever: String, CaseIterable, Identifiable { case speed = "Speed", path = "Path", face = "Face", contact = "Contact"; var id: String { rawValue } }
 
     /// The latest session with at least one swing the model can start from.
     private var session: SessionRecord? { sessions.last { WhatIf.baseline($0.shots) != nil } }
@@ -29,9 +28,9 @@ struct WhatIfView: View {
     }
 
     var body: some View {
-        ScrollView {
-            if let session {
-                content(session).padding()
+        Group {
+            if let session, let type = currentStroke(session), let base = WhatIf.baseline(session.shots, type: type) {
+                content(session, type: type, base: base)
             } else {
                 ContentUnavailableView("No swings to test yet", systemImage: "slider.horizontal.3",
                     description: Text("Play a session with the racket's motion sensors on, then try changes here."))
@@ -44,75 +43,89 @@ struct WhatIfView: View {
                     .disabled(deltas.isZero)
             }
         }
+        .museScreen()
+        .onAppear(perform: applyLastFilm)
     }
 
-    @ViewBuilder private func content(_ session: SessionRecord) -> some View {
-        let available = strokes(session)
-        VStack(alignment: .leading, spacing: 20) {
-            if available.count > 1 {
-                Picker("Stroke", selection: $stroke) {
-                    ForEach(available) { Text($0.label).tag($0) }
-                }
-                .pickerStyle(.segmented)
-            }
-            if let base = WhatIf.baseline(session.shots, type: available.contains(stroke) ? stroke : available.first) {
-                let type = available.contains(stroke) ? stroke : available.first!
-                baselineCard(base, type: type, session: session)
-                if SwingFilm.strokes.contains(type) { swing(base, type: type) }
-                resultCard(base)
-                controls
-                askCard(session, type: type)
-            }
-        }
-        .onAppear { if !available.contains(stroke), let first = available.first { stroke = first } }
-        .sensoryFeedback(.selection, trigger: deltas)
+    private func currentStroke(_ s: SessionRecord) -> ShotType? {
+        let available = strokes(s)
+        return available.contains(stroke) ? stroke : available.first
     }
 
-    // MARK: Cards
-
-    private func baselineCard(_ base: WhatIf.Baseline, type: ShotType, session: SessionRecord) -> some View {
-        let p = base.parameters
-        let face = p.faceAngleDeg >= 0 ? "\(Int(p.faceAngleDeg.rounded()))° open" : "\(Int(-p.faceAngleDeg.rounded()))° closed"
-        return VStack(alignment: .leading, spacing: 8) {
-            Text("Your average \(type.label.lowercased())").font(.headline)
-            Text("\(base.sampleCount) swings from \(session.startDate.formatted(.dateTime.weekday().day().month()))")
-                .font(.caption).foregroundStyle(.secondary)
-            Grid(alignment: .leading, horizontalSpacing: 16, verticalSpacing: 6) {
-                GridRow { stat("Swing", units.speedText(p.swingSpeedKmh)); stat("Path", "\(Int(p.pathAngleDeg.rounded()))° up") }
-                GridRow { stat("Face", face); stat("Contact", contactText(x: p.contactXcm, y: p.contactYcm)) }
-            }
-        }
-        .frame(maxWidth: .infinity, alignment: .leading)
-        .padding(16)
-        .background(.background.secondary, in: .rect(cornerRadius: 22))
+    /// Open on Muse's last film when there is one and nothing has been changed yet.
+    private func applyLastFilm() {
+        guard deltas.isZero, let film = coach.lastFilm, let session, strokes(session).contains(film.stroke) else { return }
+        stroke = film.stroke
+        deltas = film.deltas
     }
 
-    /// The 3D swing: your average, then with the sliders' change. Shows Muse's film title while its change is set.
-    private func swing(_ base: WhatIf.Baseline, type: ShotType) -> some View {
+    /// Muse's film while its change is still on the levers.
+    private func currentFilm(_ type: ShotType) -> SwingFilm? {
+        coach.lastFilm.flatMap { $0.deltas == deltas && $0.stroke == type ? $0 : nil }
+    }
+
+    private func content(_ session: SessionRecord, type: ShotType, base: WhatIf.Baseline) -> some View {
         let impact = model.impactModel
         let after = WhatIf.apply(deltas, to: base.parameters)
         let b = ShotSimulator.simulate(base.parameters, model: impact), a = ShotSimulator.simulate(after, model: impact)
-        let show = SwingShow(before: base.parameters, after: after, beforeBall: (b.ballSpeedKmh, b.spinRPM),
-                             afterBall: (a.ballSpeedKmh, a.spinRPM), stroke: type, mode: mode)
-        let current = film.flatMap { $0.deltas == deltas && $0.stroke == type ? $0 : nil }
-        return VStack(alignment: .leading, spacing: 10) {
-            SwingAnimationView(show: show, title: current?.title, mode: $mode)
-            if let current {
-                VStack(alignment: .leading, spacing: 4) {
-                    Text(current.cue).font(.subheadline.weight(.semibold))
-                    Text(current.why).font(.caption).foregroundStyle(.secondary)
-                    Text("Picked and tested by Muse Spark (Meta)").font(.caption2).foregroundStyle(.tertiary)
+        let film = currentFilm(type)
+        let available = strokes(session)
+        return ScrollView {
+            VStack(spacing: 0) {
+                if available.count > 1 { strokeSwitcher(available, selected: type).padding(.horizontal, 16).padding(.bottom, 10) }
+                SwingAnimationView(show: SwingShow(before: base.parameters, after: after, beforeBall: (b.ballSpeedKmh, b.spinRPM),
+                                                   afterBall: (a.ballSpeedKmh, a.spinRPM), stroke: type, mode: mode),
+                                   title: film?.title, mode: $mode)
+                VStack(alignment: .leading, spacing: 12) {
+                    if let film {
+                        VStack(alignment: .leading, spacing: 4) {
+                            Text(film.cue).font(.headline).foregroundStyle(MuseStyle.text)
+                            Text(film.why).font(.subheadline).foregroundStyle(MuseStyle.muted)
+                        }
+                    }
+                    baselineLine(base, type: type, session: session)
+                    leverTiles
+                    leverEditor
+                    results(before: b, after: a, film: film != nil)
+                    askAbout(type, session: session)
                 }
-                .padding(.horizontal, 4)
+                .padding(16)
             }
         }
+        .safeAreaInset(edge: .bottom) { bestChangeBar(session, type: type, film: film) }
+        .sensoryFeedback(.selection, trigger: deltas)
+        .animation(.snappy, value: deltas)
     }
 
-    private func stat(_ label: String, _ value: String) -> some View {
-        VStack(alignment: .leading, spacing: 2) {
-            Text(label).font(.caption).foregroundStyle(.secondary)
-            Text(value).font(.subheadline.weight(.semibold)).monospacedDigit()
+    // MARK: Stroke and baseline
+
+    private func strokeSwitcher(_ available: [ShotType], selected: ShotType) -> some View {
+        HStack(spacing: 0) {
+            ForEach(available) { t in
+                Button {
+                    stroke = t
+                    deltas = WhatIf.Deltas()
+                } label: {
+                    Text(t.label).font(.footnote.weight(t == selected ? .bold : .semibold))
+                        .foregroundStyle(t == selected ? MuseStyle.ink : MuseStyle.text.opacity(0.85))
+                        .frame(maxWidth: .infinity, minHeight: 38)
+                        .background(t == selected ? MuseStyle.text : .clear, in: .capsule)
+                        .contentShape(.capsule)
+                }
+                .buttonStyle(.plain)
+                .accessibilityAddTraits(t == selected ? .isSelected : [])
+            }
         }
+        .padding(3)
+        .background(MuseStyle.card, in: .capsule)
+    }
+
+    private func baselineLine(_ base: WhatIf.Baseline, type: ShotType, session: SessionRecord) -> some View {
+        let p = base.parameters
+        let face = p.faceAngleDeg >= 0 ? "\(Int(p.faceAngleDeg.rounded()))° open" : "\(Int(-p.faceAngleDeg.rounded()))° closed"
+        let path = p.pathAngleDeg >= 0 ? "\(Int(p.pathAngleDeg.rounded()))° up" : "\(Int(-p.pathAngleDeg.rounded()))° down"
+        return Text("Your average \(type.label.lowercased()): \(base.sampleCount) swings, \(units.speedText(p.swingSpeedKmh)), path \(path), face \(face), contact \(contactText(x: p.contactXcm, y: p.contactYcm)).")
+            .font(.caption).foregroundStyle(MuseStyle.muted)
     }
 
     private func contactText(x: Double, y: Double) -> String {
@@ -122,138 +135,178 @@ struct WhatIfView: View {
         return "\(units.lengthText(d)) \(dir)"
     }
 
-    private func resultCard(_ base: WhatIf.Baseline) -> some View {
-        let impact = model.impactModel
-        let before = ShotSimulator.simulate(base.parameters, model: impact)
-        let after = ShotSimulator.simulate(WhatIf.apply(deltas, to: base.parameters), model: impact)
-        return VStack(alignment: .leading, spacing: 14) {
-            HStack {
-                Text(deltas.isZero ? "Move a slider to test a change" : WhatIf.describe(deltas, units: units).capitalizedFirst)
-                    .font(.headline)
-                Spacer()
-                Text("Estimated").font(.caption.weight(.semibold))
-                    .padding(.horizontal, 8).padding(.vertical, 3)
-                    .background(.fill.tertiary, in: .capsule)
-            }
-            HStack(alignment: .top, spacing: 12) {
-                outcome("Ball speed", before: units.speedValue(before.ballSpeedKmh), after: units.speedValue(after.ballSpeedKmh),
-                        unit: units.speedUnit, change: units.speed(after.ballSpeedKmh) - units.speed(before.ballSpeedKmh), note: nil)
-                outcome("Spin", before: "\(Int(before.spinRPM.rounded()))", after: "\(Int(after.spinRPM.rounded()))",
-                        unit: "rpm", change: after.spinRPM - before.spinRPM,
-                        note: after.spin == before.spin ? after.spin.label : "\(before.spin.label) → \(after.spin.label)")
-            }
-            Text("Physics estimate on your average swing, with an assumed incoming ball. Ball flight, depth and net clearance aren't modeled.")
-                .font(.caption).foregroundStyle(.secondary)
+    // MARK: Levers
+
+    private func value(_ l: Lever) -> (text: String, changed: Bool) {
+        func signed(_ v: Double, _ unit: String) -> String { v == 0 ? "0\(unit)" : "\(v > 0 ? "+" : "−")\(abs(v).formatted(.number.precision(.fractionLength(0...1))))\(unit)" }
+        switch l {
+        case .speed: return (signed(deltas.swingPercent, "%"), deltas.swingPercent != 0)
+        case .path: return (signed(deltas.pathDeg, "°"), deltas.pathDeg != 0)
+        case .face: return (signed(deltas.faceDeg, "°"), deltas.faceDeg != 0)
+        case .contact:
+            let d = (deltas.contactXcm * deltas.contactXcm + deltas.contactYcm * deltas.contactYcm).squareRoot()
+            return (d == 0 ? "0 \(units.lengthUnit)" : units.lengthText(d), d != 0)
         }
-        .padding(16)
-        .background(.background.secondary, in: .rect(cornerRadius: 22))
-        .animation(.snappy, value: deltas)
     }
 
-    private func outcome(_ title: String, before: String, after: String, unit: String, change: Double, note: String?) -> some View {
-        let color = abs(change) < 0.5 ? Color.secondary : (change > 0 ? Self.good : Self.bad)
-        return VStack(alignment: .leading, spacing: 4) {
-            Text(title).font(.caption).foregroundStyle(.secondary)
-            HStack(alignment: .firstTextBaseline, spacing: 4) {
-                Text(after).font(.system(size: 40, weight: .bold, design: .rounded)).monospacedDigit()
-                    .contentTransition(.numericText())
-                Text(unit).font(.subheadline).foregroundStyle(.secondary)
+    private var leverTiles: some View {
+        HStack(spacing: 8) {
+            ForEach(Lever.allCases) { l in
+                let v = value(l)
+                Button { lever = l } label: {
+                    VStack(spacing: 2) {
+                        Text(l.rawValue).font(.caption2).foregroundStyle(MuseStyle.muted)
+                        Text(v.text).font(.system(size: 17, weight: .bold, design: .rounded)).monospacedDigit()
+                            .foregroundStyle(v.changed ? MuseStyle.lime : MuseStyle.text)
+                    }
+                    .frame(maxWidth: .infinity, minHeight: 72)
+                    .background(lever == l ? MuseStyle.line : MuseStyle.card, in: .rect(cornerRadius: 18))
+                    .overlay(RoundedRectangle(cornerRadius: 18)
+                        .stroke(v.changed ? MuseStyle.lime : (lever == l ? MuseStyle.muted : MuseStyle.line), lineWidth: 2))
+                    .contentShape(.rect(cornerRadius: 18))
+                }
+                .buttonStyle(.plain)
+                .accessibilityLabel("\(l.rawValue), \(v.text)")
+                .accessibilityAddTraits(lever == l ? .isSelected : [])
             }
-            Text(abs(change) < 0.5 ? "was \(before)" : "\(change > 0 ? "▲" : "▼") \(Int(abs(change).rounded())) from \(before)")
-                .font(.subheadline.weight(.semibold)).foregroundStyle(color)
-            if let note { Text(note).font(.caption).foregroundStyle(.secondary) }
         }
-        .frame(maxWidth: .infinity, alignment: .leading)
     }
 
-    // MARK: Controls
-
-    private var controls: some View {
-        VStack(alignment: .leading, spacing: 16) {
-            slider("Swing speed", value: $deltas.swingPercent, limit: WhatIf.Deltas.swingLimit, step: 1) {
-                $0 == 0 ? "same" : "\($0 > 0 ? "+" : "−")\(Int(abs($0)))%"
-            }
-            slider("Racket face", value: $deltas.faceDeg, limit: WhatIf.Deltas.angleLimit, step: 1) {
-                $0 == 0 ? "same" : "\(Int(abs($0)))° \($0 > 0 ? "more open" : "more closed")"
-            }
-            slider("Swing path", value: $deltas.pathDeg, limit: WhatIf.Deltas.angleLimit, step: 1) {
-                $0 == 0 ? "same" : "\(Int(abs($0)))° \($0 > 0 ? "more low-to-high" : "flatter")"
-            }
-            slider("Contact, tip ↔ throat", value: $deltas.contactYcm, limit: WhatIf.Deltas.contactLimit, step: 0.5) {
-                $0 == 0 ? "same" : "\(units.lengthText(abs($0))) toward \($0 > 0 ? "tip" : "throat")"
-            }
-            slider("Contact, left ↔ right", value: $deltas.contactXcm, limit: WhatIf.Deltas.contactLimit, step: 0.5) {
-                $0 == 0 ? "same" : "\(units.lengthText(abs($0))) \($0 > 0 ? "right" : "left")"
+    @ViewBuilder private var leverEditor: some View {
+        VStack(alignment: .leading, spacing: 14) {
+            switch lever {
+            case .speed:
+                slider("Swing speed", value: $deltas.swingPercent, limit: WhatIf.Deltas.swingLimit, step: 1) {
+                    $0 == 0 ? "same" : "\($0 > 0 ? "+" : "−")\(Int(abs($0)))%"
+                }
+            case .path:
+                slider("Swing path", value: $deltas.pathDeg, limit: WhatIf.Deltas.angleLimit, step: 1) {
+                    $0 == 0 ? "same" : "\(Int(abs($0)))° \($0 > 0 ? "more low-to-high" : "flatter")"
+                }
+            case .face:
+                slider("Racket face", value: $deltas.faceDeg, limit: WhatIf.Deltas.angleLimit, step: 1) {
+                    $0 == 0 ? "same" : "\(Int(abs($0)))° \($0 > 0 ? "more open" : "more closed")"
+                }
+            case .contact:
+                slider("Tip ↔ throat", value: $deltas.contactYcm, limit: WhatIf.Deltas.contactLimit, step: 0.5) {
+                    $0 == 0 ? "same" : "\(units.lengthText(abs($0))) toward \($0 > 0 ? "tip" : "throat")"
+                }
+                slider("Left ↔ right", value: $deltas.contactXcm, limit: WhatIf.Deltas.contactLimit, step: 0.5) {
+                    $0 == 0 ? "same" : "\(units.lengthText(abs($0))) \($0 > 0 ? "right" : "left")"
+                }
             }
         }
         .padding(16)
-        .background(.background.secondary, in: .rect(cornerRadius: 22))
+        .background(MuseStyle.card, in: .rect(cornerRadius: 22))
     }
 
     private func slider(_ title: String, value: Binding<Double>, limit: Double, step: Double,
                         text: @escaping (Double) -> String) -> some View {
         VStack(alignment: .leading, spacing: 4) {
             HStack {
-                Text(title).font(.subheadline.weight(.semibold))
+                Text(title).font(.subheadline.weight(.semibold)).foregroundStyle(MuseStyle.text)
                 Spacer()
-                Text(text(value.wrappedValue)).font(.subheadline).foregroundStyle(.secondary).monospacedDigit()
+                Text(text(value.wrappedValue)).font(.subheadline).foregroundStyle(MuseStyle.muted).monospacedDigit()
             }
             Slider(value: value, in: -limit...limit, step: step)
+                .tint(MuseStyle.lime)
+                .accessibilityLabel(title)
                 .accessibilityValue(text(value.wrappedValue))
         }
     }
 
-    // MARK: Coach
+    // MARK: Results
 
-    private func askCard(_ session: SessionRecord, type: ShotType) -> some View {
-        let s = type.label.lowercased()
-        let goals = [("Find more spin", "flame", "How can I get more topspin on my \(s) without losing pace?"),
-                     ("Find more pace", "speedometer", "What's the quickest way to add speed to my \(s)?"),
-                     ("Cleaner contact", "scope", "How do I find the sweet spot more on my \(s)?")]
-        return VStack(alignment: .leading, spacing: 12) {
-            Label("Ask Muse", systemImage: "sparkles").font(.headline)
-            if SwingFilm.strokes.contains(type) {
-                Button {
-                    showBestChange(session, type: type)
-                } label: {
-                    Label("Show me the best change", systemImage: "figure.tennis").frame(maxWidth: .infinity)
-                }
-                .buttonStyle(.borderedProminent).foregroundStyle(.black)
-                .disabled(coach.isWorking || !coach.museAvailable)
-                if !filmError.isEmpty { Text(filmError).font(.caption).foregroundStyle(.secondary) }
+    private func results(before b: ShotSimulator.Result, after a: ShotSimulator.Result, film: Bool) -> some View {
+        VStack(alignment: .leading, spacing: 14) {
+            bar("Ball speed", before: units.speed(b.ballSpeedKmh), after: units.speed(a.ballSpeedKmh), unit: units.speedUnit)
+            bar("Spin", before: b.spinRPM, after: a.spinRPM, unit: "rpm",
+                note: a.spin == b.spin ? nil : "\(b.spin.label) → \(a.spin.label)")
+            Text(film ? "Estimated by the racket's physics model. Picked and tested by Muse."
+                      : "Estimated by the racket's physics model on your average swing. Ball flight isn't modeled.")
+                .font(.caption).foregroundStyle(MuseStyle.muted)
+        }
+        .padding(16)
+        .background(MuseStyle.card, in: .rect(cornerRadius: 22))
+    }
+
+    private func bar(_ label: String, before: Double, after: Double, unit: String, note: String? = nil) -> some View {
+        let top = max(before, after, 1) * 1.15
+        let up = after - before
+        return VStack(alignment: .leading, spacing: 6) {
+            HStack(alignment: .firstTextBaseline) {
+                Text(label).font(.subheadline).foregroundStyle(MuseStyle.text)
+                Spacer()
+                if abs(up) >= 0.5 { Text("\(Int(before.rounded())) → ").font(.subheadline).foregroundStyle(MuseStyle.muted) }
+                Text("\(Int(after.rounded())) \(unit)").font(.subheadline.weight(.bold)).foregroundStyle(MuseStyle.text)
+                    .monospacedDigit().contentTransition(.numericText())
             }
-            Button {
-                ask("What if I \(WhatIf.describe(deltas, units: units)) on my \(s)?", session)
-            } label: {
-                Label("Ask about this change", systemImage: "questionmark.bubble").frame(maxWidth: .infinity)
-            }
-            .buttonStyle(.borderedProminent).foregroundStyle(.black)
-            .disabled(deltas.isZero || coach.isWorking)
-            ScrollView(.horizontal, showsIndicators: false) {
-                HStack {
-                    ForEach(goals, id: \.0) { goal in
-                        Button(goal.0, systemImage: goal.1) { ask(goal.2, session) }
-                            .buttonStyle(.bordered).disabled(coach.isWorking)
+            GeometryReader { geo in
+                ZStack(alignment: .leading) {
+                    Capsule().fill(MuseStyle.line)
+                    Capsule().fill(MuseStyle.ghost).frame(width: geo.size.width * before / top)
+                    if abs(up) >= 0.5 {
+                        Capsule().fill(up > 0 ? MuseStyle.lime : Color(red: 1, green: 0.6, blue: 0.55))
+                            .frame(width: geo.size.width * after / top).opacity(0.9)
                     }
                 }
             }
-            if coach.isWorking {
-                HStack { ProgressView().controlSize(.small); Text("Muse is testing changes…").foregroundStyle(.secondary) }
+            .frame(height: 10)
+            .accessibilityHidden(true)
+            if let note { Text(note).font(.caption.weight(.semibold)).foregroundStyle(MuseStyle.good) }
+        }
+    }
+
+    // MARK: Muse
+
+    private func askAbout(_ type: ShotType, session: SessionRecord) -> some View {
+        VStack(alignment: .leading, spacing: 10) {
+            Button {
+                ask("What if I \(WhatIf.describe(deltas, units: units)) on my \(type.label.lowercased())?", session)
+            } label: {
+                Label("Ask Muse about this change", systemImage: "questionmark.bubble")
+                    .font(.subheadline.weight(.semibold)).frame(maxWidth: .infinity, minHeight: 44)
             }
+            .buttonStyle(.plain)
+            .foregroundStyle(MuseStyle.text)
+            .background(MuseStyle.card, in: .capsule)
+            .disabled(deltas.isZero || coach.isWorking)
             if !answer.isEmpty {
                 VStack(alignment: .leading, spacing: 6) {
-                    Text(asked).font(.subheadline.weight(.semibold))
-                    Text(answer).textSelection(.enabled)
+                    Text(asked).font(.subheadline.weight(.bold)).foregroundStyle(MuseStyle.lime)
+                    Text(answer).foregroundStyle(MuseStyle.text).textSelection(.enabled)
                     RememberedNotes()
-                    Text(coach.engineName).font(.caption).foregroundStyle(.secondary)
+                    Text(coach.engineName).font(.caption2).foregroundStyle(MuseStyle.muted)
                 }
-                .padding(12)
+                .padding(16)
                 .frame(maxWidth: .infinity, alignment: .leading)
-                .background(.fill.quaternary, in: .rect(cornerRadius: 12))
+                .background(MuseStyle.card, in: .rect(cornerRadius: 22))
             }
         }
-        .padding(16)
-        .background(.background.secondary, in: .rect(cornerRadius: 22))
+    }
+
+    private func bestChangeBar(_ session: SessionRecord, type: ShotType, film: SwingFilm?) -> some View {
+        VStack(spacing: 6) {
+            if !filmError.isEmpty {
+                Text(filmError).font(.caption).foregroundStyle(MuseStyle.muted).multilineTextAlignment(.center)
+            } else if !coach.museAvailable {
+                Text("Sign in under Racket → Account to have Muse find the best change.").font(.caption)
+                    .foregroundStyle(MuseStyle.muted).multilineTextAlignment(.center)
+            }
+            Button { showBestChange(session, type: type) } label: {
+                HStack(spacing: 8) {
+                    if coach.isWorking { ProgressView().controlSize(.small).tint(MuseStyle.ink) } else { Image(systemName: "sparkles") }
+                    Text(coach.isWorking ? "Muse is testing changes…" : film == nil ? "Show me the best change" : "Find another change")
+                }
+                .font(.headline).foregroundStyle(MuseStyle.ink)
+                .frame(maxWidth: .infinity, minHeight: 54)
+                .background(MuseStyle.lime.opacity(coach.museAvailable ? 1 : 0.4), in: .capsule)
+            }
+            .buttonStyle(.plain)
+            .disabled(coach.isWorking || !coach.museAvailable)
+        }
+        .padding(.horizontal, 16).padding(.top, 8).padding(.bottom, 8)
+        .background(MuseStyle.background)
     }
 
     private func showBestChange(_ session: SessionRecord, type: ShotType) {
@@ -261,7 +314,6 @@ struct WhatIfView: View {
         Task {
             switch await coach.swingFilm(session, stroke: type) {
             case .success(let made):
-                film = made
                 mode = .auto
                 withAnimation { deltas = made.deltas }
             case .failure(let error):

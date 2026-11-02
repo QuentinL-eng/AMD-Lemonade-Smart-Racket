@@ -121,6 +121,12 @@ final class SwingStage: NSObject, SCNSceneRendererDelegate, @unchecked Sendable 
         show = new
     }
 
+    /// Play the loop again from the start.
+    func restart() {
+        lock.lock(); defer { lock.unlock() }
+        start = CACurrentMediaTime()
+    }
+
     /// Seconds since the current loop started, for the SwiftUI labels.
     func clock() -> (SwingShow, Double) {
         lock.lock(); defer { lock.unlock() }
@@ -242,12 +248,17 @@ final class SwingStage: NSObject, SCNSceneRendererDelegate, @unchecked Sendable 
 struct SwingAnimationView: View {
     let show: SwingShow
     var title: String?
+    var height: CGFloat = 330
+    var cornerRadius: CGFloat = 0
     @Binding var mode: SwingShow.Mode
     @State private var stage: SwingStage
 
-    init(show: SwingShow, title: String? = nil, mode: Binding<SwingShow.Mode>) {
+    init(show: SwingShow, title: String? = nil, height: CGFloat = 330, cornerRadius: CGFloat = 0,
+         mode: Binding<SwingShow.Mode>) {
         self.show = show
         self.title = title
+        self.height = height
+        self.cornerRadius = cornerRadius
         _mode = mode
         _stage = State(initialValue: SwingStage(show))
     }
@@ -259,36 +270,57 @@ struct SwingAnimationView: View {
                           antialiasingMode: .multisampling4X, delegate: stage)
                     .onChange(of: geo.size, initial: true) { _, size in stage.fit(aspect: size.width / max(size.height, 1)) }
             }
+            .accessibilityElement()
+            .accessibilityLabel("Animation of your average swing\(show.hasChange ? " and the changed swing" : "")")
             TimelineView(.periodic(from: .now, by: 0.1)) { _ in
                 let (current, clock) = stage.clock()
                 let changed = current.frame(clock).changed
                 VStack(alignment: .leading, spacing: 4) {
-                    Text(changed ? "TRY THIS" : "YOUR SWING")
-                        .font(.caption.weight(.bold)).tracking(2)
-                        .foregroundStyle(Color(SwingStage.accent))
-                    if changed, let title { Text(title).font(.headline).foregroundStyle(.white) }
+                    Text("\(changed ? "TRY THIS" : "YOUR SWING") · \(SwingShow.slowMo.formatted())× SLOW MOTION")
+                        .font(MuseStyle.eyebrow).tracking(2).foregroundStyle(MuseStyle.lime)
+                    if changed, let title { Text(title).font(MuseStyle.display(22)).foregroundStyle(MuseStyle.text) }
                 }
-                .padding(14)
+                .padding(16)
             }
-            Text("SLOW MOTION · RACKET DATA")
-                .font(.caption2.monospaced()).foregroundStyle(.white.opacity(0.5))
-                .padding(14)
-                .frame(maxWidth: .infinity, maxHeight: .infinity, alignment: .bottomLeading)
-            if show.hasChange {
-                Picker("Show", selection: $mode) {
-                    ForEach(SwingShow.Mode.allCases) { Text($0.rawValue).tag($0) }
+            .accessibilityHidden(true)
+            HStack(spacing: 8) {
+                if show.hasChange {
+                    legend("Yours", color: MuseStyle.ghost, selected: mode == .yours) { mode = mode == .yours ? .auto : .yours }
+                    legend("Change", color: MuseStyle.lime, selected: mode == .change) { mode = mode == .change ? .auto : .change }
+                } else {
+                    Text("RACKET DATA ONLY").font(MuseStyle.eyebrow).tracking(1.5).foregroundStyle(MuseStyle.muted)
                 }
-                .pickerStyle(.segmented)
-                .fixedSize()
-                .padding(10)
-                .frame(maxWidth: .infinity, maxHeight: .infinity, alignment: .bottomTrailing)
+                Spacer()
+                Button { stage.restart() } label: {
+                    Image(systemName: "arrow.counterclockwise").font(.subheadline.weight(.semibold))
+                        .foregroundStyle(MuseStyle.text).frame(width: 44, height: 44).background(MuseStyle.card, in: .circle)
+                }
+                .buttonStyle(.plain)
+                .accessibilityLabel("Replay")
             }
+            .padding(12)
+            .frame(maxWidth: .infinity, maxHeight: .infinity, alignment: .bottom)
         }
-        .frame(height: 340)
-        .clipShape(.rect(cornerRadius: 22))
+        .frame(height: height)
+        .background(MuseStyle.stage)
+        .clipShape(.rect(cornerRadius: cornerRadius))
         .environment(\.colorScheme, .dark)
         .onChange(of: show, initial: true) { _, new in stage.update(new) }
-        .accessibilityElement(children: .combine)
-        .accessibilityLabel("Animation of your average swing\(show.hasChange ? " and the changed swing" : "")")
+    }
+
+    /// A legend entry that also focuses the animation on that swing; tap again for both.
+    private func legend(_ label: String, color: Color, selected: Bool, action: @escaping () -> Void) -> some View {
+        Button(action: action) {
+            HStack(spacing: 6) {
+                Capsule().fill(color).frame(width: 16, height: 4)
+                Text(label).font(.caption.weight(.semibold)).foregroundStyle(MuseStyle.text)
+            }
+            .padding(.horizontal, 12).frame(minHeight: 36)
+            .background(selected ? MuseStyle.line : MuseStyle.card.opacity(0.85), in: .capsule)
+            .overlay(Capsule().stroke(selected ? color : .clear, lineWidth: 1.5))
+        }
+        .buttonStyle(.plain)
+        .accessibilityAddTraits(selected ? .isSelected : [])
+        .accessibilityHint("Shows only this swing")
     }
 }
