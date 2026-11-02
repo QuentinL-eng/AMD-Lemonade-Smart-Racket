@@ -220,7 +220,11 @@ struct InsightsView: View {
     private func recent(_ m: InsightsModel) -> some View {
         let last = Array(records.filter { $0.summary.count > 0 }.suffix(3).reversed())
         return VStack(alignment: .leading, spacing: 10) {
-            Text("Sessions").font(.headline)
+            HStack {
+                Text("Sessions").font(.headline)
+                Spacer()
+                NavigationLink("All sessions") { HistoryView() }.font(.subheadline)
+            }
             ForEach(last) { s in
                 NavigationLink { SessionDetailView(session: s) } label: {
                     HStack {

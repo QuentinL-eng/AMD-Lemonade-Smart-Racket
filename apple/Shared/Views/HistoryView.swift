@@ -7,20 +7,19 @@ struct HistoryView: View {
     @Query(sort: \SessionRecord.startDate, order: .reverse) private var sessions: [SessionRecord]
     @Environment(\.modelContext) private var context
 
+    /// Pushed from Insights (All sessions), so it uses that navigation stack.
     var body: some View {
-        NavigationStack {
-            List {
-                ForEach(sessions) { s in
-                    NavigationLink { SessionDetailView(session: s) } label: { SessionRow(session: s) }
-                }
-                .onDelete { idx in idx.map { sessions[$0] }.forEach(context.delete) }
+        List {
+            ForEach(sessions) { s in
+                NavigationLink { SessionDetailView(session: s) } label: { SessionRow(session: s) }
             }
-            .navigationTitle("History")
-            .overlay {
-                if sessions.isEmpty {
-                    ContentUnavailableView("No sessions yet", systemImage: "clock",
-                                           description: Text("Start a session on the Live tab."))
-                }
+            .onDelete { idx in idx.map { sessions[$0] }.forEach(context.delete) }
+        }
+        .navigationTitle("All sessions")
+        .overlay {
+            if sessions.isEmpty {
+                ContentUnavailableView("No sessions yet", systemImage: "clock",
+                                       description: Text("Start a session on the Live tab."))
             }
         }
     }
