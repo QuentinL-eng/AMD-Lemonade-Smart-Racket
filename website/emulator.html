@@ -1,0 +1,160 @@
+<!doctype html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>Tennis Buddee — Pro-match emulator</title>
+<meta name="description" content="Replay a SAM 3.1-tracked pro match through the Tennis Buddee session view. Derived timing and intensity only; contact dots are illustrative.">
+<link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Bricolage+Grotesque:opsz,wght@12..96,600..800&family=DM+Sans:wght@400;500;600&display=swap">
+<style>
+:root { --felt:#DDE85B; --ink:#1D2614; --paper:#FBFAF3; --muted:#5B6450; --card:#232D1A; --line:#E2E0D2; }
+* { box-sizing:border-box; }
+body { margin:0; background:var(--paper); color:var(--ink); font:400 16px/1.5 "DM Sans",Arial,sans-serif; }
+.wrap { max-width:1060px; margin:0 auto; padding:20px 24px 48px; }
+.top { display:flex; justify-content:space-between; align-items:center; gap:12px; flex-wrap:wrap; }
+.brand { font:800 20px/1 "Bricolage Grotesque",Arial,sans-serif; text-decoration:none; }
+h1 { font:800 clamp(34px,5vw,54px)/1 "Bricolage Grotesque",Arial,sans-serif; letter-spacing:-0.03em; margin:18px 0 6px; }
+.sub { color:var(--muted); max-width:62ch; margin:0 0 14px; }
+.prov { background:var(--ink); color:var(--paper); border-radius:14px; padding:14px 18px; font-size:14px; }
+.prov b { color:var(--felt); }
+.grid { display:grid; grid-template-columns:minmax(0,1.1fr) minmax(0,1fr); gap:18px; margin-top:18px; }
+@media (max-width:820px){ .grid{ grid-template-columns:1fr; } }
+.panel { background:#fff; border:1px solid var(--line); border-radius:14px; padding:16px 18px; }
+.panel h2 { font:700 15px/1.2 "Bricolage Grotesque",Arial,sans-serif; margin:0 0 10px; letter-spacing:0.02em; }
+#bed { width:100%; height:auto; display:block; background:var(--card); border-radius:10px; }
+.tag { display:inline-block; font-size:12px; font-weight:600; background:var(--felt); border-radius:999px; padding:2px 10px; margin-left:8px; }
+.shot { border-top:1px solid var(--line); padding:9px 0; display:flex; justify-content:space-between; gap:10px; font-size:14px; }
+.shot:first-of-type { border-top:0; }
+.bar { height:8px; border-radius:99px; background:var(--line); margin-top:5px; overflow:hidden; }
+.bar i { display:block; height:100%; background:var(--ink); border-radius:99px; }
+.controls { display:flex; gap:10px; align-items:center; flex-wrap:wrap; margin-top:14px; }
+button { font:600 15px "DM Sans",Arial,sans-serif; background:var(--ink); color:var(--felt); border:0; border-radius:999px; padding:10px 20px; cursor:pointer; }
+button.ghost { background:transparent; color:var(--ink); border:2px solid var(--ink); }
+label.chk { font-size:14px; display:flex; gap:8px; align-items:center; }
+.totals { display:flex; gap:22px; font-size:14px; color:var(--muted); margin-top:6px; flex-wrap:wrap; }
+.totals b { color:var(--ink); font-size:20px; display:block; }
+.foot { color:var(--muted); font-size:13px; margin-top:22px; }
+</style>
+</head>
+<body>
+<div class="wrap">
+  <div class="top">
+    <a class="brand" href="index.html">Tennis Buddee</a>
+    <a href="https://github.com/QuentinL-eng/Tennis-Buddy-Smart-Racket/blob/main/docs/EMULATOR_DATA.md">How this data was made</a>
+  </div>
+  <h1>Pro-match emulator</h1>
+  <p class="sub">A SAM 3.1-tracked pro match replayed through the session view: real rally cadence,
+  stroke mix, and swing intensity drive the same screens the racket feeds.</p>
+  <div class="prov" id="provenance">Loading session…</div>
+
+  <div class="grid">
+    <div class="panel">
+      <h2>String bed <span class="tag">contacts illustrative — not measured</span></h2>
+      <canvas id="bed" width="420" height="520"></canvas>
+      <label class="chk"><input type="checkbox" id="showContacts" checked> Show illustrative contact dots</label>
+    </div>
+    <div class="panel">
+      <h2>Shot feed</h2>
+      <div id="feed"></div>
+      <div class="totals" id="totals"></div>
+      <div class="controls">
+        <button id="playBtn">Play</button>
+        <button id="restartBtn" class="ghost">Restart</button>
+        <button id="speedBtn" class="ghost">1×</button>
+      </div>
+    </div>
+  </div>
+  <p class="foot">Derived from video: shot times, stroke side/kind, unitless intensity. Not observable from
+  video and never shown as measured: ball speed, spin, face angle, contact point. Method and limits:
+  <a href="https://github.com/QuentinL-eng/Tennis-Buddy-Smart-Racket/blob/main/docs/EMULATOR_DATA.md">docs/EMULATOR_DATA.md</a>.</p>
+</div>
+<script>
+"use strict";
+/* Session shape: tools/sam_track_to_session.py output. Illustrative contact dots are
+   deterministic per shot (mulberry32) and always labeled illustrative on this page. */
+function mulberry32(a){return function(){a|=0;a=a+0x6D2B79F5|0;var t=Math.imul(a^a>>>15,1|a);t=t+Math.imul(t^t>>>7,61|t)^t;return((t^t>>>14)>>>0)/4294967296;};}
+function dotFor(shot){
+  var r=mulberry32(shot.index*2654435761+7);
+  var spread=shot.intensity>0.66?150:(shot.intensity>0.33?105:70);
+  return {x:210+(r()-0.5)*2*spread, y:250+(r()-0.5)*2*spread*1.15};
+}
+function drawBed(ctx, shots, upto, showContacts){
+  var W=420,H=520;
+  ctx.clearRect(0,0,W,H);
+  ctx.strokeStyle="#DDE85B"; ctx.lineWidth=10;
+  ctx.beginPath(); ctx.roundRect(60,20,300,480,150); ctx.stroke();
+  ctx.strokeStyle="rgba(221,232,91,0.35)"; ctx.lineWidth=2;
+  for(var x=90;x<=330;x+=24){ctx.beginPath();ctx.moveTo(x,40);ctx.lineTo(x,480);ctx.stroke();}
+  for(var y=70;y<=450;y+=24){ctx.beginPath();ctx.moveTo(80,y);ctx.lineTo(340,y);ctx.stroke();}
+  ctx.strokeStyle="#DDE85B"; ctx.lineWidth=3;
+  ctx.strokeRect(170,210,80,80);
+  ctx.fillStyle="#DDE85B"; ctx.font="600 13px 'DM Sans',Arial,sans-serif";
+  ctx.fillText(showContacts?"illustrative contacts":"contacts hidden",118,505);
+  if(!showContacts) return;
+  for(var i=0;i<upto && i<shots.length;i++){
+    var p=dotFor(shots[i]);
+    var age=(upto-i)/Math.max(upto,1);
+    ctx.globalAlpha=Math.max(0.15,1-age*1.4);
+    ctx.fillStyle=shots[i].side==="forehand"?"#DDE85B":"#FBFAF3";
+    ctx.beginPath(); ctx.arc(p.x,p.y,shots[i].kind==="serve"?9:7,0,7); ctx.fill();
+  }
+  ctx.globalAlpha=1;
+}
+function shotRow(s){
+  var d=document.createElement("div"); d.className="shot";
+  var pct=Math.round(s.intensity*100);
+  d.innerHTML="<span><b>#"+(s.index+1)+"</b> "+s.side+" "+s.kind+" · "+s.t_s.toFixed(1)+"s</span><span style='min-width:110px'>intensity "+pct+"<span class='bar'><i style='width:"+pct+"%'></i></span></span>";
+  return d;
+}
+function initEmulator(doc, session){
+  var shots=session.shots||[];
+  var feed=doc.getElementById("feed"), totals=doc.getElementById("totals");
+  var bed=doc.getElementById("bed"), ctx=bed.getContext("2d");
+  var playBtn=doc.getElementById("playBtn"), restartBtn=doc.getElementById("restartBtn");
+  var speedBtn=doc.getElementById("speedBtn"), showBox=doc.getElementById("showContacts");
+  var prov=doc.getElementById("provenance");
+  var speeds=[1,2,4], state={shown:0,playing:false,speed:1,t:0,last:0};
+  prov.innerHTML="<b>Data:</b> "+session.provenance.source+" · tracker: "+session.provenance.tracker+
+    " · <b>derived:</b> timing, side/kind, intensity · <b>illustrative:</b> contact dots · <b>never shown:</b> "+session.omitted.join(", ");
+  function paintTotals(){
+    var fh=shots.filter(function(s){return s.side==="forehand";}).length;
+    totals.innerHTML="<span><b>"+shots.length+"</b>shots</span><span><b>"+fh+"</b>forehands</span><span><b>"+(shots.length-fh)+"</b>backhands/other</span>";
+  }
+  function paint(){ drawBed(ctx,shots,state.shown,showBox.checked); paintTotals(); }
+  function step(now){
+    if(!state.playing) return;
+    var dt=(now-state.last)/1000*state.speed; state.last=now; state.t+=dt;
+    var endT=shots.length?shots[shots.length-1].t_s+2:0;
+    while(state.shown<shots.length && shots[state.shown].t_s<=state.t){
+      feed.insertBefore(shotRow(shots[state.shown]),feed.firstChild);
+      while(feed.children.length>8) feed.removeChild(feed.lastChild);
+      state.shown++;
+    }
+    paint();
+    if(state.t>=endT){state.playing=false;playBtn.textContent="Play";return;}
+    requestAnimationFrame(step);
+  }
+  playBtn.addEventListener("click",function(){
+    state.playing=!state.playing; playBtn.textContent=state.playing?"Pause":"Play";
+    if(state.playing){state.last=performance.now();requestAnimationFrame(step);}
+  });
+  restartBtn.addEventListener("click",function(){state.shown=0;state.t=0;feed.innerHTML="";paint();});
+  speedBtn.addEventListener("click",function(){
+    state.speed=speeds[(speeds.indexOf(state.speed)+1)%speeds.length];
+    speedBtn.textContent=state.speed+"×";
+  });
+  showBox.addEventListener("change",paint);
+  paint();
+  return state;
+}
+if(typeof window!=="undefined" && window.document){
+  fetch("emulator_session.json").then(function(r){return r.json();}).then(function(s){
+    initEmulator(document,s);
+  }).catch(function(){
+    document.getElementById("provenance").textContent=
+      "Could not load emulator_session.json — serve this folder over HTTP (e.g. python3 -m http.server) or deploy both files together.";
+  });
+}
+</script>
+</body>
+</html>

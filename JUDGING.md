@@ -32,10 +32,12 @@ chatbot: every number Muse reports must come from a tool result.
 | Meta Wearables Device Access Toolkit (`MWDATCore`, `MWDATDisplay`), Ray-Ban Display HUD | [`apple/iOS/Glasses/GlassesController.swift`](apple/iOS/Glasses/GlassesController.swift) |
 | 2,263-conversation tool-use dataset (tool results match the app exactly) | [`ml/whatif_synth.py`](ml/whatif_synth.py), [`docs/WHATIF_DATASET.md`](docs/WHATIF_DATASET.md) |
 | Head-to-head agent eval vs the Meta API and open Muse Spark | [`tools/agent_eval.py`](tools/agent_eval.py) (`--preset meta` / `--preset baseten`) |
+| Meta SAM 3.1 video + image APIs | Racket tracks + contact pre-fill behind the reviewed contacts; tracks convert to emulator sessions | [`tools/sam_f3set_video.py`](tools/sam_f3set_video.py), [`tools/sam_track_to_session.py`](tools/sam_track_to_session.py) |
 
 Quick automated checks: `muse-spark-1.3` in `apple/Shared/Coach/MuseClient.swift:27` and
 `backend/supabase/functions/muse/index.ts` (which calls `POST https://api.meta.ai/v1/chat/completions`);
-`import MWDATCore` / `import MWDATDisplay` in `apple/iOS/Glasses/`.
+`import MWDATCore` / `import MWDATDisplay` in `apple/iOS/Glasses/`; `sam-3.1` across
+`tools/sam_*.py` and `ml/stroke_system/`.
 
 ### Technical depth and execution (20%)
 
@@ -78,7 +80,7 @@ grep -rln "MWDATCore\|MWDATDisplay" apple/iOS/Glasses
 | ML parity (296 clips) | `python3 ml/test_parity.py` | `PASS`, max distance error 7.22e-07 cm |
 | What-if simulator | `python3 -m unittest discover -s ml -p test_whatif_synth.py` | 11 tests, OK |
 | Full `ml` discovery | `python3 -m unittest discover -s ml` | 46 pass; 1 research-only module needs the local kymatio checkout under `firmware/.pio/` (git-ignored, not the supported path in `ml/README.md`) |
-| Tools | `python3 -m unittest discover -s tools` | 15 tests, OK |
+| Tools | `python3 -m unittest discover -s tools` | 22 tests, OK |
 | Robot rig | `.venv/bin/python -m pytest TennisRobot/tests/` | 51 cases; needs `pytest` + loopback sockets |
 | Backend | `npm test --prefix backend/supabase` | pass (embedded PGlite, no cloud needed) |
 | Firmware host test | `firmware/tools/backlog_test/` | flash backlog vs fake flash under ASan/UBSan |

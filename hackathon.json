@@ -30,6 +30,11 @@
       "code": ["apple/iOS/Glasses/GlassesController.swift"]
     },
     {
+      "name": "Meta SAM 3.1",
+      "use": "video + image APIs for racket tracking and contact-label pre-fill behind the reviewed contacts; cached tracks convert to web-emulator sessions",
+      "code": ["tools/sam_f3set_video.py", "ml/stroke_system/sam_contacts.py", "tools/sam_track_to_session.py", "docs/DATA_COLLECTION.md"]
+    },
+    {
       "name": "Muse tool-use dataset",
       "use": "2263 synthetic conversations whose tool results match the app exactly, for evals and tuning",
       "code": ["ml/whatif_synth.py", "docs/WHATIF_DATASET.md"]
@@ -41,7 +46,7 @@
   "evidence": {
     "swift_tests": 93,
     "python_unittest_ml": 47,
-    "python_unittest_tools": 15,
+    "python_unittest_tools": 22,
     "python_pytest_robot": 51,
     "backend_js_tests": "npm test passes (PGlite)",
     "firmware_python_parity_clips": 296,

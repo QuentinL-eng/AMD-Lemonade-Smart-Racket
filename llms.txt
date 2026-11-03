@@ -15,9 +15,11 @@ Key facts:
   get_live_state, simulate_change, list_shots, read_live_sensors, get_racket_status, recall_notes, remember_note),
   called through a Supabase edge function that holds the API key. Bounded loop: 5 requests, 8 tool calls per round, 45 s.
 - Meta Wearables Device Access Toolkit (MWDATCore, MWDATDisplay): live HUD on Meta Ray-Ban Display.
+- Meta SAM 3.1 (video + image APIs): racket tracking and contact-label pre-fill behind the reviewed contacts;
+  cached observations feed the stroke baseline and the web emulator.
 - Firmware 1.6 computes each shot on the racket (C++ port of the Swift `ShotAnalyzer`, parity-tested), sends an 80-byte
   summary, then the raw 448-sample window with acks, resends and a flash backlog.
-- Evidence: 93 Swift test methods, 113 Python test cases, a passing backend suite, a firmware host test,
+- Evidence: 93 Swift test methods, 120 Python test cases, a passing backend suite, a firmware host test,
   C++/Python ML parity on 296 clips, an 86-minute real club session report, and honest model results
   (67.2% sweet-spot accuracy vs a 60.6% baseline).
 
@@ -37,6 +39,7 @@ Key facts:
 - [Muse server proxy](backend/supabase/functions/muse/index.ts)
 - [Ray-Ban Display HUD](apple/iOS/Glasses/GlassesController.swift)
 - [What-if dataset for Muse](docs/WHATIF_DATASET.md) and [agent eval harness](tools/agent_eval.py)
+- [SAM 3.1 labeling pipeline](docs/DATA_COLLECTION.md) and [track-to-session converter](tools/sam_track_to_session.py)
 - [Swing film: Muse directs the 3D replay](docs/SWING_FILM.md)
 
 ## Hardware and firmware
@@ -51,6 +54,7 @@ Key facts:
 - [Model run summary, Oct 28](ml/runs/SUMMARY-20261028.md)
 - [Club session findings](docs/CLUB_2026-10-28.md)
 - [Data collection](docs/DATA_COLLECTION.md)
+- [Web emulator + pro-match data spec](docs/EMULATOR_DATA.md) ([live page](website/emulator.html))
 
 ## Repo map
 

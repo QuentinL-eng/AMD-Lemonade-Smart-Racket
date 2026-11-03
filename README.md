@@ -62,6 +62,7 @@ state, and a robot-arm rig for repeatable ground truth ([`TennisRobot/`](TennisR
 | **Muse Spark directs the swing film** | Muse tests swing changes with `simulate_change` and returns a short, validated script; the What-if screen animates the player's swing and the change in 3D | [`SwingFilm.swift`](apple/Shared/Coach/SwingFilm.swift), [`SwingAnimationView.swift`](apple/Shared/Views/SwingAnimationView.swift), [`docs/SWING_FILM.md`](docs/SWING_FILM.md) |
 | **Meta Wearables Device Access Toolkit** (`MWDATCore`, `MWDATDisplay`) | Live HUD on **Meta Ray-Ban Display**: latest shot, sweet-spot rate, score, drill progress | [`apple/iOS/Glasses/`](apple/iOS/Glasses/) |
 | **Tool-use dataset for Muse** | 2,263 synthetic conversations whose tool results match the app exactly, for evals and tuning | [`ml/whatif_synth.py`](ml/whatif_synth.py), [`docs/WHATIF_DATASET.md`](docs/WHATIF_DATASET.md) |
+| **Meta SAM 3.1 video + image APIs** | Labels the ground truth: racket tracks and ball/racket-head pre-fill behind the reviewed contacts; tracks convert to emulator sessions | [`tools/sam_f3set_video.py`](tools/sam_f3set_video.py), [`ml/stroke_system/sam_contacts.py`](ml/stroke_system/sam_contacts.py), [`tools/sam_track_to_session.py`](tools/sam_track_to_session.py) |
 
 **Beyond a basic integration.**
 
@@ -80,6 +81,9 @@ state, and a robot-arm rig for repeatable ground truth ([`TennisRobot/`](TennisR
    number in an answer appears in a tool result.
 6. **Production limits.** At most 5 requests and 8 tool calls per round. 45 s timeout. HTTP 429 falls back at once
    to a built-in engine, and the UI names the engine that answered.
+7. **Meta models label the training data.** SAM 3.1 tracks rackets through video and pre-fills contact
+   labels (a human confirms every one); the cached observations feed the stroke-system baseline
+   ([`ml/stroke_system/`](ml/stroke_system/)) and the web emulator ([`website/emulator.html`](website/emulator.html)).
 
 The 10 tools: `query_shots`, `compare_sessions`, `get_session_digest`, `get_live_state`, `simulate_change`,
 `list_shots`, `read_live_sensors`, `get_racket_status`, `recall_notes`, `remember_note`.
@@ -129,7 +133,7 @@ muse     Your backhand contact sits 2.0 cm toward the tip. Try this: move contac
 | Check | Result | Source |
 |---|---|---|
 | Swift tests | 93 test methods (62 RacketKit + 31 app): C++ ↔ Swift shot parity, labeled real sessions, replay, scoring, simulator, Muse agent with mocked HTTP | [`apple/RacketKit/Tests/`](apple/RacketKit/Tests/), [`apple/Tests/`](apple/Tests/) |
-| Python tests | 113 cases: ML and what-if tools (unittest), robot pipeline (pytest) | `ml/test_*.py`, `tools/test_*.py`, `TennisRobot/tests/` |
+| Python tests | 120 cases: ML and what-if tools (unittest), robot pipeline (pytest) | `ml/test_*.py`, `tools/test_*.py`, `TennisRobot/tests/` |
 | Backend tests | Migration + social logic in embedded PGlite (`npm test`) | [`backend/supabase/tests/`](backend/supabase/tests/) |
 | Firmware host test | Flash backlog against a fake flash, under ASan/UBSan | [`firmware/tools/backlog_test`](firmware/tools/backlog_test) |
 | Firmware ↔ Python ML parity | Same decision on 296 clips; max distance error 7e-7 cm | `ml/test_parity.py` |
