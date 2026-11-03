@@ -180,6 +180,15 @@ struct SharedSessionView: View {
                     } else { Text("No racket stats shared").foregroundStyle(.secondary) }
                 }
             }
+            if let rival = state.host.id == me ? state.guest : state.host {
+                let stats = state.stats.first { $0.id == rival.id }
+                NavigationLink {
+                    ScoutView(opponent: stats, opponentName: rival.name)
+                } label: {
+                    Label(stats == nil ? "Scout yourself before playing \(rival.name)" : "Scout \(rival.name) with Muse",
+                          systemImage: "binoculars")
+                }
+            }
         } header: { Text("Shared stats") } footer: {
             Text("Only real racket shots are shared. Heart rate, calories, and private session notes stay private.")
         }

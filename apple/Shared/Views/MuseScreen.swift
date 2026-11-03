@@ -59,6 +59,7 @@ struct SwingSketch: View {
 struct CoachScreen: View {
     @Query(sort: \SessionRecord.startDate) private var sessions: [SessionRecord]
     @Query(sort: \CoachNote.updatedAt, order: .reverse) private var allNotes: [CoachNote]
+    @Query(filter: #Predicate<CoachReview> { $0.statusRaw == "pending" }) private var pending: [CoachReview]
     @Environment(CoachModel.self) private var coach
     @Environment(AppModel.self) private var model
     @AppStorage(UnitSystem.storageKey) private var useMetric = false
@@ -69,7 +70,7 @@ struct CoachScreen: View {
     @State private var openWhatIf = false
     private var units: UnitSystem { UnitSystem(metric: useMetric) }
 
-    private var latest: SessionRecord? { sessions.last { $0.summary.count > 0 } }
+    private var latest: SessionRecord? { sessions.last { $0.hasPlayableShots } }
     /// The newest session with motion shots, and its first stroke the swing film can draw.
     private var filmSource: (SessionRecord, ShotType)? {
         guard let s = sessions.last(where: { WhatIf.baseline($0.shots) != nil }),
@@ -81,6 +82,7 @@ struct CoachScreen: View {
         sessions.last { WhatIf.baseline($0.shots, type: stroke) != nil }.flatMap { WhatIf.baseline($0.shots, type: stroke) }
     }
     private var noteCount: Int { allNotes.filter { $0.playerID == model.activePlayerID }.count }
+    private var pendingReviews: Int { pending.count }
     private var online: Bool { coach.museEnabled && coach.museAvailable }
 
     var body: some View {
@@ -94,6 +96,16 @@ struct CoachScreen: View {
                 }
                 if !drill.isEmpty { drillCard }
                 whatIfRow
+                featureRow(symbol: "list.number", title: "Practice plan",
+                           detail: coach.activePlan.map { "\($0.title) · \($0.steps.count) steps" } ?? "Three steps from your last session") {
+                    PracticePlanView()
+                }
+                featureRow(symbol: "binoculars", title: "Scout yourself",
+                           detail: "Where an opponent would attack you") { ScoutView() }
+                featureRow(symbol: "flag", title: "Review queue",
+                           detail: pendingReviews == 0 ? "Flag a session for a human look" : "\(pendingReviews) waiting for you") {
+                    ReviewQueueView()
+                }
                 askList
                 ForEach(Array(chat.enumerated()), id: \.offset) { index, item in answerCard(item, last: index == chat.count - 1) }
                 engineCard
@@ -219,6 +231,26 @@ struct CoachScreen: View {
                 VStack(alignment: .leading, spacing: 2) {
                     Text("What if").font(.headline).foregroundStyle(MuseStyle.text)
                     Text("Try a change on your swing in 3D").font(.caption).foregroundStyle(MuseStyle.muted)
+                }
+                Spacer()
+                Image(systemName: "chevron.right").font(.caption).foregroundStyle(MuseStyle.ghost)
+            }
+            .padding(14)
+            .frame(minHeight: 60)
+            .background(MuseStyle.card, in: .rect(cornerRadius: 22))
+            .contentShape(.rect)
+        }
+        .buttonStyle(.plain)
+    }
+
+    private func featureRow<D: View>(symbol: String, title: String, detail: String,
+                                     @ViewBuilder destination: @escaping () -> D) -> some View {
+        NavigationLink(destination: destination) {
+            HStack(spacing: 12) {
+                Image(systemName: symbol).font(.title3).foregroundStyle(MuseStyle.lime).frame(width: 28)
+                VStack(alignment: .leading, spacing: 2) {
+                    Text(title).font(.headline).foregroundStyle(MuseStyle.text)
+                    Text(detail).font(.caption).foregroundStyle(MuseStyle.muted).lineLimit(1)
                 }
                 Spacer()
                 Image(systemName: "chevron.right").font(.caption).foregroundStyle(MuseStyle.ghost)
