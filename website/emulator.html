@@ -159,6 +159,14 @@ svg.i .f{fill:currentColor;stroke:none}
 .sw{background:var(--m-card);border-radius:999px;padding:3px;display:flex;margin-bottom:12px}
 .sw button{flex:1;min-height:38px;border-radius:999px;font-size:13px;font-weight:600;color:rgba(243,245,236,.85)}
 .sw button.on{background:var(--m-text);color:var(--m-ink);font-weight:700}
+.msub{font-size:15px;color:var(--m-muted)}
+.mbtn{width:100%;min-height:44px;border-radius:999px;font-weight:700;font-size:15px;background:var(--m-lime);color:var(--m-ink);display:flex;align-items:center;justify-content:center;gap:6px}
+.mbtn.ghost{background:none;color:var(--m-lime);border:1px solid rgba(221,232,91,.6)}
+.mbtn.dim{background:var(--m-line);color:var(--m-text)}
+.mbtn:disabled{opacity:.6}
+.eng{font-size:11px;color:var(--m-muted);display:flex;gap:6px;align-items:center;margin-top:10px}.eng i{width:6px;height:6px;border-radius:50%;background:var(--m-muted)}
+.stat{font-size:11px;font-weight:700;padding:3px 8px;border-radius:999px;border:1px solid}
+.flagrow{margin:10px 0}.flagrow b{display:flex;gap:8px;align-items:center;font-size:17px}.flagrow .ev{font:12px/1.4 ui-monospace,Menlo,Consolas,monospace;color:var(--m-muted);margin-top:3px}
 .stage3d{position:relative;height:250px;border-radius:22px;overflow:hidden;background:#0B0C09;margin-bottom:12px}
 .stage3d .gl{position:absolute;inset:0}.stage3d canvas{width:100%!important;height:100%!important;display:block}
 .stage3d .tg{position:absolute;left:10px;top:10px;display:flex;gap:6px}
@@ -231,8 +239,8 @@ svg.i .f{fill:currentColor;stroke:none}
     <div class="note" style="margin-top:8px">These two controls aren't in the app; everything inside the phone is.</div></div>
   <div class="panel"><h2>Try it</h2><ol>
     <li>Tap <b>Start Session</b> on Live and watch the racket swing and every hit land.</li>
-    <li>Open <b>Insights</b> → <b>Muse</b> for the best change and questions.</li>
-    <li>From Muse, open <b>What if</b> and move the levers.</li></ol></div>
+    <li>Open the <b>Muse</b> tab for the best change, questions, a practice plan and more.</li>
+    <li>From Muse, open <b>What if</b> and move the levers, or check <b>Insights</b> for the session summary.</li></ol></div>
  </div>
  <div class="phone" id="phone">
   <div class="island"></div>
@@ -347,6 +355,7 @@ const IC={
  chev:'<path d="M9 5l7 7-7 7"/>', chevl:'<path d="M15 5l-7 7 7 7"/>', chevd:'<path d="M6 9l6 6 6-6"/>',
  up:'<path d="M12 19V5M5 12l7-7 7 7"/>', sliders:'<path d="M4 7h10M18 7h2M4 17h2M10 17h10"/><circle cx="16" cy="7" r="2"/><circle cx="8" cy="17" r="2"/>',
  brain:'<path d="M9 4a3 3 0 0 0-3 3 3 3 0 0 0-2 2.800A3 3 0 0 0 5 14a3 3 0 0 0 4 4.500V4zM15 4a3 3 0 0 1 3 3 3 3 0 0 1 2 2.800A3 3 0 0 1 19 14a3 3 0 0 1-4 4.500V4z"/>',
+ gear:'<circle cx="12" cy="12" r="3"/><circle cx="12" cy="12" r="6.500"/><path d="M12 2.500v3M12 18.500v3M2.500 12h3M18.500 12h3M5.300 5.300l2.100 2.100M16.600 16.600l2.100 2.100M18.700 5.300l-2.100 2.100M7.400 16.600l-2.100 2.100"/>', chartup:'<path d="M3 17l5-6 4 3 8-9"/><path d="M15 5h5v5"/>', listn:'<path d="M10 6h10M10 12h10M10 18h10M4 5.500h2v3M4 11h2l-2 2.500h2M4 17h2v1.500H4M4 19.500h2"/>', bino:'<circle cx="7" cy="16" r="3.500"/><circle cx="17" cy="16" r="3.500"/><path d="M7 12.500V6h3v5M17 12.500V6h-3v5M10 8.500h4"/>', target:'<circle cx="12" cy="12" r="8"/><circle cx="12" cy="12" r="4"/><circle cx="12" cy="12" r="1"/>', flagf:'<path class="f" d="M6 3h12l-2.500 4.500L18 12H6z"/><path d="M6 3v18"/>',
  turnl:'<path d="M9 4L4 9l5 5"/><path d="M4 9h9a6 6 0 0 1 6 6v5"/>', turnr:'<path d="M15 4l5 5-5 5"/><path d="M20 9h-9a6 6 0 0 0-6 6v5"/>', upc:'<circle cx="12" cy="12" r="9"/><path d="M12 17V8M8 12l4-4 4 4"/>', hand:'<path d="M8 12V6a1.500 1.500 0 0 1 3 0v5M11 11V4.500a1.500 1.500 0 0 1 3 0V11M14 11V6a1.500 1.500 0 0 1 3 0v8a6 6 0 0 1-6 6h-1a5 5 0 0 1-4-2l-3-4a1.500 1.500 0 0 1 2.400-1.800L8 15"/>',
  ball:'<circle cx="12" cy="12" r="9"/><path d="M4.500 6.500c4 2 4 9 0 11M19.500 6.500c-4 2-4 9 0 11"/>',
  check:'<path d="M5 12.500l4.500 4.500L19 7.500"/>', x:'<path d="M6 6l12 12M18 6L6 18"/>', undo:'<path d="M9 8L4 12.500 9 17M4.500 12.500H15a5 5 0 0 1 0 10"/>',
@@ -433,11 +442,11 @@ function bedSVG(rows,hi,px=90,heat=false){
    App state
    ===================================================================== */
 let PLAYERS=[],rows=[];
-const S={tab:"live",stack:{live:[],score:[],together:[],insights:[],racket:[]},pi:0,active:false,shown:0,clock:-1.4,speed:1,last:0,
+const S={tab:"live",stack:{live:[],score:[],muse:[],insights:[],settings:[]},pi:0,active:false,shown:0,clock:-1.4,speed:1,last:0,
   title:"Tennis session",lastRow:null,flashKey:0,
   stroke:null,metric:"ballSpeed",period:"Month",
   d:Z(),lever:"Speed",film:null,chat:[],drill:null,drillRun:false,question:"",museSeen:false,
-  match:null,rules:{simple:false,setsToWin:2,noAd:false,matchTB:false},recenter:0,skin:false};
+  plan:null,planRun:-1,scout:"",reviews:[],match:null,rules:{simple:false,setsToWin:2,noAd:false,matchTB:false},recenter:0,skin:false};
 const $=id=>document.getElementById(id);
 const shownRows=()=>rows.slice(0,S.shown);
 const clockStr=s=>{s=Math.floor(s);return s>=3600?`${Math.floor(s/3600)}:${String(Math.floor(s/60)%60).padStart(2,"0")}:${String(s%60).padStart(2,"0")}`:`${Math.floor(s/60)}:${String(s%60).padStart(2,"0")}`;};
@@ -553,20 +562,20 @@ function frameLive(now){
     liveStage.setPose(gm);liveStage.render(now);
     $("lGyro").lastChild.textContent=Math.round(sens.gyro)+" °/s";$("lG").lastChild.textContent=sens.g.toFixed(1)+" g";
   }
-  if(S.tab==="insights"&&S.stack.insights.at(-1)==="whatif"&&wiStage)frameWhatIf(now);
+  if(S.tab==="muse"&&S.stack.muse.at(-1)==="whatif"&&wiStage)frameWhatIf(now);
 }
 
 /* =====================================================================
    Nav + tabs
    ===================================================================== */
-const TABS=[["live","Live","figure"],["score","Score","trophy"],["together","Together","people"],["insights","Insights","sparkles"],["racket","Racket","tag"]];
+const TABS=[["live","Live","figure"],["score","Score","trophy"],["muse","Muse","sparkles"],["insights","Insights","chartup"],["settings","Settings","gear"]];
 $("tabs").innerHTML=TABS.map(t=>`<button class="tab" data-tab="${t[0]}">${ic(t[2])}<span>${t[1]}</span></button>`).join("");
-const TITLES={live:"Live",score:"Score",together:"Play together",insights:"Insights",racket:"Racket",muse:"",whatif:"What if",memory:"Memory",detail:"Session",account:"Account"};
-const DARK=new Set(["muse","whatif","memory"]);
+const TITLES={live:"Live",score:"Score",together:"Play together",insights:"Insights",settings:"Settings",muse:"",whatif:"What if",memory:"Memory",plan:"",scout:"",review:"",detail:"Session",account:"Account"};
+const DARK=new Set(["muse","whatif","memory","plan","scout","review"]);
 function top(){return S.stack[S.tab].at(-1)||S.tab;}
 function renderNav(){
   const v=top(),ph=$("phone"),dark=DARK.has(v);
-  ph.classList.toggle("dark",dark);ph.classList.toggle("grouped",!dark&&["racket","together","account"].includes(v));
+  ph.classList.toggle("dark",dark);ph.classList.toggle("grouped",!dark&&["settings","together","account"].includes(v));
   document.querySelectorAll(".tab").forEach(b=>b.classList.toggle("on",b.dataset.tab===S.tab));
   if(v!=="muse")document.getElementById("askbar")?.remove();
   if(v!=="whatif")document.getElementById("bbar")?.remove();
@@ -595,7 +604,7 @@ function refreshOther(){
   const el=$("v-other"),keep=el.scrollTop;
   if(v==="whatif")disposeWI();
   el.innerHTML="";
-  ({score:scoreHTML,together:togetherHTML,insights:insightsHTML,racket:racketHTML,muse:museHTML,whatif:whatifHTML,memory:memoryHTML,detail:detailHTML,account:accountHTML})[v](el);
+  ({score:scoreHTML,together:togetherHTML,insights:insightsHTML,settings:racketHTML,muse:museHTML,whatif:whatifHTML,memory:memoryHTML,plan:planHTML,scout:scoutHTML,review:reviewHTML,detail:detailHTML,account:accountHTML})[v](el);
   el.scrollTop=keep;
   if(v==="whatif")mountWI();
 }
@@ -608,7 +617,7 @@ const munit=m=>({ballSpeed:U.su(),swingSpeed:U.su(),spin:"rpm",face:"°",path:"�
 function insightsHTML(el){
   const rs=shownRows(),all=!S.stroke;
   const f=n=>["face","path","contact"].includes(S.metric)?n.toFixed(1):n.toFixed(0);
-  let h=`<button class="musecard" data-act="muse"><span class="ic">${ic("sparkles")}</span><span><div class="t">Muse</div><div class="s">Your best change, drills and questions</div></span><span class="ch">${ic("chev")}</span></button>`;
+  let h="";
   if(!rs.length)return el.innerHTML=h+empty("No data yet","Play a session and your trends show up here.","ecg"),bind(el);
   h+=`<div class="chips">${[null,"Forehand","Backhand","Serve","Volley"].map(s=>`<button class="${(S.stroke||null)===s?"on":""}" data-act="stroke" data-v="${s||""}">${s||"All"}</button>`).join("")}</div>`;
   h+=`<div class="mtabs">${METRICS.map(m=>`<button class="${S.metric===m[0]?"on":""}" data-act="metric" data-v="${m[0]}">${m[1]}<span></span></button>`).join("")}</div>`;
@@ -680,6 +689,10 @@ function museHTML(el){
   if(S.drill)h+=`<div class="mcard"><div class="eyebrow" style="color:var(--m-muted)">NEXT DRILL</div><div style="font:800 22px var(--rounded);margin:6px 0">${S.drill.title}</div><div>${S.drill.goal}</div><div class="mfoot" style="margin-top:6px">${S.drill.why}</div>
    <button data-act="rundrill" style="margin-top:12px;width:100%;min-height:44px;border-radius:999px;background:var(--m-lime);color:var(--m-ink);font-weight:700" ${S.drillRun?"disabled":""}>${S.drillRun?"Drill running":"Start on Watch"}</button></div>`;
   h+=`<button class="mrow" data-act="openwi">${ic("sliders")}<span><div class="a">What if</div><div class="b">Try a change on your swing in 3D</div></span><span class="ch">${ic("chev")}</span></button>`;
+  const pend=S.reviews.filter(x=>x.status==="pending").length;
+  h+=`<button class="mrow" data-act="plan">${ic("listn")}<span><div class="a">Practice plan</div><div class="b">${S.plan?`${S.plan.title} · ${S.plan.steps.length} steps`:"Three steps from your last session"}</div></span><span class="ch">${ic("chev")}</span></button>`;
+  h+=`<button class="mrow" data-act="scout">${ic("bino")}<span><div class="a">Scout yourself</div><div class="b">Where an opponent would attack you</div></span><span class="ch">${ic("chev")}</span></button>`;
+  h+=`<button class="mrow" data-act="review">${ic("flag")}<span><div class="a">Review queue</div><div class="b">${pend?`${pend} waiting for you`:"Flag a session for a human look"}</div></span><span class="ch">${ic("chev")}</span></button>`;
   h+=`<div><div class="eyebrow" style="color:var(--m-muted);margin:4px 0 8px">ASK</div><div class="asklist">${SUGG.map(q=>`<button data-act="ask" data-v="${q}"><span>${q}</span>${ic("chev")}</button>`).join("")}</div></div>`;
   S.chat.forEach((c,i)=>{h+=`<div class="mcard"><div class="mq">${c.q}</div><div class="mans">${c.a}</div>${i===S.chat.length-1?`<div class="mfoot">Tools: ${c.tools.join(", ")} · demo engine, template reply over real tool results</div>`:""}</div>`;});
   h+=`<div class="mcard" style="font-size:12px;color:var(--m-muted)">In the app, Muse Spark makes these tool calls on your sessions and writes the reply. This page can't reach Muse, so a template writes the reply from the same tool outputs, computed here on the replayed match.</div>`;
@@ -723,6 +736,65 @@ function answer(q){
 }
 function askMuse(q){q=(q||"").trim();if(!q)return;const r=answer(q);S.chat.push({q,a:r.a,tools:r.tools});S.question="";refreshOther();const sc=$("v-other");sc.scrollTop=sc.scrollHeight;}
 function memoryHTML(el){el.innerHTML=`<div class="mh"><span class="t">Memory</span></div>${`<div class="mcard" style="text-align:center;padding:40px 20px"><div style="font-size:44px;color:var(--m-lime)">${ic("brain")}</div><div style="font:800 20px var(--rounded);margin:8px 0">No notes yet</div><div style="color:var(--m-muted)">Muse keeps short notes about your habits between sessions. This replay starts with none.</div></div>`}`;}
+
+/* ---------- Muse feature screens (demo engine over the replay's own numbers) ---------- */
+const museHead=(t,sub,right="")=>`<div class="mh"><span class="t" style="font-size:30px">${t}</span>${right}</div><div class="msub">${sub}</div>`;
+const engLabel=()=>`<div class="eng"><i></i>Demo engine · offline</div>`;
+function strokeStats(rs){return strokesIn(rs).map(g=>{const q=strokeRows(rs,g);return {g,n:q.length,sw:q.filter(x=>x.sweet).length/q.length,ball:mean(q.map(x=>x.r.ball)),off:q.filter(x=>!x.sweet)};}).filter(x=>x.n>=3);}
+function makePlan(rs){
+  const st=strokeStats(rs).sort((a,z)=>a.sw-z.sw),w=st[0]||{g:"hit",sw:rs.filter(x=>x.sweet).length/Math.max(1,rs.length)};
+  const name=LABEL[w.g].toLowerCase(),n=Math.round(clamp(5+10*(1-w.sw),5,15)),when=new Date().toLocaleDateString("en-US",{weekday:"short",day:"numeric",month:"short"});
+  return {title:`Center the ${name}`,when,steps:[
+    {title:`Center ${name}s`,goal:`Land ${n} sweet-spot ${name}s.`,why:`Your ${name} found the sweet spot ${Math.round(100*w.sw)}% of the time here, the lowest of your strokes (an estimate).`,note:"Slow it down: aim for the middle of the strings, not the fastest ball."},
+    {title:"Add pace, keep the middle",goal:`Hit ${n+3} balls at your normal pace with centered contact.`,why:"Pace only helps if the contact stays centered.",note:"If you start missing the middle, ease off."},
+    {title:"Rally count",goal:"Keep one rally going for 12 shots.",why:"Puts the first two steps under match pressure.",note:""}]};
+}
+function planHTML(el){
+  const rs=shownRows(),P=S.plan;let h=museHead("Practice plan","Three steps from your last session: the weakest link first, a progression, then a rally count.");
+  if(P){
+    h+=`<div style="background:var(--m-lime);color:var(--m-ink);border-radius:22px;padding:16px"><div class="eyebrow" style="opacity:.7">PLAN · ${P.when.toUpperCase()}</div><div style="font:800 24px var(--rounded);margin:6px 0">${P.title}</div><div style="font-size:11px;opacity:.7">Demo engine · offline</div></div>`;
+    P.steps.forEach((x,i)=>{const run=S.planRun===i;
+      h+=`<div class="mcard"><div class="eyebrow" style="color:var(--m-muted)">STEP ${i+1}</div><div style="font:800 20px var(--rounded);margin:6px 0">${x.title}</div><div style="display:flex;gap:8px;align-items:center;margin-bottom:6px">${ic("target")}<span>${x.goal}</span></div><div style="font-size:12px;color:var(--m-muted)">${x.why}</div>${x.note?`<div style="font-style:italic;opacity:.85;margin-top:6px">${x.note}</div>`:""}
+       <button class="mbtn" style="margin-top:12px;${run?"opacity:.6":""}" data-act="planstep" data-v="${i}" ${run?"disabled":""}>${ic(run?"check":"play")} ${run?"Running on Watch":"Start"}</button></div>`;});
+  }else h+=`<div class="mcard">${rs.length?"No plan yet. Muse writes one from your last session.":"Play a session first, then Muse writes a plan from it."}</div>`;
+  h+=`<button class="mbtn ghost" data-act="writeplan" ${rs.length?"":"disabled"}>${P?"Write a new plan":"Write my plan"}</button>`;
+  el.innerHTML=h;
+}
+function makeScout(rs){
+  const st=strokeStats(rs);if(!st.length)return "Not enough hits yet to scout.";
+  const by=st.slice().sort((a,z)=>a.sw-z.sw),w=by[0],b=by[by.length-1];
+  const off=w.off,mx=mean(off.map(x=>x.p.cx)),my=mean(off.map(x=>x.p.cy));
+  const dir=Math.abs(my)>=Math.abs(mx)?(my>0?"toward the tip":"toward the throat"):(mx>0?"to the right":"to the left");
+  return `Over ${rs.length} hits, an opponent would see your ${LABEL[w.g].toLowerCase()} as the softer wing: ${Math.round(100*w.sw)}% sweet-spot against ${Math.round(100*b.sw)}% on your ${LABEL[b.g].toLowerCase()}.\n\nAttack: go at the ${LABEL[w.g].toLowerCase()}. When it misses the middle it drifts ${dir} (about ${U.lt(mean(off.map(x=>x.r.dist)))} off center), which tends to cost you pace: ${U.sv(w.ball)} ${U.su()} on average against ${U.sv(b.ball)} ${U.su()} on the ${LABEL[b.g].toLowerCase()}.\n\nLean on: the ${LABEL[b.g].toLowerCase()}. Avoid: long exchanges on the ${LABEL[w.g].toLowerCase()} side.\n\nThese are estimates: contact points here are an assumption, not measured.`;
+}
+function scoutHTML(el){
+  const rs=shownRows();let h=museHead("Scout yourself","Muse reads your recent sessions the way an opponent would and predicts where they'd attack.");
+  h+=`<div class="mcard"><div class="eyebrow" style="color:var(--m-muted)">MATCH PLAN</div><div style="margin:10px 0;white-space:pre-wrap">${S.scout||(rs.length?"Muse writes a short plan: how you match up, what to lean on, what to avoid.":"Play a session first, then scout.")}</div>
+   <button class="mbtn" data-act="writescout" ${rs.length?"":"disabled"}>${S.scout?"Write it again":"Write the plan"}</button>${engLabel()}</div>`;
+  el.innerHTML=h;
+}
+function makeReview(rs){
+  const flags=[],t=Math.max(1,Math.floor(rs.length/3)),a=mean(rs.slice(0,t).map(x=>x.p.swing)),z=mean(rs.slice(-t).map(x=>x.p.swing)),sw=rs.filter(x=>x.sweet).length/rs.length;
+  if(z<a*.92)flags.push({label:"Swing speed faded late",detail:"Your swing got slower toward the end of the session.",evidence:`first third ${U.sv(a)} → last third ${U.sv(z)} ${U.su()}`});
+  if(sw<.7)flags.push({label:"Many off-center hits",detail:"Fewer than 7 in 10 hits found the sweet spot.",evidence:`${Math.round(100*sw)}% sweet spot over ${rs.length} hits (estimate)`});
+  const when=new Date().toLocaleDateString("en-US",{weekday:"short",day:"numeric",month:"short"});
+  return {label:`${when} · ${rs.length} shots`,flags,clear:!flags.length,status:"pending",at:null};
+}
+function reviewHTML(el){
+  const rs=shownRows(),pend=S.reviews.filter(x=>x.status==="pending").length;
+  let h=museHead("Review queue","Muse flags the moments in a session that need a human look. Approve what you'll work on; dismiss the rest.",pend?`<span style="font-size:12px;font-weight:600;color:var(--m-lime)">${pend} pending</span>`:"");
+  h+=`<button class="mbtn" data-act="reviewnow" ${rs.length?"":"disabled"}>Review this session</button>`;
+  if(!S.reviews.length)h+=`<div class="mcard" style="color:var(--m-muted)">No reviews yet.</div>`;
+  S.reviews.forEach((r,i)=>{
+    const col=r.status==="pending"?"var(--m-lime)":r.status==="approved"?"var(--m-good)":"var(--m-ghost)";
+    h+=`<div class="mcard"><div style="display:flex;justify-content:space-between;align-items:center"><span class="eyebrow" style="color:var(--m-muted)">${r.label.toUpperCase()}</span><span class="stat" style="color:${col};border-color:${col}">${r.status[0].toUpperCase()+r.status.slice(1)}</span></div>`;
+    if(r.clear)h+=`<div style="color:var(--m-good);margin:10px 0">${ic("check")} Nothing needs a review.</div>`;
+    else r.flags.forEach(f=>{h+=`<div class="flagrow"><b>${ic("flagf")} ${f.label}</b><div>${f.detail}</div><div class="ev">${f.evidence}</div></div>`;});
+    if(r.status==="pending")h+=`<div style="display:flex;gap:10px;margin-top:10px"><button class="mbtn" data-act="decide" data-v="${i}:approved">${ic("check")} Approve</button><button class="mbtn dim" data-act="decide" data-v="${i}:dismissed">${ic("x")} Dismiss</button></div>`;
+    else h+=`<div style="font-size:12px;color:var(--m-muted);margin-top:8px">${r.status==="approved"?"Approved":"Dismissed"} ${r.at}</div>`;
+    h+=engLabel()+`</div>`;});
+  el.innerHTML=h;
+}
 
 /* ---------- What if ---------- */
 let wiStage=null,wiStart=0,wiKey="";
@@ -883,10 +955,11 @@ function accountHTML(el){
 const swc=(on,act,k)=>`<button class="sw3 ${on?"on":""}" data-act="${act}" data-k="${k||""}" role="switch" aria-checked="${on}"><i></i></button>`;
 function racketHTML(el){
   const P=PLAYERS[S.pi]||{name:"—"};
-  el.innerHTML=`<div class="sect"><div class="grp">
+  el.innerHTML=`<div class="sect"><div class="grp"><button data-act="together"><span class="lk">${ic("people")}Play together</span><span class="ch">${ic("chev")}</span></button></div><div class="ft">Invite friends, keep score together and share racket stats.</div></div>
+   <div class="sect"><div class="hd">Your racket</div><div class="grp">
     <button data-act="skinrow"><span class="lk">${ic("palette")}Racket skins</span><span class="ch">${ic("chev")}</span></button>
     <button data-act="glasses"><span class="lk">${ic("glasses")}Glasses</span><span class="ch">${ic("chev")}</span></button>
-    <button data-act="account"><span class="lk">${ic("account")}Account</span><span class="ch">${ic("chev")}</span></button></div><div class="hd" style="padding-top:6px;text-transform:none;font-size:12px">Your racket</div></div>
+    <button data-act="account"><span class="lk">${ic("account")}Account</span><span class="ch">${ic("chev")}</span></button></div></div>
    <div class="sect"><div class="hd">Connection</div><div class="grp">
     <div style="display:block"><div class="seg3"><button>Racket</button><button class="on">Simulator</button></div></div>
     <div><span>Status</span><span class="v">Pro replay</span></div><div><span>Sample rate</span><span class="v">1000 Hz</span></div>
@@ -896,7 +969,7 @@ function racketHTML(el){
     <button class="link" data-act="hw">${ic("scope")}<span style="flex:1;margin-left:8px">Calibrate racket…</span></button>
     <button class="link" data-act="recenter">↺<span style="flex:1;margin-left:8px">Recenter 3D view</span></button></div>
     <div class="ft">Takes about 2 minutes: hold still, tip up, lay flat. Then optionally drop balls on a taped grid to score the racket's sweet-spot AI.</div></div>
-   <div class="sect"><div class="hd">Settings</div><div class="grp"><div><span>Use metric units</span>${swc(U.metric,"units")}</div><div><span>iCloud sync</span><span class="v">Off</span></div></div>
+   <div class="sect"><div class="hd">General</div><div class="grp"><div><span>Use metric units</span>${swc(U.metric,"units")}</div><div><span>iCloud sync</span><span class="v">Off</span></div></div>
     <div class="ft">${U.metric?"km/h and cm":"mph and inches"}. iCloud sync: not in the emulator.</div></div>
    <div class="sect"><div class="hd">Players</div><div class="grp">
     <div><span>Active player</span><span class="v">${P.name}</span></div>
@@ -925,6 +998,15 @@ $("phone").addEventListener("click",e=>{
    case"period":toast("The emulator holds a single session, so every period shows the same data.");break;
    case"detail":go("detail");break;
    case"memory":go("memory");break;
+   case"plan":go("plan");break;
+   case"scout":go("scout");break;
+   case"review":go("review");break;
+   case"together":go("together");break;
+   case"writeplan":S.plan=makePlan(shownRows());S.planRun=-1;refreshOther();break;
+   case"planstep":S.planRun=+v;refreshOther();break;
+   case"writescout":S.scout=makeScout(shownRows());refreshOther();break;
+   case"reviewnow":S.reviews.unshift(makeReview(shownRows()));refreshOther();break;
+   case"decide":{const[i,st]=v.split(":");const r=S.reviews[+i];r.status=st;r.at=new Date().toLocaleTimeString("en-US",{hour:"numeric",minute:"2-digit"});refreshOther();break;}
    case"openwi":go("whatif");break;
    case"findfilm":{const w=wiBase();if(!w.b)break;const c=evalCands(w.b)[0];S.film={...c,stroke:w.st};S.wiStroke=w.st;S.d={...c.d};refreshOther();break;}
    case"drill":{const rs=shownRows(),sw=rs.filter(x=>x.sweet).length/Math.max(1,rs.length),goal=Math.round(clamp(5+10*(1-sw),5,15));
@@ -952,7 +1034,7 @@ $("skip").addEventListener("click",skipToEnd);
 $("speed").addEventListener("click",e=>{const b=e.target.closest("button");if(!b)return;S.speed=+b.dataset.v;[...$("speed").children].forEach(x=>x.classList.toggle("on",x===b));});
 
 function setPlayer(i){
-  S.pi=i;S.active=false;S.shown=0;S.clock=-LEAD;S.lastRow=null;S.d=Z();S.film=null;S.chat=[];S.drill=null;S.drillRun=false;
+  S.pi=i;S.active=false;S.shown=0;S.clock=-LEAD;S.lastRow=null;S.d=Z();S.film=null;S.chat=[];S.drill=null;S.drillRun=false;S.plan=null;S.planRun=-1;S.scout="";S.reviews=[];
   const P=PLAYERS[i],ses=P.session;rows=(ses.shots||[]).map(enrich);
   const lab=ses.provenance.labels,pred=ses.provenance.predicted;
   $("prov").innerHTML=pred?`<b>Predicted by a model:</b> each hit's stroke type, which player hit it and when — the F3Tennis tsm_e2espot model (97% stroke-type accuracy on held-out Ostrava hits; not measured on this broadcast). <b>From video:</b> how the hitter's racket moved, tracked with SAM 3.1 (box centre, 25 fps, windows spread through the match). <b>Estimated:</b> speeds, spin, angles, contact points, and the 3D swing built from that motion.<br><a href="${P.video_url}">Source video</a>`:lab?`<b>From the dataset (real):</b> each hit's stroke, forehand/backhand, technique and outcome — ${ses.provenance.labels}. <b>From video:</b> when each hit happened and how the hitter's racket moved, tracked with SAM 3.1 (box centre, 25 fps). <b>Estimated:</b> speeds, spin, angles, contact points, and the 3D swing built from that motion.<br><a href="${P.video_url}">F3Tennis dataset</a>`:

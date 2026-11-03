@@ -79,10 +79,13 @@ look and behave like `apple/Shared/Views`:
   [`tools/optimize_racket_glb.py`](../tools/optimize_racket_glb.py) from 15 MB to 0.65 MB) rendered with
   three.js, the same session controls, stat tiles, shot card (green/red flash), string bed and gyro/g/Hz labels.
 - **Score** — working tennis scoring (sets, tiebreaks, no-ad, match tiebreak) with the app's layout.
-- **Together**, **Racket** — the signed-out and settings screens (units toggle works; the player picker switches
-  the replayed pro).
-- **Insights** — metric tabs, summary, chart, sessions, and the Muse entry card. **Muse** and **What if** open
-  from it, in the app's dark "Lab" style, including the 3D swing stage with path trail and ghost.
+- **Settings** — the app's Settings screen (units toggle works; the player picker switches the replayed match),
+  with "Play together" opening the signed-out Together screen, as in the app.
+- **Insights** — stroke chips, metric tabs, summary, chart, by-stroke bars and sessions.
+- **Muse** — its own tab, as in the app since the Nov 3 restructure (tabs: Live, Score, Muse, Insights, Settings), in
+  the app's dark "Lab" style: best change, drill, memory, **What if** (3D swing stage with path trail and ghost),
+  **Practice plan**, **Scout yourself** and **Review queue**. The plan, scout and review texts are written by a
+  template from the replay's own numbers, labelled "Demo engine · offline".
 
 Three things are not in the app and live outside the phone: the player picker, 1×/2×/4× speed and "Skip to end".
 
