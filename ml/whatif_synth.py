@@ -351,16 +351,26 @@ def describe(deltas, units):
 
 
 CUES = {
+    # Plain words only: no digits (the answer-numbers test), no field names, each short (80-word cap).
     "face_deg-": ["keep the strings facing the net a beat longer through contact", "turn the racket face slightly down at contact",
-                  "let the forearm turn over through the ball instead of holding the face open"],
-    "face_deg+": ["tilt the strings slightly up at contact", "hold the face a touch more open through the ball"],
-    "path_deg+": ["start the racket below the ball and finish over your shoulder", "drop the racket head earlier and brush up the back of the ball"],
-    "path_deg-": ["swing more through the ball than up it", "finish out toward the target, not straight up"],
-    "swing_percent+": ["load your legs and turn your hips earlier for the extra racket speed", "relax the grip so the racket head can accelerate"],
-    "swing_percent-": ["ease off to about 90% effort and stay balanced", "slow the swing slightly and keep your head still at contact"],
-    "contact_y_cm-": ["step in so you are not reaching for the ball", "move your feet closer to the ball so you meet it nearer the middle"],
-    "contact_y_cm+": ["give yourself a bit more room from the ball", "take a small step back so you're not crowded at contact"],
-    "contact_x_cm": ["keep your head still and watch the ball onto the strings"],
+                  "let the forearm turn over through the ball instead of holding the face open",
+                  "finish with the strings facing the court", "cover the ball a touch more at contact"],
+    "face_deg+": ["tilt the strings slightly up at contact", "hold the face a touch more open through the ball",
+                  "let the strings tilt up through the hit", "swing through with the face laid back"],
+    "path_deg+": ["start the racket below the ball and finish over your shoulder", "drop the racket head earlier and brush up the back of the ball",
+                  "swing from the knees to the opposite shoulder", "trace up the back of the ball to finish high"],
+    "path_deg-": ["swing more through the ball than up it", "finish out toward the target, not straight up",
+                  "drive out toward the target before lifting", "hit through three balls lined up ahead"],
+    "swing_percent+": ["load your legs and turn your hips earlier for the extra racket speed", "relax the grip so the racket head can accelerate",
+                       "turn the shoulders fully and uncoil into the shot", "let the head lag then whip through contact"],
+    "swing_percent-": ["ease off to about 90% effort and stay balanced", "slow the swing slightly and keep your head still at contact",
+                       "swing at rally pace and watch the contact", "trade a little pace for clean timing"],
+    "contact_y_cm-": ["step in so you are not reaching for the ball", "move your feet closer to the ball so you meet it nearer the middle",
+                      "track the ball onto the strings a beat earlier"],
+    "contact_y_cm+": ["give yourself a bit more room from the ball", "take a small step back so you're not crowded at contact",
+                      "extend the arm a touch more at contact"],
+    "contact_x_cm": ["keep your head still and watch the ball onto the strings", "keep the head down until after the hit",
+                     "watch the seams until they blur"],
 }
 
 
