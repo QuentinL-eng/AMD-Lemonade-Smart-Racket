@@ -8,7 +8,7 @@ The site is hosted on Cloudflare Pages in the `tennisbuddy` project.
 
 To publish updates, run `npm run deploy:website` from the repository root.
 The build copies `website/index.html`, `website/emulator.html`, `website/emulator_session.json`,
-`website/emulator_sessions.json`, and `website/img/` into `.website-dist/`.
+`website/emulator_sessions.json`, `website/emulator/` (three.js, the loader and the 0.65 MB racket model), and `website/img/` into `.website-dist/`.
 Alternate design pages and this document are excluded from publication.
 
 Wrangler uses the existing Cloudflare login. If it expires, run `npx wrangler login`.
