@@ -1,0 +1,137 @@
+{
+  "git": {
+    "commits": 153,
+    "first": "2026-10-26",
+    "last": "2026-11-03",
+    "days": [
+      {
+        "date": "2026-10-26",
+        "commits": 69
+      },
+      {
+        "date": "2026-10-27",
+        "commits": 6
+      },
+      {
+        "date": "2026-10-28",
+        "commits": 7
+      },
+      {
+        "date": "2026-10-29",
+        "commits": 37
+      },
+      {
+        "date": "2026-10-30",
+        "commits": 3
+      },
+      {
+        "date": "2026-10-31",
+        "commits": 0
+      },
+      {
+        "date": "2026-11-01",
+        "commits": 0
+      },
+      {
+        "date": "2026-11-02",
+        "commits": 18
+      },
+      {
+        "date": "2026-11-03",
+        "commits": 13
+      }
+    ],
+    "subjects": [
+      "Restructure fork as Tennis Buddy: plan, CAD, legacy folder",
+      "Add racket firmware: 1 kHz MPU6050 + H3LIS331DL BLE streaming",
+      "Add Tennis Buddy iPhone, Mac and Watch apps",
+      "Sync sessions between iPhone and Mac with SwiftData + CloudKit",
+      "Hide inline labels on Racket tab number fields",
+      "Add status note to the plan",
+      "Insights: draw the sweet-spot trend as a line instead of day-wide bars",
+      "Show a loading state while Gemma loads",
+      "Constrain Gemma's drill format so it parses into a trackable goal",
+      "Prep TestFlight: export-compliance flag, build 2, archive/upload script",
+      "Add privacy policy and TestFlight notes; first build uploaded",
+      "Add TestFlight public link",
+      "Fix submission time in TestFlight notes",
+      "Use the textured Yonex racket model in the 3D view",
+      "Credit the team-made racket model in the README",
+      "Show the racket's on-device sweet-spot verdict in the Live view",
+      "Mic-only hits when motion sensors are missing; calibrate MPU accel scale",
+      "Add the TennisRobot camera-to-racket pipeline and the project website",
+      "Firmware: switch to LSM6DSV320X IMU on D4/D5; move mic to D1-D3",
+      "Firmware: switch to LSM6DSV320X IMU on D4/D5; move mic to D1-D3",
+      "Update racket 3D model; add Codex project config",
+      "Update racket 3D model; add Codex project config",
+      "App: follow the LSM6DSV320X IMU switch; bump firmware to 1.1",
+      "App: follow the LSM6DSV320X IMU switch; bump firmware to 1.1",
+      "App: move to Quentin's team and rename to Tennis Buddee",
+      "Watch: restyle pages to match the Figma mockup",
+      "Sync working tree: firmware tap pipeline, iOS/Watch updates, tooling",
+      "TennisCamera: record ball detections and racket IMU on one clock",
+      "Docs: describe the in-app sweet-spot check and its CSV",
+      "Shot type: swing-angle volleys, serves by face and turn, taught forehand",
+      "App: show the score and shot readouts on Meta glasses",
+      "Video: RevealSong cut on the beat, hype composition, sound effects",
+      "Docs: club session 28 Oct, raw-stream link and sensor health",
+      "App: link log next to each racket recording; bundle firmware 1.6",
+      "High-g fixed at ±400 g on the wire; remove the range picker",
+      "Firmware 1.6: shots computed on the racket, acked windows, flash backlog",
+      "TennisCamera: keep Syncthing conflict copies out of the build",
+      "README: fix dead links and drop the vendored RC+ manual dumps",
+      "TennisCamera: fix crash after Start capture (%s given a Swift String)",
+      "Robot arm: day-one RC+ programs and recap tooling",
+      "Tab bar: Insights replaces History",
+      "Swing film: serve and volley",
+      "Muse: Lab redesign (option B)",
+      "Insights: Muse card at the top",
+      "Baseten: dedicated Muse Glimmer 30B Truss (vLLM, 1xH100)",
+      "Eval harness + head-to-head; technique-grounded cue bank",
+      "Dataset counts after cue-bank regen: 2,263 conversations, 85,552 rows",
+      "SAM 3.1 push: track converter, emulator, Dockerfile, CI",
+      "Emulator mirrors the app Live tab (shot card, string bed, tabs)",
+      "Pro-match pipeline: contact windows, assembler, player picker",
+      "Scorer: dataset-identical grounding tolerance (abs 0.051, rounded, 1%)",
+      "Emulator: shared shot-name helper (unknown sides show Hit)",
+      "Emulator: 8 SAM-tracked pro sessions (291 shots)",
+      "Docs: Swift suite now 105 methods"
+    ]
+  },
+  "tests": {
+    "swift": 105,
+    "python": 128
+  },
+  "parityClips": 296,
+  "sweetSpot": {
+    "accuracy": 0.672,
+    "baseline": 0.606,
+    "errorCm": 1.83
+  },
+  "clubMinutes": 86,
+  "model": "muse-spark-1.3",
+  "agentTools": [
+    "query_shots",
+    "compare_sessions",
+    "get_session_digest",
+    "get_live_state",
+    "simulate_change",
+    "list_shots",
+    "read_live_sensors",
+    "get_racket_status",
+    "recall_notes",
+    "remember_note"
+  ],
+  "agentLimits": {
+    "max_requests_per_round": 5,
+    "max_tool_calls_per_round": 8,
+    "timeout_s": 45,
+    "fallback": "built-in deterministic engine, UI names the engine that answered"
+  },
+  "links": {
+    "website": "https://tennisbuddy.net",
+    "testflight": "https://testflight.apple.com/join/137F7kvd",
+    "judging_guide": "JUDGING.md",
+    "llm_index": "llms.txt"
+  }
+}

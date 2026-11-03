@@ -1,7 +1,14 @@
 // Music and sound effects. Files live in public/audio/ (credits: public/audio/CREDITS.md).
 import type { SceneId } from '../scenes';
 
-export type Music = { src: string; /** seconds into the file where the video starts */ from?: number; volume?: number };
+export type Music = {
+  src: string;
+  /** seconds into the file where the video starts */
+  from?: number;
+  volume?: number;
+  /** At `at` seconds into the file, jump back to `to`, so a long cut never reaches the song's fade-out. Use bar lines. */
+  jump?: { at: number; to: number };
+};
 
 /** Default music bed for the Reveal and Demo cuts (the song cut sets its own). */
 export const music: Music = { src: 'audio/keep-it-movin.mp3', from: 0.386, volume: 0.55 };
@@ -9,6 +16,8 @@ export const music: Music = { src: 'audio/keep-it-movin.mp3', from: 0.386, volum
 export const sound = {
   /** Music level while a footage slot with `muted: false` plays (people talking). */
   musicUnderTalk: 0.12,
+  /** Music level under a recorded voiceover line (public/audio/vo/). */
+  musicUnderVoiceover: 0.16,
   /** Fade the music out over the last N seconds. */
   musicFadeOut: 3,
 };
@@ -41,7 +50,7 @@ export const cues: Record<SceneId, Cue[]> = {
   racketReveal: [{ sfx: 'whoosh', at: 10, volume: 0.6 }, { sfx: 'whoosh', at: 55, volume: 0.4 }, { sfx: 'boom', at: 100 }],
   insideHandle: [{ sfx: 'whoosh', at: 50, volume: 0.6 }, ...[105, 141, 177, 213].map((at) => ({ sfx: 'blip' as const, at, volume: 0.4 }))],
   impact: [{ sfx: 'whoosh', at: 45, volume: 0.4 }, { sfx: 'impact', at: 60 }, { sfx: 'blip', at: 90, volume: 0.4 }],
-  robotLab: [{ sfx: 'servo', at: 40, volume: 0.5 }, { sfx: 'impact', at: 76, volume: 0.8 }, { sfx: 'servo', at: 135, volume: 0.5 }, { sfx: 'impact', at: 171, volume: 0.8 }],
+  robotLab: [{ sfx: 'servo', at: 40, volume: 0.5 }, { sfx: 'servo', at: 135, volume: 0.5 }], // no ball, no impact: copy.robotLab.showBalls
   devices: [38, 50, 62].map((at) => ({ sfx: 'ping' as const, at, volume: 0.5 })),
   score: [36, 44, 100, 108].map((at) => ({ sfx: 'tap' as const, at })),
   whatIf: [
@@ -50,4 +59,11 @@ export const cues: Record<SceneId, Cue[]> = {
   ],
   together: [{ sfx: 'blip', at: 26, volume: 0.4 }, { sfx: 'blip', at: 34, volume: 0.4 }],
   endcard: [{ sfx: 'boom', at: 4, volume: 0.8 }, { sfx: 'chime', at: 24, volume: 0.5 }],
+  clubFinding: [{ sfx: 'blip', at: 40, volume: 0.4 }, { sfx: 'swipe', at: 150, volume: 0.6 }, ...[172, 186, 200].map((at) => ({ sfx: 'blip' as const, at, volume: 0.4 }))],
+  evidence: [20, 60, 100].map((at) => ({ sfx: 'blip' as const, at, volume: 0.4 })),
+  museAgent: [{ sfx: 'blip', at: 12, volume: 0.4 }, { sfx: 'swipe', at: 66, volume: 0.5 }, { sfx: 'blip', at: 112, volume: 0.4 }, { sfx: 'swipe', at: 150, volume: 0.5 }, { sfx: 'blip', at: 205, volume: 0.4 }, { sfx: 'chime', at: 250, volume: 0.5 }],
+  samTrack: [{ sfx: 'impact', at: 111, volume: 0.7 }],
+  glassesPov: [{ sfx: 'impact', at: 45, volume: 0.7 }, { sfx: 'ping', at: 52, volume: 0.5 }, { sfx: 'impact', at: 135, volume: 0.7 }, { sfx: 'ping', at: 142, volume: 0.5 }],
+  builtProof: [{ sfx: 'blip', at: 30, volume: 0.4 }, { sfx: 'chime', at: 120, volume: 0.4 }],
+  swingFilm: [],
 };

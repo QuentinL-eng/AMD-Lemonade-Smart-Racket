@@ -1,12 +1,38 @@
-// Every word that appears on screen in the CGI scenes lives here.
+// Every word that appears on screen in the CGI scenes lives here. Spoken words: voiceover.ts.
+// Numbers from git and hackathon.json are not here: they come from generated/facts.json (npm run assets).
 //
 // Rules we keep:
 // - Never call the product a "coach" or "analyzer" (hackathon anti-project list).
 // - UI labels copy the real app strings (quoted in comments with their source).
-// - Numbers are sample data unless noted. Replace with real numbers from tonight's
-//   session before final render (see SHOOT_PLAN.md, "Numbers to capture").
+// - Example shots run through the real simulator (lib/sim.ts). To show your own, change the inputs below.
+//   `npm run check` lists anything still marked as a sample.
+import { applyDeltas, simulate, toMph, type SimDeltas, type SimInput } from '../lib/sim.ts';
+
+// ---- Example shots: change these and every card, HUD and what-if follows. ----
+const forehand: SimInput = { swingKmh: 75, pathDeg: 12, faceDeg: 2, contactXcm: -0.4, contactYcm: -2.1, incomingKmh: 43.2 };
+const serve: SimInput = { swingKmh: 100, pathDeg: 10, faceDeg: 2, contactXcm: 0.5, contactYcm: -1.5, incomingKmh: 0 };
+const whatIfChange: SimDeltas = { swingPercent: 5, contactYcm: 2 };
+
+/** The Live card's fields for a simulated shot (ShotCard in the app). */
+const card = (stroke: string, p: SimInput, sample: boolean) => {
+  const r = simulate(p);
+  return {
+    stroke,
+    badge: r.sweetSpot ? 'Sweet spot' : `${Math.round(Math.hypot(p.contactXcm, p.contactYcm))} cm off`,
+    speed: Math.round(toMph(r.ballKmh)),
+    unit: 'mph',
+    sub: `${Math.round(r.spinRpm)} rpm ${r.spinType} · ${Math.round(toMph(p.swingKmh))} mph swing`,
+    sample,
+  };
+};
+const forehandCard = card('Forehand', forehand, false);
+const before = simulate(forehand), after = simulate(applyDeltas(forehand, whatIfChange));
 
 export const copy = {
+  // Shot card over the real serve in the cold open. Replace with the numbers from your real serve, then set
+  // `sample: false`. While it is true the card wears a SAMPLE tag and `npm run check` fails.
+  coldOpenShot: card('Serve', serve, true),
+
   hook: {
     lines: ['Four hundred shots tonight.', 'Which ones were good?'],
   },
@@ -23,7 +49,7 @@ export const copy = {
     parts: [
       { part: 'imu', name: 'LSM6DSV320X', detail: '6-axis IMU + ±320 g high-g accelerometer' },
       { part: 'mic', name: 'INMP441 microphone', detail: 'Hears where the ball meets the strings' },
-      { part: 'mcu', name: 'ESP32-C3', detail: 'Streams every swing over Bluetooth LE' },
+      { part: 'mcu', name: 'ESP32-C3', detail: 'Computes every shot on the racket' },
       { part: 'board', name: 'Custom control board', detail: 'Designed and assembled for this build' },
     ],
   },
@@ -32,21 +58,111 @@ export const copy = {
     kicker: 'One shot, three signals',
     traces: ['Gyro', 'High-g accel', 'Microphone'],
     // Matches the Live / glasses HUD layout ("Forehand", "Sweet spot")
-    stroke: 'Forehand',
-    badge: 'Sweet spot',
-    speed: 68,
-    unit: 'mph',
-    sub: '1840 rpm topspin · 74 mph swing',
+    ...forehandCard,
   },
 
   robotLab: {
     kicker: 'Ground truth',
     title: 'A 6-axis robot arm swings the racket',
+    // True of the Oct 29 session (data/room-2026-10-29): the real arm struck no ball, so none is drawn.
+    showBalls: false,
     bullets: [
-      'Epson C8 arm, camera-guided strikes',
-      'Hits a chosen point on the strings',
-      'Labels every swing for the models',
+      'Real Epson C8, real racket, real sensors',
+      'Known motion to check the numbers against',
+      'It helped catch a gyro reading 2× too high',
     ],
+  },
+
+  // docs/CLUB_2026-10-28.md, firmware/include/protocol.h, firmware/src/backlog.h
+  clubFinding: {
+    kicker: 'Real court',
+    title: 'On court, the raw stream fell apart.',
+    arrivedPercent: 17,
+    arrivedLabel: 'of the 1 kHz stream reached the phone',
+    pivot: 'So the racket computes every shot itself.',
+    steps: [
+      { big: '80 bytes', small: 'Shot summary, sent first' },
+      { big: '448 ms', small: 'Raw window, acked and resent' },
+      { big: '117', small: 'Windows kept in flash, no phone needed' },
+    ],
+  },
+
+  // ml/runs/SUMMARY-20261028.md. Accuracy, baseline and the 1.83 cm come from hackathon.json via facts.json.
+  evidence: {
+    kicker: 'Measured',
+    title: 'We publish the weak numbers too.',
+    parity: { label: 'C++ on the racket and Python agree', detail: 'Same sweet-spot call on every clip. Max distance error 7e-7 cm.' },
+    distance: { label: 'Where the ball hit, from sound', medianCm: 2.41, medianLabel: 'Always guessing the median', detail: 'Mean distance error' },
+    accuracy: { label: 'Sweet spot, yes or no', range: [59.6, 74.8], detail: 'The range still touches the baseline. Not a clear win yet.' },
+    source: '274 labelled clips · grouped 5-fold · ml/runs/SUMMARY-20261028.md',
+  },
+
+  // Every tool must appear once (npm run check compares this with hackathon.json).
+  museAgent: {
+    kicker: 'An agent, not a chat box',
+    groups: [
+      { name: 'Your shots', tools: ['query_shots', 'list_shots', 'compare_sessions', 'get_session_digest'] },
+      { name: 'The live racket', tools: ['get_live_state', 'read_live_sensors', 'get_racket_status'] },
+      { name: 'Physics simulator', tools: ['simulate_change'] },
+      { name: 'Memory', tools: ['recall_notes', 'remember_note'] },
+    ],
+    // The tool-call trace in README.md, from the generated dataset.
+    question: 'I keep mishitting my backhand. What should I fix?',
+    calls: [
+      { tool: 'get_session_digest', args: '', result: 'backhand contact 2.0 cm toward the tip' },
+      { tool: 'simulate_change', args: 'type: "backhand", contact_y_cm: -1.0', result: 'ball 149.6 → 151.3 km/h · spin 1,066 rpm' },
+    ],
+    answer: 'Move contact 1.0 cm back toward the center. The estimate says ball speed goes from 150 km/h to about 151 km/h, and spin holds.',
+    traceNote: 'Trace from our 2,263-conversation tool-use dataset',
+    rule: 'Every number must come from a tool',
+  },
+
+  // Real SAM 3.1 boxes on the real clip (scripts/sam-clip.mjs). ml/stroke_system/README.md for the counts.
+  samTrack: {
+    kicker: 'Meta SAM 3.1',
+    title: 'Real video. Real boxes.',
+    prompts: { racket: 'tennis racket', ball: 'tennis ball' },
+    stat: '15,566 frame/prompt pairs in 62 video requests',
+    contact: 'Contact',
+    purpose: 'Pre-fills the contact labels',
+  },
+
+  // Mirrors GlassesHUD.swift field by field. A simulated view: film the real lens and it replaces this scene.
+  glassesPov: {
+    tag: 'Simulated view · real HUD fields',
+    badge: 'Meta Ray-Ban Display · Meta Wearables Device Access Toolkit',
+    elapsed: '12:48',
+    idleTitle: 'Ready', // GlassesHUD.swift
+    idleDetail: 'Hit a ball to see your shot', // GlassesHUD.swift
+    detailSweet: `${forehandCard.speed} ${forehandCard.unit} · ${forehandCard.badge}`, // GlassesController.swift
+    stroke: forehandCard.stroke,
+    shots: 48,
+    sweetPercent: 67,
+    score: 'You 6 · Opp 4',
+    points: '40 – 15',
+    drillName: 'Sweet-spot forehands',
+    drillTarget: 10,
+    drillStart: 3,
+  },
+
+  builtProof: {
+    kicker: 'Check our work',
+    title: 'Every commit is public.',
+    testsLabel: ['Swift tests', 'Python tests', 'Firmware = Python clips'],
+    license: 'MIT',
+    verify: 'python3 ml/test_parity.py  →  PASS',
+  },
+
+  // Text for the overlays placed in src/config/timeline.ts
+  overlays: {
+    hook: ['Hundreds of shots tonight.', 'Which ones were good?'],
+    deviceBadge: 'Meta Wearables Device Access Toolkit',
+    filmBadge: 'Real Muse Spark script, on a demo forehand session',
+    museCallouts: ['You ask in your own words', 'Muse calls simulate_change', 'An estimate, on your own shots', 'Then it plans a drill'],
+    // Fill in name and level. Leave a testimonial out of the timeline if you don't have one.
+    testimonial1: { name: 'Name', detail: 'Club player, level' },
+    testimonial2: { name: 'Name', detail: 'Club player, level' },
+    testimonial3: { name: 'Name', detail: 'Club player, level' },
   },
 
   devices: {
@@ -69,11 +185,12 @@ export const copy = {
     status: 'Muse Spark · online', // CoachModel
     question: 'What if I hit 2 cm closer to the sweet spot and swing 5% faster?',
     tool: 'simulate_change', // CoachTools.swift
-    toolArgs: 'contact −2 cm · swing +5%',
+    toolArgs: `swing_percent: ${whatIfChange.swingPercent}, contact_y_cm: ${whatIfChange.contactYcm}`,
     results: [
-      { label: 'Ball speed', before: 61, after: 67, unit: 'mph' },
-      { label: 'Spin', before: 1840, after: 1930, unit: 'rpm' },
+      { label: 'Ball speed', before: Math.round(toMph(before.ballKmh)), after: Math.round(toMph(after.ballKmh)), unit: 'mph' },
+      { label: 'Spin', before: Math.round(before.spinRpm), after: Math.round(after.spinRpm), unit: 'rpm' },
     ],
+    note: 'Estimate on an example forehand, not a measurement',
     drillButton: 'Plan my next drill', // CoachModel
     drillName: 'Sweet-spot forehands',
     drillTarget: 10,
@@ -94,6 +211,8 @@ export const copy = {
   endcard: {
     name: 'Tennis Buddee',
     tagline: 'Find the sweet spot.', // website <h1>
+    site: 'tennisbuddy.net',
+    tryIt: 'Try it on TestFlight in two minutes. It opens on a simulated racket, no hardware needed.',
     footer: 'Built with Muse Spark · Meta Global AI Developer Hackathon',
   },
 };

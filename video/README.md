@@ -7,7 +7,7 @@ UI, plus slots for real footage. No AI-generated video.
 |---|---|---|
 | `Reveal` | ~60 s | CGI only, crossfades |
 | `RevealSong` | 1:08 | CGI only, hard cuts on the beat of "Keep It Movin'". The X post |
-| `Demo` | 2:57 | Hackathon submission (limit 3:00). CGI + footage slots |
+| `Demo` | 2:56 | Hackathon submission (limit 3:00). CGI + footage slots. Script: [`DEMO_SCRIPT.md`](DEMO_SCRIPT.md) |
 | `Hype` | 0:30 | X hype clip, CGI only, on "Keep It Movin'" |
 | `RobotHype` | 0:27 | X clip from the 2026-10-29 robot-arm session: real footage cut against CGI, on "Ten" |
 | `BuildLog` | 0:26 | X clip: the build as a six-step how-to (bench, robot, court footage + CGI), on "Comin Wit It" |
@@ -26,6 +26,8 @@ npm run studio          # live preview at http://localhost:3000
 npm run render:reveal   # -> out/reveal.mp4
 npm run render:song     # -> out/reveal-song.mp4
 npm run render:demo     # -> out/demo.mp4
+npm run check           # what's left before the Demo can ship (length, footage, samples, voiceover, banned words)
+npm run clips           # the Demo's CGI scenes and transparent overlays as files in out/clips/, for an outside editor
 npm run timeline -- RevealSong   # timecodes (and bars) of any cut
 npm run frames          # key frames of every scene -> out/review/
 node scripts/stills.mjs RobotHype 150 372 716   # several frames, one bundle -> out/review/
@@ -77,8 +79,13 @@ You should almost never need to open a scene file.
 | To change | Edit |
 |---|---|
 | Any on-screen text or number | `src/config/copy.ts` |
-| Scene order, length, crossfade | `src/config/timeline.ts` (`reveal`, `demo`) |
-| Add your filmed clips | drop in `public/footage/`, set `file:` on the slot in `src/config/timeline.ts` |
+| Example shots (cards, HUD, what-if) | The inputs at the top of `src/config/copy.ts`. They run through `src/lib/sim.ts`, a mirror of the app's simulator |
+| Spoken lines and their captions | `src/config/voiceover.ts`. Save a recording as `public/audio/vo/<id>.wav` and it plays |
+| Scene order, length, crossfade | `src/config/timeline.ts` (`reveal`, `demo`). Lines follow their entry when you reorder |
+| Add your filmed clips | Save as `public/footage/<slot id>.mp4`. No code change |
+| Cards and text over a shot | `overlays` on the entry in `src/config/timeline.ts`, drawn by `src/components/Overlays.tsx` |
+| Commit counts, test counts, Muse tools, model results | Nothing: `npm run assets` reads git and `../hackathon.json` into `src/config/generated/facts.json` |
+| The SAM clip and boxes | `npm run sam -- <candidate>` (uses the cache, no API call). Needs the recording in `../data/Tennis Camera/` |
 | Colours, fonts, resolution | `src/config/brand.ts` |
 | Music, effect files, per-scene sound cues | `src/config/sound.ts` (credits in `public/audio/CREDITS.md`) |
 | Cut to a new song | run `scripts/analyze-song.mjs` on it for BPM + first downbeat, then copy the `revealSong` pattern in `src/config/timeline.ts` (scene lengths in bars, `skip` to land key moments on beats) |
@@ -87,13 +94,17 @@ You should almost never need to open a scene file.
 ### Footage slots
 
 ```ts
-{ footage: 'club-rally', seconds: 5, file: 'club-rally.mp4', from: 12.5, caption: '…', shot: '…' }
+{ footage: 'cold-open', seconds: 8, from: 12.5, caption: '…', shot: '…', clips: [['ev-toss', 3.2, 0.5]], standIn: true }
 ```
 
-- `file`: name of the clip in `public/footage/`. Leave it out and the slot shows a placeholder with the shot notes.
-- `from`: start the clip this many seconds in (trim).
+- `public/footage/<footage>.mp4` fills the slot as soon as it exists. Until then it plays `clips`, then `fallback` (a CGI
+  scene), then a placeholder with the `shot` notes.
+- `clips`: `[name, seconds, optional rate]`, cut end to end from `public/footage/`. `standIn: true` tags them on screen and
+  makes `npm run check` fail, so a stand-in can't ship by accident.
+- `from`: start the clip this many seconds in (trim). `playbackRate`: speed it up.
+- `layout: 'phone'`: a portrait screen recording in an iPhone frame, ungraded.
 - `muted: false`: keep the clip's audio (testimonials, talking to camera).
-- `caption`: burned-in subtitle. Most viewers watch muted.
+- `caption`: burned-in subtitle, for a clip with no line in `voiceover.ts`.
 
 The `Demo` length is computed from the list. Keep the total under 3:00, which the studio timeline shows.
 
@@ -149,5 +160,7 @@ Animation is driven by frame number only (no `Math.random`, no timers), so rende
 
 ## Copy rules
 
-- Don't call it a coach or an analyzer: "Sports analyzers or coaches" is on the hackathon's anti-project list.
+- Don't call it a coach or an analyzer: "Sports analyzers or coaches" is on the hackathon's anti-project list. `npm run check` looks.
 - Mirror real app strings (`copy.ts` notes the source file of each).
+- Numbers shown over real footage must be that shot's real numbers. `copy.coldOpenShot` stays tagged SAMPLE until they are.
+- Label what isn't measured: example shots say so, what-if results are estimates, and the glasses scene says it's simulated.
