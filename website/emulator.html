@@ -555,16 +555,17 @@ function paintRecent(){
    ${rs.slice(-6).reverse().map(x=>`<div class="rrow">${ic(SYM[x.type])}<span>${x.name}</span><span class="sp">${U.sv(x.r.ball)} ${U.su()}</span><span class="dot" style="background:${x.sweet?"var(--green)":"var(--red)"}"></span></div>`).join("")}</div>`;
 }
 function setActive(a){
-  S.active=a;S.last=performance.now();
+  S.active=a;S.last=performance.now();VID.seg=null;if(!a)pauseVideoNow();
   if(a&&S.shown>=rows.length&&rows.length){S.shown=0;S.clock=-LEAD;S.lastRow=null;}
   if(!a&&S.shown===0)S.lastRow=null;
   paintSess();paintShot();paintRecent();renderNav();
 }
-function skipToEnd(){S.active=false;S.shown=rows.length;S.clock=endT();S.lastRow=rows[rows.length-1]||null;paintSess();paintShot();paintRecent();refreshOther();paintVidList();}
+function skipToEnd(){S.active=false;pauseVideoNow();VID.seg=null;S.shown=rows.length;S.clock=endT();S.lastRow=rows[rows.length-1]||null;paintSess();paintShot();paintRecent();refreshOther();paintVidList();}
 function frameLive(now){
   const dt=Math.min(.1,(now-S.last)/1000);S.last=now;
   if(S.active){
-    S.clock+=dt*S.speed;let added=false;
+    if(!videoMaster(now))S.clock+=dt*S.speed;
+    let added=false;
     while(S.shown<rows.length&&rows[S.shown].t<=S.clock){S.lastRow=rows[S.shown];S.shown++;added=true;
       if(liveStage)liveStage.showImpact(S.lastRow,now);}
     if(added){paintShot();paintRecent();paintSess();paintVidList();if(S.tab==="insights")refreshOther();}
@@ -582,7 +583,6 @@ function frameLive(now){
     $("lGyro").lastChild.textContent=Math.round(sens.gyro)+" °/s";$("lG").lastChild.textContent=sens.g.toFixed(1)+" g";
   }
   if(S.tab==="muse"&&S.stack.muse.at(-1)==="whatif"&&wiStage)frameWhatIf(now);
-  syncVideo(now);
 }
 
 /* =====================================================================
@@ -1055,7 +1055,7 @@ $("pace").addEventListener("click",e=>{const b=e.target.closest("button");if(!b)
 $("speed").addEventListener("click",e=>{const b=e.target.closest("button");if(!b)return;S.speed=+b.dataset.v;vidNote();[...$("speed").children].forEach(x=>x.classList.toggle("on",x===b));});
 
 /* ---------- source video (YouTube IFrame API, loaded only on click) ---------- */
-const VID={bias:0,lead:.5,armed:false,seekAt:0,asked:false,ready:false,player:null,follow:true,seg:null,last:0,state:-1,pending:null,loadedId:null,err:false};
+const VID={bias:0,lead:.5,armed:false,seekAt:0,cur:0,wall:0,waiting:false,tries:0,rateAt:0,warned:false,asked:false,ready:false,player:null,follow:true,seg:null,last:0,state:-1,pending:null,loadedId:null,err:false};
 let SEGS=[];
 function buildSegments(){
   VID.bias=((PLAYERS[S.pi]||{}).session||{}).video_bias||0;
@@ -1077,7 +1077,7 @@ function loadVideo(then){
     VID.player=new YT.Player("ytp",{host:"https://www.youtube-nocookie.com",videoId:id,width:"100%",height:"100%",
       playerVars:{rel:0,playsinline:1,modestbranding:1,start:Math.max(0,Math.floor(first-1)),origin:location.origin},
       events:{onReady:()=>{VID.ready=true;VID.loadedId=id;if(VID.pending){seekVideo(VID.pending.t);VID.pending=null;}vidNote();},
-              onStateChange:e=>{VID.state=e.data;},
+              onStateChange:e=>{VID.state=e.data;if(e.data===1&&!S.active&&VID.follow&&!VID.err&&S.speed<=2)startFromVideo();},
               onError:()=>{VID.err=true;vidNote("This video can't be played here. Use “Open on YouTube”.");}}});
   };
 }
@@ -1087,7 +1087,7 @@ function seekVideo(sec){
 }
 function vidNote(msg){
   const n=$("vidnote");if(!n)return;
-  n.textContent=msg||(S.speed>2?"Following the replay works at 1× and 2×. Pick a hit below to jump to it.":"Press Start Session and the video follows the replay. Between tracked windows it pauses.");
+  n.textContent=msg||(S.speed>2?"Following the replay works at 1× and 2×. Pick a hit below to jump to it.":"The video and the replay move together: Start Session plays both, End Session pauses both, and pausing or scrubbing the video moves the replay. Between tracked windows it skips the dead air.");
 }
 function onVidPlayerChange(){
   buildSegments();VID.seg=null;
@@ -1104,34 +1104,66 @@ function paintVidList(){
   $("vidyt").href=ytLink(latest?latest.s.video_t+VID.bias-1.5:(SEGS[0]?SEGS[0].t0+SEGS[0].off:0));
   box.innerHTML=last.length?`<div class="vnote" style="margin:0">Latest hits — tap one to watch it in the video</div>`+last.map(x=>`<button data-vt="${x.s.video_t}"><span class="d" style="background:${x.sweet?"#34C759":"#FF3B30"}"></span>${x.name}<span class="tm">${vtime(x.s.video_t)}</span></button>`).join(""):`<div class="vnote">Hits appear here as the replay plays. Tap one to see it in the video.</div>`;
 }
-function syncVideo(now){
-  if(!VID.ready||!VID.follow||VID.err)return;
-  const live=S.active&&S.speed<=2,seg=live?segAt(S.clock):null;
-  if(!seg){
-    if(VID.seg!==null&&VID.state===1)VID.player.pauseVideo();
-    VID.seg=null;VID.armed=false;return;
+const videoMasterOn=()=>VID.ready&&VID.follow&&!VID.err&&S.speed<=2;
+const videoSegAt=cur=>SEGS.find(g=>cur>=g.c0+g.off-.7&&cur<=g.c1+g.off+.02)||null;      // window by VIDEO time (a seek can land a little early)
+const liveState=()=>{if(VID.ready){try{VID.state=VID.player.getPlayerState();}catch(e){}}return VID.state;};   // read the player, not a cached event (events can be missed)
+function pauseVideoNow(){if(VID.ready&&(liveState()===1||VID.state===3))VID.player.pauseVideo();}
+function rewindShown(){   // the clock moved backwards (the viewer scrubbed): drop hits that haven't happened yet
+  let changed=false;while(S.shown>0&&rows[S.shown-1].t>S.clock+.05){S.shown--;changed=true;}
+  if(changed){S.lastRow=S.shown?rows[S.shown-1]:null;paintShot();paintRecent();paintSess();paintVidList();}
+}
+function videoTimeNow(now){   // smooth estimate of the player's position between its coarse updates
+  const v=VID.player.getCurrentTime();
+  if(v!==VID.cur){VID.cur=v;VID.wall=now;}
+  return VID.cur+Math.min(.4,(now-VID.wall)/1000*S.speed);
+}
+/* While following, the VIDEO is the clock: the replay position is read from the player, so the two cannot drift.
+   Buffering or a pause in the player freezes the replay; a scrub moves it. Returns true when the video owns the clock. */
+function videoMaster(now){
+  liveState();
+  if(!videoMasterOn()){
+    VID.seg=null;VID.waiting=false;
+    if(VID.ready&&S.speed>2)pauseVideoNow();          // YouTube can't play faster than 2x
+    return false;
   }
-  const vt=S.clock+seg.off;
-  if(seg!==VID.seg){
-    VID.seg=seg;VID.armed=true;VID.seekAt=now;VID.last=now;
-    VID.player.seekTo(vt+VID.lead,true);VID.player.setPlaybackRate(S.speed);VID.player.playVideo();return;
+  if(VID.seg===null){                                   // enter a window: seek, then wait for the picture
+    let g=segAt(S.clock);
+    if(!g){g=SEGS.find(x=>x.c0>S.clock)||null;if(!g){S.clock=endT();return true;}S.clock=g.c0;rewindShown();}   // skip the dead air between windows
+    VID.seg=g;VID.waiting=true;VID.armed=true;VID.seekAt=now;VID.tries=0;VID.warned=false;
+    VID.player.seekTo(S.clock+g.off+VID.lead,true);VID.player.setPlaybackRate(S.speed);VID.player.playVideo();
+    return true;
   }
-  if(VID.state!==1){if((VID.state===2||VID.state===0)&&now-VID.last>700){VID.last=now;VID.player.playVideo();}return;}
-  const cur=VID.player.getCurrentTime(),drift=cur-vt;
-  if(VID.armed&&now-VID.seekAt>350){
-    // first playing frame after a seek: learn how far the seek missed by, then land on the replay
-    VID.armed=false;VID.last=now;
-    if(Math.abs(drift)>.2){VID.lead=clamp(VID.lead-drift*.8,-1,2);VID.player.seekTo(vt+VID.lead,true);VID.armed=true;VID.seekAt=now;}
-    return;
+  const g=VID.seg;
+  if(VID.state!==1){                                    // buffering, paused by the viewer, or not started: the replay waits
+    if(now-VID.seekAt>5000&&!VID.warned&&VID.state!==3&&VID.state!==2){VID.warned=true;vidNote("The video hasn't started. Press play in the player.");}
+    return true;
   }
-  if(now-VID.last>600){
-    VID.last=now;
-    if(Math.abs(drift)>.3&&now-VID.seekAt>1500){VID.lead=clamp(VID.lead-drift*.5,-1,2);VID.armed=true;VID.seekAt=now;VID.player.seekTo(vt+VID.lead,true);return;}
-    if(VID.player.getPlaybackRate()!==S.speed)VID.player.setPlaybackRate(S.speed);
+  const cur=videoTimeNow(now);
+  if(VID.waiting){                                      // first picture after a seek: check where it landed
+    if(now-VID.seekAt<300)return true;
+    const target=S.clock+g.off,miss=cur-target;
+    if(Math.abs(miss)>.25&&VID.tries<2){VID.tries++;VID.lead=clamp(VID.lead-miss*.8,-1,2);VID.seekAt=now;VID.player.seekTo(target+VID.lead,true);return true;}
+    VID.waiting=false;
   }
+  const gv=videoSegAt(cur);
+  if(!gv){                                              // past this window, or the viewer scrubbed out of the data
+    if(cur>g.c1+g.off)S.clock=g.c1+.01;
+    VID.seg=null;return true;
+  }
+  if(gv!==g)VID.seg=gv;                                 // the viewer scrubbed into another window: follow it
+  S.clock=cur-VID.seg.off;rewindShown();
+  if(now-VID.rateAt>500){VID.rateAt=now;if(VID.player.getPlaybackRate()!==S.speed)VID.player.setPlaybackRate(S.speed);}
+  return true;
+}
+function startFromVideo(){                              // the viewer pressed play in the player while the session was stopped
+  const cur=VID.player.getCurrentTime(),g=videoSegAt(cur);
+  if(!g){VID.player.pauseVideo();vidNote("No tracked hits at this point in the video. Press Start Session, or tap a hit below.");return;}
+  S.clock=cur-g.off;S.shown=0;while(S.shown<rows.length&&rows[S.shown].t<=S.clock)S.shown++;
+  S.lastRow=S.shown?rows[S.shown-1]:null;VID.seg=g;VID.waiting=false;VID.armed=false;
+  S.active=true;S.last=performance.now();paintSess();paintShot();paintRecent();renderNav();paintVidList();
 }
 $("vidload").addEventListener("click",()=>loadVideo());
-$("vidfollow").addEventListener("change",e=>{VID.follow=e.target.checked;VID.seg=null;});
+$("vidfollow").addEventListener("change",e=>{VID.follow=e.target.checked;VID.seg=null;if(!VID.follow)pauseVideoNow();});
 $("hitlist").addEventListener("click",e=>{
   const b=e.target.closest("button[data-vt]");if(!b)return;
   VID.follow=false;$("vidfollow").checked=false;

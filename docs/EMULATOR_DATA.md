@@ -93,9 +93,12 @@ Three things are not in the app and live outside the phone: the player picker, 1
 
 The side panel has a **Source video** card: the real broadcast, played from YouTube next to the replay. Nothing is
 requested from YouTube until the visitor presses *Load the source video* (the player is `youtube-nocookie.com`;
-all 9 videos allow embedding). *Follow the replay* plays the video in step with the replay clock, window by window,
-pausing between tracked windows; a tap on any recent hit jumps the video to it. It follows at 1x and 2x (YouTube's
-maximum rate); at 4x pick hits by hand. "Open on YouTube" links to the same moment.
+all 9 videos allow embedding). *Follow the replay* (on by default) makes the **video the clock**: the replay position is read from the player, so the
+two cannot drift. Start Session plays both and End Session pauses both (resume continues from the same moment). If the
+video buffers or the viewer pauses it, the replay freezes with it; pressing play on a stopped video starts the replay; and
+scrubbing the video moves the replay (and its hit feed) to match. Between tracked windows the dead air is skipped. A tap
+on any recent hit jumps the video to it (and turns Follow off). It follows at 1x and 2x (YouTube's maximum rate); at 4x the
+video pauses and the replay runs alone. "Open on YouTube" links to the same moment.
 
 Every hit carries `video_t`, its time in the source video in seconds (Ostrava: clip start frame + hit frame at 25 fps;
 predicted matches: window start `t0_s` + hit frame / 25). Within a tracked window the replay clock and video time
@@ -111,9 +114,10 @@ How well it lines up, measured:
   (Wimbledon 90%, Shelton 77%, Alcaraz 62%, Sabalenka 59%, against 5-11% by chance), so there is no gross offset. The
   sound arrives 0.1-0.28 s after the picture's hit by a different amount per broadcast (audio delay and mic distance), which
   is why no audio offset is applied; the other matches were inconclusive (crowd and commentary noise).
-- **Player vs replay clock**: after each seek the page measures how far the player missed and corrects it once, then
-  watches for drift. Measured on a live session: signed median +0.01 s at 1x and +0.02 s at 2x, 90% of samples within
-  0.14-0.18 s. A hit's first frames after a window jump can be off by up to about 0.8 s until the correction lands.
+- **Video vs replay**: they are locked by construction while following. Measured on a live session, video position minus
+  replay clock is 0.00-0.02 s throughout at 1x, and the replay ran at 1.95x against a 2x player at 2x. After a seek the page
+  checks where the video landed and re-seeks up to twice (a seek can land a few tenths off), keeping the replay still until
+  the picture is there, so a window's first moments wait for the video instead of running ahead of it.
 - **Racket swing pace** (Emulator controls, outside the phone): *Slower* (default) stretches each swing around contact
   by 1/0.6 so it is easy to follow; *Real time* plays it at the video's speed. The contact instant is identical in both.
 
