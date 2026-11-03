@@ -15,8 +15,9 @@ app's session format, and a static web page plays the sessions back. Live page:
 3. No real player's name is attached to measured data. Style presets are illustrative and
    say so. Never commit source footage; derived tracks + this provenance note are the artifact.
 4. The committed `emulator_sessions.json` carries one entry per player, each with its own
-   provenance block (video title, uploader, URL). Until the SAM runs land, entries are
-   synthetic demo data and say so.
+   provenance block (video title, uploader, URL). Current file: 8 pro players, 291 shots
+   from SAM 3.1-tracked broadcast windows (29,296 billed frames, $5.86), source videos
+   deleted after tracking.
 
 ## Why this is a fair analogy for racket data
 
