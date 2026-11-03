@@ -63,18 +63,19 @@ struct InsightsView: View {
     var body: some View {
         ScrollView {
             if sessions.isEmpty {
+                coachRow.padding([.horizontal, .top])
                 ContentUnavailableView("No data yet", systemImage: "chart.xyaxis.line",
                                        description: Text("Play a session and your trends show up here."))
             } else {
                 let m = model
                 VStack(alignment: .leading, spacing: 20) {
+                    coachRow
                     strokeChips
                     metricTabs(m)
                     summary(m)
                     chart(m)
                     byStroke(m)
                     recent(m)
-                    coachRow
                 }
                 .padding()
             }
@@ -248,16 +249,23 @@ struct InsightsView: View {
         }
     }
 
+    /// First thing on Insights: the way into Muse, in the Muse section's own dark look.
     private var coachRow: some View {
         NavigationLink { CoachScreen() } label: {
-            HStack {
-                Label("Muse", systemImage: "sparkles").font(.headline)
+            HStack(spacing: 14) {
+                Image(systemName: "sparkles").font(.title3.weight(.semibold)).foregroundStyle(MuseStyle.ink)
+                    .frame(width: 44, height: 44).background(MuseStyle.lime, in: .circle)
+                VStack(alignment: .leading, spacing: 2) {
+                    Text("Muse").font(MuseStyle.display(20)).foregroundStyle(MuseStyle.text)
+                    Text("Your best change, drills and questions").font(.caption).foregroundStyle(MuseStyle.muted)
+                }
                 Spacer()
-                Text("Ask, test what-ifs, plan drills").font(.caption).foregroundStyle(.secondary)
-                Image(systemName: "chevron.right").font(.caption).foregroundStyle(.tertiary)
+                Image(systemName: "chevron.right").font(.subheadline.weight(.semibold)).foregroundStyle(MuseStyle.lime)
             }
-            .padding(16)
-            .background(.background.secondary, in: .rect(cornerRadius: 18))
+            .padding(14)
+            .background(MuseStyle.background, in: .rect(cornerRadius: 22))
+            .overlay(RoundedRectangle(cornerRadius: 22).stroke(MuseStyle.lime.opacity(0.35), lineWidth: 1))
+            .contentShape(.rect(cornerRadius: 22))
         }
         .buttonStyle(.plain)
     }
