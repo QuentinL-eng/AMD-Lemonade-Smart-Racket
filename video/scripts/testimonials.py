@@ -1,16 +1,19 @@
 #!/usr/bin/env python3
 """Cleans the speech in the filmed testimonials and writes them to public/footage/ as testimonial-N.mp4.
 
-The clips are camera-mic interviews in a loud tennis hall. So: take the centre of the stereo pair (the speaker), reduce
-the steady noise, duck the background between phrases, balance the tone against normal speech, even out the level and
-normalize. Measured against the long-term speech spectrum, the raw clips are already bright at 2-3 kHz and short of
-body under 300 Hz, so the tone goes that way, not toward more presence. Picture is de-squeezed to 1920x1080 at 30 fps.
+The clips are camera-mic interviews in a loud tennis hall. So: take the centre of the stereo pair (the speaker), isolate
+the voice, balance the tone against normal speech, even out the level and normalize. Measured against the long-term
+speech spectrum, the voice comes out bright at 2-3 kHz and short of body under 300 Hz, so the tone goes that way, not
+toward more presence. Picture is de-squeezed to 1920x1080 at 30 fps.
 
-    FFMPEG=path/to/ffmpeg python scripts/testimonials.py       # all, -> public/footage/
-    FFMPEG=path/to/ffmpeg python scripts/testimonials.py 1     # only testimonial-1
+Voice isolation is DeepFilterNet, a neural model (deep-filter-0.5.6-x86_64-pc-windows-msvc.exe from the GitHub releases
+of Rikorose/DeepFilterNet). Point DEEP_FILTER at it. Without it, a plain noise filter runs instead: gentler, no download.
+
+    FFMPEG=path/to/ffmpeg DEEP_FILTER=path/to/deep-filter.exe python scripts/testimonials.py     # all, -> public/footage/
+    FFMPEG=path/to/ffmpeg DEEP_FILTER=path/to/deep-filter.exe python scripts/testimonials.py 1   # only testimonial-1
 
 Files keep their full length. Pick the line with `from` and `seconds` on the slot in src/config/timeline.ts.
-Too watery or hollow? Raise FLOOR_DB. Too noisy? Lower it. Too thin or too boomy? Adjust TONE or LOW_FLOOR_DB.
+Sounds processed or gated? Lower ISOLATION_DB. Hall still audible? Raise it. Too thin or too boomy? Adjust TONE.
 """
 import json
 import os
@@ -28,24 +31,23 @@ ROOT = Path(__file__).resolve().parents[1]
 SOURCE = ROOT.parent / "marketing" / "Videos"
 OUT = ROOT / "public" / "footage"
 FFMPEG = os.environ.get("FFMPEG", "ffmpeg")
+DEEP_FILTER = os.environ.get("DEEP_FILTER")
 
 CLIPS = {"testimonial-1": "MAH08215.MP4", "testimonial-2": "MAH08216.MP4"}
 
+ISOLATION_DB = 30  # how far DeepFilterNet may pull the background down. Unlimited sounds dead between phrases.
+
+# The plain filter, without DEEP_FILTER
 FLOOR_DB = -14.0  # the most noise reduction above 800 Hz: deeper is cleaner, but risks a watery sound
 LOW_FLOOR_DB = -6.0  # the most under 300 Hz, where the voice's body shares the band with the hall: deeper sounds thin
 GAP_DB = -9.0  # how far the background ducks between phrases
 OVERSUBTRACT = 1.5  # how far above the measured noise to treat as noise
 LOUDNESS_LUFS = -16.0
 
-# Applied after noise reduction: rumble out, body back, the tinny 2-3 kHz band down, pops above the voice out, level evened.
-TONE = ",".join([
-    "highpass=f=70:poles=2",
-    "equalizer=f=170:t=q:w=1:g=3",
-    "equalizer=f=260:t=q:w=0.7:g=4",
-    "equalizer=f=2500:t=q:w=1.4:g=-6",
-    "lowpass=f=9500",
-    "acompressor=threshold=-24dB:ratio=3:attack=8:release=120:makeup=2",
-])
+# Applied after isolation: rumble out, body back, the tinny 2-3 kHz band down, pops above the voice out, level evened.
+LEVEL = "lowpass=f=9500,acompressor=threshold=-24dB:ratio=3:attack=8:release=120:makeup=2"
+TONE = ",".join(["highpass=f=70:poles=2", "equalizer=f=130:t=q:w=1:g=7", "equalizer=f=260:t=q:w=1:g=7", "equalizer=f=2400:t=q:w=1.4:g=-8", LEVEL])
+FILTER_TONE = ",".join(["highpass=f=70:poles=2", "equalizer=f=170:t=q:w=1:g=3", "equalizer=f=260:t=q:w=0.7:g=4", "equalizer=f=2500:t=q:w=1.4:g=-6", LEVEL])
 
 
 def run(*args):
@@ -82,18 +84,29 @@ def reduce_noise(x, sr):
     return clean[: len(x)]
 
 
+def isolate(raw, tmp):
+    """The voice from a 48 kHz mono wav, in time with the original (-D). Returns the new file."""
+    if DEEP_FILTER:
+        subprocess.run([DEEP_FILTER, "-D", "-a", str(ISOLATION_DB), "-o", str(tmp / "isolated"), str(raw)], check=True, capture_output=True)
+        return tmp / "isolated" / raw.name
+    sr, x = wavfile.read(raw)
+    reduced = tmp / "reduced.wav"
+    wavfile.write(reduced, sr, reduce_noise(x / 32768.0, sr).astype(np.float32))
+    return reduced
+
+
 def clean_audio(source, target):
+    tone = TONE if DEEP_FILTER else FILTER_TONE
     with tempfile.TemporaryDirectory() as tmp:
-        raw, reduced = Path(tmp) / "raw.wav", Path(tmp) / "reduced.wav"
+        raw = Path(tmp) / "raw.wav"
         # Centre of the stereo pair: the speaker adds up, the hall around them partly cancels.
-        run("-i", source, "-vn", "-af", "pan=mono|c0=0.5*c0+0.5*c1", "-c:a", "pcm_f32le", raw)
-        sr, x = wavfile.read(raw)
-        wavfile.write(reduced, sr, reduce_noise(x, sr).astype(np.float32))
+        run("-i", source, "-vn", "-af", "pan=mono|c0=0.5*c0+0.5*c1", "-ar", "48000", "-c:a", "pcm_s16le", raw)
+        reduced = isolate(raw, Path(tmp))
         # Two-pass loudness, so the level is set once for the clip and doesn't pump.
-        measure = f"{TONE},loudnorm=I={LOUDNESS_LUFS}:TP=-1.5:LRA=11:print_format=json"
+        measure = f"{tone},loudnorm=I={LOUDNESS_LUFS}:TP=-1.5:LRA=11:print_format=json"
         log = run("-i", reduced, "-af", measure, "-f", "null", "-").stderr
         m = json.loads(log[log.rindex("{"):log.rindex("}") + 1])
-        final = (f"{TONE},loudnorm=I={LOUDNESS_LUFS}:TP=-1.5:LRA=11:linear=true:measured_I={m['input_i']}:"
+        final = (f"{tone},loudnorm=I={LOUDNESS_LUFS}:TP=-1.5:LRA=11:linear=true:measured_I={m['input_i']}:"
                  f"measured_TP={m['input_tp']}:measured_LRA={m['input_lra']}:measured_thresh={m['input_thresh']}:"
                  f"offset={m['target_offset']}")
         run("-i", reduced, "-af", final, "-ar", "48000", "-c:a", "pcm_s16le", target)

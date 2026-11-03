@@ -29,7 +29,7 @@ npm run render:demo     # -> out/demo.mp4
 npm run check           # what's left before the Demo can ship (length, footage, samples, voiceover, banned words)
 npm run clips           # the Demo's CGI scenes and transparent overlays as files in out/clips/, for an outside editor
 npm run timeline -- RevealSong   # timecodes (and bars) of any cut
-FFMPEG=path/to/ffmpeg npm run testimonials   # cleans the speech in the filmed testimonials -> public/footage/
+FFMPEG=path/to/ffmpeg DEEP_FILTER=path/to/deep-filter.exe npm run testimonials   # isolates the voices in the filmed testimonials -> public/footage/ (see the script for the download)
 npm run frames          # key frames of every scene -> out/review/
 node scripts/stills.mjs RobotHype 150 372 716   # several frames, one bundle -> out/review/
 ```
