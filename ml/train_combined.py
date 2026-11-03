@@ -141,6 +141,8 @@ def main():
     ap = argparse.ArgumentParser(description=__doc__)
     ap.add_argument("--sessions", nargs="+", type=Path, required=True)
     ap.add_argument("--run-dir", type=Path, default=ROOT / "ml/runs/20261028-combined")
+    ap.add_argument("--holdout", type=Path, default=ROOT / "ml/holdout.json",
+                    help="frozen control set from ml/make_holdout.py; these clips are never trained or tuned on")
     ap.add_argument("--promote", action="store_true", help="replace active generated model only if validation and test beat baseline")
     args = ap.parse_args()
     run = args.run_dir.resolve()
@@ -153,6 +155,10 @@ def main():
             shutil.copy2(source, run / ("previous_" + source.name))
     examples, rejected, excluded, sessions_report = [], [], [], []
     seen = set()
+    held = set()
+    if args.holdout.exists():
+        held = {(c["session"], c["file"]) for c in json.loads(args.holdout.read_text())["clips"]}
+        print(f"Control set: skipping {len(held)} held-out clips from {args.holdout}", flush=True)
     for session in args.sessions:
         session = session.resolve()
         labels = read_csv(session / "labels.csv")
@@ -173,6 +179,8 @@ def main():
                 target.parent.mkdir(parents=True, exist_ok=True)
                 shutil.copy2(source, target)
         for label in labels:
+            if (session.name, label["file"]) in held:
+                continue
             raw = session / label["file"]
             clip = np.fromfile(raw, dtype="<i2")
             dist = float(label["dist_cm"])

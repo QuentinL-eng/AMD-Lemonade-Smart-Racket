@@ -1,0 +1,396 @@
+{
+ "seed": 20261103,
+ "block_size": 8,
+ "fraction": 0.1,
+ "good_clips": 473,
+ "held_out": 51,
+ "blocks": [
+  [
+   "20261027-224032-long-1",
+   5
+  ],
+  [
+   "20261027-224032-long-1",
+   7
+  ],
+  [
+   "20261027-224032-long-1",
+   8
+  ],
+  [
+   "20261027-224032-long-1",
+   10
+  ],
+  [
+   "20261028-155849-long-run2",
+   0
+  ],
+  [
+   "20261103-122017-third-session",
+   0
+  ],
+  [
+   "20261103-122017-third-session",
+   16
+  ]
+ ],
+ "clips": [
+  {
+   "session": "20261027-224032-long-1",
+   "file": "clips/clip-0041.i16",
+   "dist_cm": 12.86,
+   "block": 5,
+   "sha256": "38cce3d826551de6ad3e4d66ae9b6d1f95db406580d1998814077bc350cbdfc7"
+  },
+  {
+   "session": "20261027-224032-long-1",
+   "file": "clips/clip-0042.i16",
+   "dist_cm": 5.67,
+   "block": 5,
+   "sha256": "7181d0266b6b7b7e7a5d59e10d85c8c290bc895642836c96b7326e8f03a29185"
+  },
+  {
+   "session": "20261027-224032-long-1",
+   "file": "clips/clip-0043.i16",
+   "dist_cm": 7.89,
+   "block": 5,
+   "sha256": "ce394334dbdd6e55251f4d4449dba880dd486dc3bb4bcbe6ce868f40ce42616a"
+  },
+  {
+   "session": "20261027-224032-long-1",
+   "file": "clips/clip-0044.i16",
+   "dist_cm": 2.79,
+   "block": 5,
+   "sha256": "09014ac95ff975ad08d29069fdc87002b197f8aab974fdca6adc9bdf0ce3edb5"
+  },
+  {
+   "session": "20261027-224032-long-1",
+   "file": "clips/clip-0045.i16",
+   "dist_cm": 6.9,
+   "block": 5,
+   "sha256": "6625f278c89c47542692358b20e505db19c6fa924d5d97a031cfed14b5316dd0"
+  },
+  {
+   "session": "20261027-224032-long-1",
+   "file": "clips/clip-0046.i16",
+   "dist_cm": 7.38,
+   "block": 5,
+   "sha256": "dd18ddd6701a3255175079152272f755ccd7a31cfb92482090d845618b49b5d1"
+  },
+  {
+   "session": "20261027-224032-long-1",
+   "file": "clips/clip-0047.i16",
+   "dist_cm": 12.1,
+   "block": 5,
+   "sha256": "dd40c15bb2c069c78b8f5d04b263c1ebaba6807486ee1885488fdfefd628c98e"
+  },
+  {
+   "session": "20261027-224032-long-1",
+   "file": "clips/clip-0048.i16",
+   "dist_cm": 4.68,
+   "block": 5,
+   "sha256": "d33a983939c648b7a79887f44b2e4bca36d7793bec4016b9dd0547c313ceaf67"
+  },
+  {
+   "session": "20261027-224032-long-1",
+   "file": "clips/clip-0057.i16",
+   "dist_cm": 7.23,
+   "block": 7,
+   "sha256": "4c08f8b151ed71d1dae1c126076750256784cdba049618dcd34e93ad4fe73871"
+  },
+  {
+   "session": "20261027-224032-long-1",
+   "file": "clips/clip-0058.i16",
+   "dist_cm": 5.75,
+   "block": 7,
+   "sha256": "9d349d4bddeae4355326974675121f819acaba479c5ae87f0c67a400047acb9b"
+  },
+  {
+   "session": "20261027-224032-long-1",
+   "file": "clips/clip-0059.i16",
+   "dist_cm": 6.82,
+   "block": 7,
+   "sha256": "cc6003c873d4a4c57d7617efcf314ebfaafb250cf4c101b635f42a8619351b25"
+  },
+  {
+   "session": "20261027-224032-long-1",
+   "file": "clips/clip-0061.i16",
+   "dist_cm": 7.09,
+   "block": 7,
+   "sha256": "0089f71a78d51026e37c013f364c9a09369c1c2667925c5601892fc2cdc3e5eb"
+  },
+  {
+   "session": "20261027-224032-long-1",
+   "file": "clips/clip-0062.i16",
+   "dist_cm": 5.12,
+   "block": 7,
+   "sha256": "4f1b5170afd565ca4b62e62d7d373061b1f934e927da22a92bf2bf95d056b4b3"
+  },
+  {
+   "session": "20261027-224032-long-1",
+   "file": "clips/clip-0063.i16",
+   "dist_cm": 9.26,
+   "block": 7,
+   "sha256": "94fced62622eb19c4aef75a52f8b544b0b7274b142527ff87878571a0b6f92f6"
+  },
+  {
+   "session": "20261027-224032-long-1",
+   "file": "clips/clip-0064.i16",
+   "dist_cm": 7.45,
+   "block": 7,
+   "sha256": "9db8e405c14fbb70e83dab417880b586c63ca008a6f96608dd870b469791965b"
+  },
+  {
+   "session": "20261027-224032-long-1",
+   "file": "clips/clip-0065.i16",
+   "dist_cm": 4.2,
+   "block": 8,
+   "sha256": "a98a26fbc72b083114e12f003a3bbdd22f394853a3fe9e322ce461bfbaaf6adf"
+  },
+  {
+   "session": "20261027-224032-long-1",
+   "file": "clips/clip-0066.i16",
+   "dist_cm": 10.58,
+   "block": 8,
+   "sha256": "7c738c514babedf9d1306f67f252a55da86a9291c2005fd3845c6e30c2cf324c"
+  },
+  {
+   "session": "20261027-224032-long-1",
+   "file": "clips/clip-0067.i16",
+   "dist_cm": 7.72,
+   "block": 8,
+   "sha256": "c133184a1c336599e0954f64b173b2d2dbe3d6e8054151be172464f2a236a4b8"
+  },
+  {
+   "session": "20261027-224032-long-1",
+   "file": "clips/clip-0068.i16",
+   "dist_cm": 4.58,
+   "block": 8,
+   "sha256": "813d81c6f83204ed0eb296da35ab1ef09935ceb0c017fe4ed23992bebea9b404"
+  },
+  {
+   "session": "20261027-224032-long-1",
+   "file": "clips/clip-0069.i16",
+   "dist_cm": 11.98,
+   "block": 8,
+   "sha256": "aa2ff2bbf7d917d7105d36a47bf905bc8e0221c9888dcb0b898b47281b50f26f"
+  },
+  {
+   "session": "20261027-224032-long-1",
+   "file": "clips/clip-0070.i16",
+   "dist_cm": 7.84,
+   "block": 8,
+   "sha256": "38731cce1ea95f19a68d08c9b7617a573c90298947506b5a6f19e80ffc655fb5"
+  },
+  {
+   "session": "20261027-224032-long-1",
+   "file": "clips/clip-0072.i16",
+   "dist_cm": 4.93,
+   "block": 8,
+   "sha256": "fb3d604780c0a3cbf01bf729c2d046beaef4325dd61724847fb5111f33b7cfb7"
+  },
+  {
+   "session": "20261027-224032-long-1",
+   "file": "clips/clip-0081.i16",
+   "dist_cm": 9.92,
+   "block": 10,
+   "sha256": "4fb7bdbe29dfc7627e84a62629c79485bba1630d85136b553a533752cdfe7e22"
+  },
+  {
+   "session": "20261027-224032-long-1",
+   "file": "clips/clip-0082.i16",
+   "dist_cm": 6.34,
+   "block": 10,
+   "sha256": "293bdb606cd5e7a10d5de826eb64e71ea342172cad3161a4d32df21090176e12"
+  },
+  {
+   "session": "20261027-224032-long-1",
+   "file": "clips/clip-0083.i16",
+   "dist_cm": 5.61,
+   "block": 10,
+   "sha256": "734a1d4342e87402c5b78431dba45af7df93bb8bb6040b150dc204fbe6cdd0e7"
+  },
+  {
+   "session": "20261027-224032-long-1",
+   "file": "clips/clip-0084.i16",
+   "dist_cm": 11.49,
+   "block": 10,
+   "sha256": "c757f220996540324219865ebededdd5ec5a22436d23a2a8d608ee6c1120977a"
+  },
+  {
+   "session": "20261027-224032-long-1",
+   "file": "clips/clip-0085.i16",
+   "dist_cm": 3.49,
+   "block": 10,
+   "sha256": "ab262fe1ed2ffea24bca8498ec9ef77e810478348c80baf8b9f650a977eacfe1"
+  },
+  {
+   "session": "20261027-224032-long-1",
+   "file": "clips/clip-0086.i16",
+   "dist_cm": 11.51,
+   "block": 10,
+   "sha256": "ee323c945926e80d65254b7db24da94fb444df93facb334bd369c136a7a3ac22"
+  },
+  {
+   "session": "20261027-224032-long-1",
+   "file": "clips/clip-0087.i16",
+   "dist_cm": 6.63,
+   "block": 10,
+   "sha256": "39c7f0b91bffd43643db22588db3d238cb11f0f8d2efcf59ebffdac48fc5ad4e"
+  },
+  {
+   "session": "20261027-224032-long-1",
+   "file": "clips/clip-0088.i16",
+   "dist_cm": 9.7,
+   "block": 10,
+   "sha256": "eb385299843d3ddc684d8ec19d7fa51c980e252c99c7d1c1c8c5d18df1ab6f74"
+  },
+  {
+   "session": "20261028-155849-long-run2",
+   "file": "clips/clip-0001.i16",
+   "dist_cm": 0.34,
+   "block": 0,
+   "sha256": "64533e177598c9f04b4af888fd7304c07001b2daadc6e2dc4cc2f653309780e9"
+  },
+  {
+   "session": "20261028-155849-long-run2",
+   "file": "clips/clip-0002.i16",
+   "dist_cm": 2.37,
+   "block": 0,
+   "sha256": "2df56fd815d4c6375068d682f588b003309acfe4a8a5eb9713de536f509793e4"
+  },
+  {
+   "session": "20261028-155849-long-run2",
+   "file": "clips/clip-0003.i16",
+   "dist_cm": 3.46,
+   "block": 0,
+   "sha256": "beb9da0b674fcb4045309c3c0dd54b4a77639cff1655e4c318ad4a35ab30d3d3"
+  },
+  {
+   "session": "20261028-155849-long-run2",
+   "file": "clips/clip-0004.i16",
+   "dist_cm": 11.18,
+   "block": 0,
+   "sha256": "41cc6566bb31441f48efdefe241ea1731fbe1053e5f881c2b5da8e51f7559bb9"
+  },
+  {
+   "session": "20261028-155849-long-run2",
+   "file": "clips/clip-0005.i16",
+   "dist_cm": 3.9,
+   "block": 0,
+   "sha256": "3c178403e01351b966f5e9652416e8a1aff2ebfba666fb76b458e1acd02efa8c"
+  },
+  {
+   "session": "20261028-155849-long-run2",
+   "file": "clips/clip-0006.i16",
+   "dist_cm": 4.23,
+   "block": 0,
+   "sha256": "088536c93d8c147b43c136f4696b1749a870ea4de915a6ad74dd88e2ad76f93c"
+  },
+  {
+   "session": "20261028-155849-long-run2",
+   "file": "clips/clip-0007.i16",
+   "dist_cm": 3.03,
+   "block": 0,
+   "sha256": "65d14422a80a9d78568ec4a304217faaf4faf180393855f222d6390eebd5a48c"
+  },
+  {
+   "session": "20261028-155849-long-run2",
+   "file": "clips/clip-0008.i16",
+   "dist_cm": 3.18,
+   "block": 0,
+   "sha256": "588bc1f88fadd0cf302708d28506f96280f2b10931a59f2a406050184f8a3f29"
+  },
+  {
+   "session": "20261103-122017-third-session",
+   "file": "clips/clip-0003.i16",
+   "dist_cm": 3.43,
+   "block": 0,
+   "sha256": "ece7764b109b36223e3ed1c4620984840d5e3d41d27e030af4b9b24d1d6f6290"
+  },
+  {
+   "session": "20261103-122017-third-session",
+   "file": "clips/clip-0004.i16",
+   "dist_cm": 0.75,
+   "block": 0,
+   "sha256": "b83650f849bf257172709351485e2cc0b0d1484f277690e04769b12fd2c13756"
+  },
+  {
+   "session": "20261103-122017-third-session",
+   "file": "clips/clip-0005.i16",
+   "dist_cm": 3.17,
+   "block": 0,
+   "sha256": "535841eceb958c65f911abb9ac5a7719de13c3a4bd430491863bcebcf544f3be"
+  },
+  {
+   "session": "20261103-122017-third-session",
+   "file": "clips/clip-0006.i16",
+   "dist_cm": 3.19,
+   "block": 0,
+   "sha256": "1f811df6dfd858a89fa8fc87d22f5083dc418d65b788fcc925a85bdc8bc9d32a"
+  },
+  {
+   "session": "20261103-122017-third-session",
+   "file": "clips/clip-0007.i16",
+   "dist_cm": 2.67,
+   "block": 0,
+   "sha256": "34425cb5dc497f5d422e874a105977d5a6fce84c6a5e860f70369adabd009153"
+  },
+  {
+   "session": "20261103-122017-third-session",
+   "file": "clips/clip-0008.i16",
+   "dist_cm": 1.86,
+   "block": 0,
+   "sha256": "1befeac32e9c23fa03d0711c241f59faabcb518edb15e5fcfc47b7105647be6f"
+  },
+  {
+   "session": "20261103-122017-third-session",
+   "file": "clips/clip-0130.i16",
+   "dist_cm": 0.92,
+   "block": 16,
+   "sha256": "cba00819bfc1a98f4bc43bde8b5f3d95b54716ff1d4a3ebf325cd694fa409a84"
+  },
+  {
+   "session": "20261103-122017-third-session",
+   "file": "clips/clip-0131.i16",
+   "dist_cm": 2.18,
+   "block": 16,
+   "sha256": "5e1f3432f20bec0fc6fd2fe96471d965487b1803cc5003286765594e57d441a2"
+  },
+  {
+   "session": "20261103-122017-third-session",
+   "file": "clips/clip-0132.i16",
+   "dist_cm": 2.32,
+   "block": 16,
+   "sha256": "b7057592d0332cf76153ad4535ca5f7a8a03f83b9704c5e70c46d275023bd7f6"
+  },
+  {
+   "session": "20261103-122017-third-session",
+   "file": "clips/clip-0133.i16",
+   "dist_cm": 2.73,
+   "block": 16,
+   "sha256": "ca700c00e9f62d0b14346916e64237c9ff0aa1bf8736ed428f54b0c001c5881d"
+  },
+  {
+   "session": "20261103-122017-third-session",
+   "file": "clips/clip-0134.i16",
+   "dist_cm": 3.48,
+   "block": 16,
+   "sha256": "8cd48a9c1ba82c7d009350c6ef0bfbe6a1142a7d361fe311be7e593fbfd8585b"
+  },
+  {
+   "session": "20261103-122017-third-session",
+   "file": "clips/clip-0135.i16",
+   "dist_cm": 1.61,
+   "block": 16,
+   "sha256": "639bfbe5591f01d34cd4a0e7db872086afde6e93483d8759426837bc0896ad46"
+  },
+  {
+   "session": "20261103-122017-third-session",
+   "file": "clips/clip-0136.i16",
+   "dist_cm": 1.2,
+   "block": 16,
+   "sha256": "a60071cda78bc973e6214cd9cdf70b84657e4eb9b432171ee7ed051f4f3a64c7"
+  }
+ ]
+}
