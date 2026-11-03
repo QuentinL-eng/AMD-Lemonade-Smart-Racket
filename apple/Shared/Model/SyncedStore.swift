@@ -12,7 +12,7 @@ enum SyncedStore {
     private(set) static var isSyncing = false
 
     static func makeContainer() -> ModelContainer {
-        let schema = Schema([SessionRecord.self, ShotRecord.self, CoachNote.self])
+        let schema = Schema([SessionRecord.self, ShotRecord.self, CoachNote.self, WhatIfTrial.self, CoachReview.self])
         if canUseCloudKit, FileManager.default.ubiquityIdentityToken != nil,
            let container = try? ModelContainer(
                for: schema,
