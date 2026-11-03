@@ -66,18 +66,25 @@ struct RootView: View {
         TabView(selection: $tab) {
             Tab("Live", systemImage: "figure.tennis", value: "live") { NavigationStack { LiveView() } }
             Tab("Score", systemImage: "trophy", value: "score") { NavigationStack { ScoreView() } }
-            Tab("Together", systemImage: "person.2", value: "together") { NavigationStack { SharedSessionView() } }
-            Tab("Insights", systemImage: "sparkles", value: "insights") { NavigationStack { InsightsView() } }
-            Tab("Racket", systemImage: "sensor.tag.radiowaves.forward", value: "racket") { NavigationStack { RacketView() } }
+            Tab("Muse", systemImage: "sparkles", value: "muse") { NavigationStack { CoachScreen() } }
+            Tab("Insights", systemImage: "chart.line.uptrend.xyaxis", value: "insights") { NavigationStack { InsightsView() } }
+            Tab("Settings", systemImage: "gearshape", value: "settings") { NavigationStack { RacketView() } }
         }
         .tabViewStyle(.sidebarAdaptable)
-        // History now lives under Insights → Sessions → All sessions.
-        .onAppear { if tab == "history" { tab = "insights" } }
+        // Old tab values: History moved under Insights; Together became Muse; Racket became Settings.
+        .onAppear {
+            switch tab {
+            case "history": tab = "insights"
+            case "together": tab = "muse"
+            case "racket": tab = "settings"
+            default: break
+            }
+        }
     }
 }
 
 #if os(macOS)
-/// Mac Settings window (⌘,). The same toggle lives in the Racket tab on iPhone.
+/// Mac Settings window (⌘,). The same toggle lives in the Settings tab on iPhone.
 struct AppSettingsView: View {
     @AppStorage(UnitSystem.storageKey) private var useMetric = false
 

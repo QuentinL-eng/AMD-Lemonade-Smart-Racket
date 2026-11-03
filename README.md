@@ -146,7 +146,7 @@ We report weak results too. The sweet-spot model only modestly beats the baselin
 
 - **Demo video:** 3 minutes, real club footage plus CGI built in Remotion ([`video/`](video/)).
 - **Try it in two minutes:** install the [TestFlight beta](https://testflight.apple.com/join/137F7kvd). The app opens
-  on a simulated racket that swings and hits every few seconds. Open Insights → Muse → What if, and ask Muse.
+  on a simulated racket that swings and hits every few seconds. Open the Muse tab → What if, and ask Muse.
 - **Holds up live:**
   - The racket keeps every hit when Bluetooth drops: it acks, resends and keeps a flash backlog.
   - Any recorded session replays exactly like the live racket.

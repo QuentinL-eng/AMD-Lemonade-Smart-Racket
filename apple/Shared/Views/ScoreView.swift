@@ -231,7 +231,7 @@ struct ScoreView: View {
     /// Why taps might not arrive: no racket, or firmware from before tap support.
     private var connectionNote: String? {
         guard model.sourceKind == .racket, model.isConnected else {
-            return "Taps need the racket connected (Racket tab). The buttons work any time."
+            return "Taps need the racket connected (Settings tab). The buttons work any time."
         }
         if let fw = model.racketStatus?.firmwareVersion, !RacketFirmware.supportsTaps(fw) {
             return "The racket's firmware (\(fw)) predates tap gestures: update it to 1.2 or later."

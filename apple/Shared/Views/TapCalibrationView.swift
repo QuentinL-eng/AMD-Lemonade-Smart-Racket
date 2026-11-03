@@ -57,7 +57,7 @@ struct TapCalibrationView: View {
                 }
             }
             if !model.isConnected || model.sourceKind != .racket {
-                Text("Connect the racket first (Racket tab).").font(.callout).foregroundStyle(.orange)
+                Text("Connect the racket first (Settings tab).").font(.callout).foregroundStyle(.orange)
             }
             if step == .narrow {
                 Button("Start over") { restart() }.font(.callout)
