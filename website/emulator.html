@@ -23,7 +23,7 @@ button{font:inherit;color:inherit;border:0;background:none;padding:0;cursor:poin
 svg.i{width:1em;height:1em;stroke:currentColor;fill:none;stroke-width:1.7;stroke-linecap:round;stroke-linejoin:round;vertical-align:-.125em}
 svg.i .f{fill:currentColor;stroke:none}
 .wrap{max-width:900px;margin:0 auto;padding:18px 16px 40px;display:flex;gap:28px;justify-content:center;align-items:flex-start;flex-wrap:wrap}
-.side{width:300px;flex:none;font-size:14px}
+.side{width:340px;flex:none;font-size:14px}
 @media(min-width:860px){.side{position:sticky;top:18px}}
 .side a{color:inherit}
 .brandrow{display:flex;justify-content:space-between;margin-bottom:10px;font-size:14px}
@@ -40,6 +40,15 @@ svg.i .f{fill:currentColor;stroke:none}
 .seg2{display:flex;background:#ECECF1;border-radius:9px;padding:2px}
 .seg2 button{padding:5px 11px;border-radius:7px;font-size:13px;font-weight:600;color:#6B6B70}
 .seg2 button.on{background:#fff;color:#000;box-shadow:0 1px 2px rgba(0,0,0,.15)}
+.vid{position:relative;width:100%;aspect-ratio:16/9;background:#000;border-radius:10px;overflow:hidden}
+.vid iframe,.vid>div{position:absolute;inset:0;width:100%;height:100%}
+.vidrow{display:flex;gap:8px;align-items:center;flex-wrap:wrap;margin-top:8px;font-size:13px}
+.vidrow label{display:flex;gap:6px;align-items:center;font-weight:600}
+.hits{margin-top:8px;display:flex;flex-direction:column;gap:4px}
+.hits button{display:flex;align-items:center;gap:8px;width:100%;text-align:left;border:1px solid #E3E3E8;border-radius:8px;padding:6px 9px;background:#fff;font-size:13px}
+.hits button:hover{border-color:#B0DA1C}.hits .tm{margin-left:auto;font-variant-numeric:tabular-nums;color:#6B6B70}
+.hits .d{width:8px;height:8px;border-radius:50%;flex:none}
+.vnote{font-size:12px;color:#6B6B70;line-height:1.45;margin-top:8px}
 .panel ol{margin:0;padding-left:19px;line-height:1.45} .panel li{margin:3px 0}
 .note{font-size:12px;color:#6B6B70;line-height:1.45}
 
@@ -233,10 +242,19 @@ svg.i .f{fill:currentColor;stroke:none}
   <div class="brandrow"><a href="index.html">Tennis Buddee</a><a href="https://github.com/QuentinL-eng/Tennis-Buddy-Smart-Racket/blob/main/docs/EMULATOR_DATA.md">How this data was made</a></div>
   <div class="panel prov" id="prov">Loading…</div>
   <div class="panel"><h2>Whose match</h2><div class="pl" id="players"></div></div>
+  <div class="panel" id="vidpanel"><h2>Source video</h2>
+    <div id="vidbox"><button class="btn" id="vidload" style="border:1.5px solid #D8D8DE;border-radius:10px;padding:8px 12px;font-weight:600;background:#fff;font-size:13px">Load the source video</button>
+    <div class="vnote">Watch the real match next to the data. It plays from YouTube, and nothing is requested from YouTube until you press this.</div></div>
+    <div id="vidwrap" hidden><div class="vid"><div id="ytp"></div></div>
+     <div class="vidrow"><label><input type="checkbox" id="vidfollow" checked> Follow the replay</label><a id="vidyt" target="_blank" rel="noopener" style="margin-left:auto;color:#0A66C2">Open on YouTube</a></div>
+     <div class="vnote" id="vidnote"></div></div>
+    <div class="hits" id="hitlist"></div>
+    <div class="vnote" id="vidcredit"></div></div>
   <div class="panel"><h2>Emulator controls</h2>
     <div class="row2"><div class="seg2" id="speed"><button data-v="1" class="on">1×</button><button data-v="2">2×</button><button data-v="4">4×</button></div>
     <button class="btn" id="skip">Skip to end of match</button></div>
-    <div class="note" style="margin-top:8px">These two controls aren't in the app; everything inside the phone is.</div></div>
+    <div class="row2" style="margin-top:8px"><span class="note" style="margin:0">Racket swing</span><div class="seg2" id="pace"><button data-k="1">Real time</button><button data-k="0.6" class="on">Slower</button></div></div>
+    <div class="note" style="margin-top:8px">These controls aren't in the app; everything inside the phone is. “Slower” stretches each swing around contact; the hit itself stays on the video's hit.</div></div>
   <div class="panel"><h2>Try it</h2><ol>
     <li>Tap <b>Start Session</b> on Live and watch the racket swing and every hit land.</li>
     <li>Open the <b>Muse</b> tab for the best change, questions, a practice plan and more.</li>
@@ -254,7 +272,7 @@ svg.i .f{fill:currentColor;stroke:none}
   <div class="toast" id="toast" hidden></div>
  </div>
  <p class="foot">This is a browser emulator of the iPhone app, not a recording of a real match. In the labelled Ostrava match, stroke types and outcomes are the F3Tennis dataset's labels and the swing timing follows the SAM-tracked racket (a 2D box, so a rough guide). In the other eight matches the stroke types, hitters and hit times are predictions of the F3Tennis model (97% on held-out Ostrava hits, not measured on these broadcasts), and the swing timing follows the SAM-tracked racket. Speeds, spin, face and path angles, contact points, the 3D swing and the gyro/g readouts are estimates from the app's own physics model and swing template, ported to JavaScript.
- Method and limits: <a href="https://github.com/QuentinL-eng/Tennis-Buddy-Smart-Racket/blob/main/docs/EMULATOR_DATA.md">docs/EMULATOR_DATA.md</a>.</p>
+ The source video is the real broadcast, played from YouTube on request. Method and limits: <a href="https://github.com/QuentinL-eng/Tennis-Buddy-Smart-Racket/blob/main/docs/EMULATOR_DATA.md">docs/EMULATOR_DATA.md</a>.</p>
 </div>
 
 <script type="module">
@@ -454,11 +472,12 @@ const endT=()=>rows.length?rows[rows.length-1].t+2:0;
 let toastT;function toast(t){const e=$("toast");e.textContent=t;e.hidden=false;clearTimeout(toastT);toastT=setTimeout(()=>e.hidden=true,2600);}
 
 /* ---------- racket motion for the Live scene ---------- */
-const LEAD=1.4, SLOW=.3, HALF=12, FPS=25, REST={swing:80,face:0,path:10,cx:0,cy:0,inc:43.2}, READYF=-.4;
+let SWING_K=.6;   // 1 = real time (matches the video exactly); <1 stretches the swing around contact so it is easier to follow
+const LEAD=1.4, SLOW=1, HALF=12, FPS=25, REST={swing:80,face:0,path:10,cx:0,cy:0,inc:43.2}, READYF=-.4;
 // racket progress in -1..1 (fraction of the stroke's turn) at `tau` seconds from contact for one hit.
 // Hits with a SAM track use that track's real timing (sampled at 25 fps); the rest use the template's tanh profile.
 function rowFrac(r,tau){
-  const sh=shapeOf(r.type);
+  const sh=shapeOf(r.type);tau*=SWING_K;
   if(r.prog){
     const x=clamp(tau*FPS+HALF,0,2*HALF),i=Math.min(2*HALF-1,Math.floor(x)),w=x-i;
     return r.prog[i]*(1-w)+r.prog[i+1]*w;
@@ -476,7 +495,7 @@ function motion(clock){
   for(const [i,tau,wi] of w)fr+=wi/wn*(rowFrac(rows[i],tau)-READYF);
   const row=dom!=null?rows[dom]:null,sh=row?shapeOf(row.type):SHAPES.forehand;
   const phi=(READYF+fr)*sh.maxTurn+.04*Math.sin(clock*1.3);
-  return {phi,p:row?row.p:REST,shape:sh,dom,slow:row&&row.prog?1:SLOW,w:Math.min(1,sum)};
+  return {phi,p:row?row.p:REST,shape:sh,dom,slow:SWING_K*(row&&row.prog?1:SLOW),w:Math.min(1,sum)};
 }
 let gyroSm=0;
 function liveSensors(clock){
@@ -541,14 +560,14 @@ function setActive(a){
   if(!a&&S.shown===0)S.lastRow=null;
   paintSess();paintShot();paintRecent();renderNav();
 }
-function skipToEnd(){S.active=false;S.shown=rows.length;S.clock=endT();S.lastRow=rows[rows.length-1]||null;paintSess();paintShot();paintRecent();refreshOther();}
+function skipToEnd(){S.active=false;S.shown=rows.length;S.clock=endT();S.lastRow=rows[rows.length-1]||null;paintSess();paintShot();paintRecent();refreshOther();paintVidList();}
 function frameLive(now){
   const dt=Math.min(.1,(now-S.last)/1000);S.last=now;
   if(S.active){
     S.clock+=dt*S.speed;let added=false;
     while(S.shown<rows.length&&rows[S.shown].t<=S.clock){S.lastRow=rows[S.shown];S.shown++;added=true;
       if(liveStage)liveStage.showImpact(S.lastRow,now);}
-    if(added){paintShot();paintRecent();paintSess();if(S.tab==="insights")refreshOther();}
+    if(added){paintShot();paintRecent();paintSess();paintVidList();if(S.tab==="insights")refreshOther();}
     const sc=$("sclock");if(sc)sc.textContent="Session time "+clockStr(Math.max(0,S.clock));
     if(S.clock>=endT()){setActive(false);toast("Replay finished — see Insights for the session.");}
   }
@@ -563,6 +582,7 @@ function frameLive(now){
     $("lGyro").lastChild.textContent=Math.round(sens.gyro)+" °/s";$("lG").lastChild.textContent=sens.g.toFixed(1)+" g";
   }
   if(S.tab==="muse"&&S.stack.muse.at(-1)==="whatif"&&wiStage)frameWhatIf(now);
+  syncVideo(now);
 }
 
 /* =====================================================================
@@ -1031,7 +1051,92 @@ $("phone").addEventListener("click",e=>{
   }
 });
 $("skip").addEventListener("click",skipToEnd);
-$("speed").addEventListener("click",e=>{const b=e.target.closest("button");if(!b)return;S.speed=+b.dataset.v;[...$("speed").children].forEach(x=>x.classList.toggle("on",x===b));});
+$("pace").addEventListener("click",e=>{const b=e.target.closest("button");if(!b)return;SWING_K=+b.dataset.k;[...$("pace").children].forEach(x=>x.classList.toggle("on",x===b));});
+$("speed").addEventListener("click",e=>{const b=e.target.closest("button");if(!b)return;S.speed=+b.dataset.v;vidNote();[...$("speed").children].forEach(x=>x.classList.toggle("on",x===b));});
+
+/* ---------- source video (YouTube IFrame API, loaded only on click) ---------- */
+const VID={bias:0,lead:.5,armed:false,seekAt:0,asked:false,ready:false,player:null,follow:true,seg:null,last:0,state:-1,pending:null,loadedId:null,err:false};
+let SEGS=[];
+function buildSegments(){
+  VID.bias=((PLAYERS[S.pi]||{}).session||{}).video_bias||0;
+  SEGS=[];let cur=null;
+  rows.forEach(r=>{const c=r.s.clip;if(!cur||cur.clip!==c){cur={clip:c,t0:r.t,t1:r.t,off:r.s.video_t-r.t};SEGS.push(cur);}cur.t1=r.t;});
+  SEGS.forEach(g=>{g.c0=g.t0-1;g.c1=g.t1+1;g.off+=VID.bias;});
+}
+const segAt=clock=>SEGS.find(g=>clock>=g.c0&&clock<=g.c1)||null;
+const vtime=sec=>{sec=Math.max(0,Math.floor(sec));const h=Math.floor(sec/3600),m=Math.floor(sec/60)%60,x=sec%60;return (h?h+":"+String(m).padStart(2,"0"):m)+":"+String(x).padStart(2,"0");};
+const curVideoId=()=>(PLAYERS[S.pi]||{}).video_id||null;
+function ytLink(sec){const id=curVideoId();return id?`https://www.youtube.com/watch?v=${id}&t=${Math.max(0,Math.floor(sec))}s`:"#";}
+function loadVideo(then){
+  if(VID.asked){if(then)seekVideo(then.t);return;}
+  VID.asked=true;VID.pending=then||null;
+  $("vidbox").hidden=true;$("vidwrap").hidden=false;
+  const tag=document.createElement("script");tag.src="https://www.youtube.com/iframe_api";document.head.appendChild(tag);
+  window.onYouTubeIframeAPIReady=()=>{
+    const id=curVideoId(),first=SEGS[0]?SEGS[0].t0+SEGS[0].off:0;
+    VID.player=new YT.Player("ytp",{host:"https://www.youtube-nocookie.com",videoId:id,width:"100%",height:"100%",
+      playerVars:{rel:0,playsinline:1,modestbranding:1,start:Math.max(0,Math.floor(first-1)),origin:location.origin},
+      events:{onReady:()=>{VID.ready=true;VID.loadedId=id;if(VID.pending){seekVideo(VID.pending.t);VID.pending=null;}vidNote();},
+              onStateChange:e=>{VID.state=e.data;},
+              onError:()=>{VID.err=true;vidNote("This video can't be played here. Use “Open on YouTube”.");}}});
+  };
+}
+function seekVideo(sec){
+  if(!VID.ready){VID.pending={t:sec};return;}
+  VID.seg=null;VID.player.seekTo(Math.max(0,sec),true);VID.player.playVideo();
+}
+function vidNote(msg){
+  const n=$("vidnote");if(!n)return;
+  n.textContent=msg||(S.speed>2?"Following the replay works at 1× and 2×. Pick a hit below to jump to it.":"Press Start Session and the video follows the replay. Between tracked windows it pauses.");
+}
+function onVidPlayerChange(){
+  buildSegments();VID.seg=null;
+  const id=curVideoId(),P=PLAYERS[S.pi]||{};
+  $("vidpanel").hidden=!id;
+  $("vidcredit").textContent=id?`${(P.session&&P.session.provenance&&P.session.provenance.source)||""} — video courtesy of its YouTube uploader.`:"";
+  if(VID.ready&&id&&VID.loadedId!==id){VID.player.cueVideoById({videoId:id,startSeconds:SEGS[0]?Math.max(0,SEGS[0].t0+SEGS[0].off-1):0});VID.loadedId=id;}
+  paintVidList();
+}
+function paintVidList(){
+  const rs=shownRows(),last=rs.slice(-6).reverse(),box=$("hitlist");if(!box)return;
+  if(!curVideoId()){box.innerHTML="";return;}
+  const latest=rs[rs.length-1];
+  $("vidyt").href=ytLink(latest?latest.s.video_t+VID.bias-1.5:(SEGS[0]?SEGS[0].t0+SEGS[0].off:0));
+  box.innerHTML=last.length?`<div class="vnote" style="margin:0">Latest hits — tap one to watch it in the video</div>`+last.map(x=>`<button data-vt="${x.s.video_t}"><span class="d" style="background:${x.sweet?"#34C759":"#FF3B30"}"></span>${x.name}<span class="tm">${vtime(x.s.video_t)}</span></button>`).join(""):`<div class="vnote">Hits appear here as the replay plays. Tap one to see it in the video.</div>`;
+}
+function syncVideo(now){
+  if(!VID.ready||!VID.follow||VID.err)return;
+  const live=S.active&&S.speed<=2,seg=live?segAt(S.clock):null;
+  if(!seg){
+    if(VID.seg!==null&&VID.state===1)VID.player.pauseVideo();
+    VID.seg=null;VID.armed=false;return;
+  }
+  const vt=S.clock+seg.off;
+  if(seg!==VID.seg){
+    VID.seg=seg;VID.armed=true;VID.seekAt=now;VID.last=now;
+    VID.player.seekTo(vt+VID.lead,true);VID.player.setPlaybackRate(S.speed);VID.player.playVideo();return;
+  }
+  if(VID.state!==1){if((VID.state===2||VID.state===0)&&now-VID.last>700){VID.last=now;VID.player.playVideo();}return;}
+  const cur=VID.player.getCurrentTime(),drift=cur-vt;
+  if(VID.armed&&now-VID.seekAt>350){
+    // first playing frame after a seek: learn how far the seek missed by, then land on the replay
+    VID.armed=false;VID.last=now;
+    if(Math.abs(drift)>.2){VID.lead=clamp(VID.lead-drift*.8,-1,2);VID.player.seekTo(vt+VID.lead,true);VID.armed=true;VID.seekAt=now;}
+    return;
+  }
+  if(now-VID.last>600){
+    VID.last=now;
+    if(Math.abs(drift)>.3&&now-VID.seekAt>1500){VID.lead=clamp(VID.lead-drift*.5,-1,2);VID.armed=true;VID.seekAt=now;VID.player.seekTo(vt+VID.lead,true);return;}
+    if(VID.player.getPlaybackRate()!==S.speed)VID.player.setPlaybackRate(S.speed);
+  }
+}
+$("vidload").addEventListener("click",()=>loadVideo());
+$("vidfollow").addEventListener("change",e=>{VID.follow=e.target.checked;VID.seg=null;});
+$("hitlist").addEventListener("click",e=>{
+  const b=e.target.closest("button[data-vt]");if(!b)return;
+  VID.follow=false;$("vidfollow").checked=false;
+  loadVideo({t:+b.dataset.vt+VID.bias-1.5});
+});
 
 function setPlayer(i){
   S.pi=i;S.active=false;S.shown=0;S.clock=-LEAD;S.lastRow=null;S.d=Z();S.film=null;S.chat=[];S.drill=null;S.drillRun=false;S.plan=null;S.planRun=-1;S.scout="";S.reviews=[];
@@ -1040,7 +1145,7 @@ function setPlayer(i){
   $("prov").innerHTML=pred?`<b>Predicted by a model:</b> each hit's stroke type, which player hit it and when — the F3Tennis tsm_e2espot model (97% stroke-type accuracy on held-out Ostrava hits; not measured on this broadcast). <b>From video:</b> how the hitter's racket moved, tracked with SAM 3.1 (box centre, 25 fps, windows spread through the match). <b>Estimated:</b> speeds, spin, angles, contact points, and the 3D swing built from that motion.<br><a href="${P.video_url}">Source video</a>`:lab?`<b>From the dataset (real):</b> each hit's stroke, forehand/backhand, technique and outcome — ${ses.provenance.labels}. <b>From video:</b> when each hit happened and how the hitter's racket moved, tracked with SAM 3.1 (box centre, 25 fps). <b>Estimated:</b> speeds, spin, angles, contact points, and the 3D swing built from that motion.<br><a href="${P.video_url}">F3Tennis dataset</a>`:
    `<b>From video:</b> ${ses.provenance.source} — shot times and swing intensity, tracked with SAM 3.1 in short windows around contacts (not the full match). Stroke types aren't labelled for this match, so every hit shows as "Hit" with a generic swing. <b>Estimated:</b> speeds, spin, angles, contact points, and the racket's 3D motion.${P.video_url?`<br><a href="${P.video_url}">Source video</a>`:""}`;
   [...$("players").children].forEach((b,k)=>b.classList.toggle("on",k===i));
-  paintSess();paintShot();paintRecent();renderNav();refreshOther();
+  paintSess();paintShot();paintRecent();renderNav();refreshOther();onVidPlayerChange();
 }
 function boot(players){
   PLAYERS=players;
@@ -1049,7 +1154,7 @@ function boot(players){
   buildLive();setPlayer(0);
   S.last=performance.now();
   (function loop(now){frameLive(now);requestAnimationFrame(loop);})(performance.now());
-  window.__emu={S,get rows(){return rows;},simulate,swingFrame,motion,setActive,skipToEnd,go,setTab,THREE};
+  window.__emu={S,get rows(){return rows;},simulate,swingFrame,motion,setActive,skipToEnd,go,setTab,THREE,VID,segAt};
 }
 fetch("emulator_sessions.json").then(r=>r.json()).then(d=>boot(d.players))
  .catch(()=>fetch("emulator_session.json").then(r=>r.json()).then(s=>boot([{name:"Demo",video_url:null,session:s}])))

@@ -17,3 +17,8 @@ to `pretrained=False` in `train_f3tennis_baselines.py` (the checkpoint replaces 
 download). Weights: the authors' Drive folder linked from `data/external/f3set/repo/f3tennis-model/README.md`, subfolder
 `tsm_e2espot` (21 MB). Then `tools/sam_model_windows.py` tracks rackets around the detected hits and
 `tools/model_events_to_emulator.py` builds the emulator sessions. Source video is downloaded locally and deleted afterwards.
+
+| File | What it does |
+|---|---|
+| `swing_alignment.py` | Picture-based alignment check: frame of the racket's speed peak vs the data's hit frame, per match, against the human-labelled Ostrava reference. |
+| `align_check.py` | Audio-based gross check: how tightly ball-hit sounds cluster around the data's hit times (needs the videos' audio, deleted afterwards). Audio runs 0.1-0.28 s late in these broadcasts, so it does not set the offset. |

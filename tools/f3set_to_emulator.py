@@ -22,6 +22,7 @@ import glob
 import json
 import math
 import os
+import re
 import sys
 
 FPS = 25.0            # F3Set videos are 25 fps (data/external/f3set/repo/README.md)
@@ -31,6 +32,7 @@ GAP_S = 3.0           # between clips, as in tools/sam_players_to_emulator.py
 NAME = "Ostrava 2022 final (labelled)"
 SOURCE = "WTA Ostrava 2022 final, Swiatek v Krejcikova, F3Tennis dataset labels + SAM 3.1 racket tracks"
 DATASET_URL = "https://github.com/F3EST/F3Tennis"
+VIDEO_ID = "Ym2XI1FeCxg"   # the match on YouTube (data/f3tennis/videos.csv); clip start frames are frames of this video at 25 fps
 
 TECH = {"gs": "groundstroke", "slice": "slice", "volley": "volley", "smash": "smash", "drop": "drop shot", "lob": "lob"}
 
@@ -133,9 +135,15 @@ def profile(sm):
     return prog, path, peak, scale
 
 
+def clip_start(path):
+    """Start frame from `<match>_<start>_<end>.json`, so clips replay in match order (not name order: '3849' > '101204')."""
+    m = re.search(r"_(\d+)_(\d+)\.json$", os.path.basename(path))
+    return int(m.group(1)) if m else 0
+
+
 def convert(paths):
     shots, skipped, untracked, offset = [], 0, 0, 0.0
-    for p in sorted(paths):
+    for p in sorted(paths, key=clip_start):
         with open(p) as fh:
             d = json.load(fh)
         frames, height = d.get("frames", {}), d.get("height", 720)
@@ -157,6 +165,7 @@ def convert(paths):
             t_s = round(offset + (f0 - first) / FPS, 3)
             last_t = max(last_t, t_s)
             shot = {"clip": d.get("clip", os.path.basename(p)), "contact_frame": f0, "t_s": t_s,
+                    "video_t": round((d.get("start", 0) + f0) / FPS, 2),
                     "stroke": app_type(lab), "kind": lab["kind"] or "stroke", "side": lab["hand"] or "unknown",
                     "side_source": "dataset_label", "technique": lab["tech"], "hitter": lab["hitter"],
                     "court": lab["court"], "dir": lab["dir"], "outcome": lab["outcome"]}
@@ -175,7 +184,7 @@ def convert(paths):
     for i, s in enumerate(shots):
         s["index"] = i
     return {
-        "name": NAME, "video_url": DATASET_URL,
+        "name": NAME, "video_url": DATASET_URL, "video_id": VIDEO_ID,
         "session": {
             "provenance": {"player": "both players (near and far)", "source": SOURCE, "video_url": DATASET_URL,
                            "tracker": "SAM 3.1 video API (cached tracks, no live calls)", "fps_assumed": FPS,

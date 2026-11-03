@@ -49,7 +49,7 @@ def cache(tmp, slug="nadal", events=None, near=True):
     evs = events if events is not None else [{"frame": 50, "label": "hit", "type": "backhand", "hitter": "near", "conf": 0.91, "peak": 0.9}]
     with open(os.path.join(d, f"{slug}_0000.json"), "w") as fh:
         json.dump({"clip": f"{slug}_0000", "start": 0, "events": evs, "width": 1280, "height": 720,
-                   "n_frames": 100, "billed": 100, "frames": frames}, fh)
+                   "n_frames": 100, "billed": 100, "t0_s": 100.0, "frames": frames}, fh)
     return os.path.join(tmp, slug)
 
 
@@ -61,6 +61,8 @@ class Convert(unittest.TestCase):
         self.assertTrue(pl["predicted"] and s["predicted"] and pl["session"]["provenance"]["predicted"])
         self.assertEqual((s["stroke"], s["hitter"], s["side_source"]), ("backhand", "near", "model_prediction"))
         self.assertEqual(s["conf"], 0.91)
+        self.assertEqual(s["video_t"], 102.0)               # window start 100 s + frame 50 / 25 fps
+        self.assertEqual(pl["video_id"], "sFjMstbZtPw")           # Nadal v Djokovic on YouTube
         self.assertIsNone(s["outcome"])                           # the model predicts no outcomes
         self.assertEqual(len(s["prog"]), 25)
         self.assertEqual(pl["name"], me.MATCHES["rafael_nadal"][0])   # named by match, not by one player

@@ -13,7 +13,7 @@ sys.path.insert(0, os.path.dirname(__file__))
 import f3set_to_emulator as fe  # noqa: E402
 
 
-def clip(tmp, name="c", events=None, near_box=True, far_box=False):
+def clip(tmp, name="c", events=None, near_box=True, far_box=False, start=1000):
     """A 100-frame clip whose near racket sweeps right-and-up through frame 50."""
     frames = {}
     for f in range(100):
@@ -25,7 +25,7 @@ def clip(tmp, name="c", events=None, near_box=True, far_box=False):
         if far_box:
             recs.append([3, 300, 100, 312, 128, 0.8])
         frames[str(f)] = recs
-    d = {"clip": name, "start": 1000, "width": 1280, "height": 720, "n_frames": 100, "frames": frames,
+    d = {"clip": name, "start": start, "width": 1280, "height": 720, "n_frames": 100, "frames": frames,
          "events": events if events is not None else [{"frame": 50, "label": "near_deuce_stroke_fh_gs_CC_non-approach_in", "outcome": "in"}]}
     p = os.path.join(tmp, name + ".json")
     json.dump(d, open(p, "w"))
@@ -54,6 +54,7 @@ class Convert(unittest.TestCase):
         with tempfile.TemporaryDirectory() as tmp:
             s = fe.convert([clip(tmp)])["session"]["shots"][0]
         self.assertEqual(s["stroke"], "forehand")
+        self.assertEqual(s["video_t"], 42.0)                 # (clip start 1000 + frame 50) / 25 fps
         self.assertEqual(len(s["prog"]), 25)
         self.assertEqual(s["prog"][fe.HALF], 0.0)           # contact
         self.assertEqual((s["prog"][0], s["prog"][-1]), (-1.0, 1.0))
@@ -76,6 +77,13 @@ class Convert(unittest.TestCase):
             sh = fe.convert([a, b])["session"]["shots"]
         self.assertAlmostEqual(sh[1]["t_s"] - sh[0]["t_s"], fe.GAP_S, places=2)
         self.assertEqual([s["index"] for s in sh], [0, 1])
+
+    def test_clips_replay_in_match_order_not_name_order(self):
+        with tempfile.TemporaryDirectory() as tmp:
+            early = clip(tmp, "m_900_999", start=900)      # starts at frame 900
+            late = clip(tmp, "m_10000_10099", start=10000)   # sorts BEFORE it by name, but is later in the match
+            sh = fe.convert([late, early])["session"]["shots"]
+        self.assertLess(sh[0]["video_t"], sh[1]["video_t"])
 
     def test_intensity_is_clipped(self):
         with tempfile.TemporaryDirectory() as tmp:

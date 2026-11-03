@@ -89,6 +89,37 @@ look and behave like `apple/Shared/Views`:
 
 Three things are not in the app and live outside the phone: the player picker, 1×/2×/4× speed and "Skip to end".
 
+## Source video viewer and timing
+
+The side panel has a **Source video** card: the real broadcast, played from YouTube next to the replay. Nothing is
+requested from YouTube until the visitor presses *Load the source video* (the player is `youtube-nocookie.com`;
+all 9 videos allow embedding). *Follow the replay* plays the video in step with the replay clock, window by window,
+pausing between tracked windows; a tap on any recent hit jumps the video to it. It follows at 1x and 2x (YouTube's
+maximum rate); at 4x pick hits by hand. "Open on YouTube" links to the same moment.
+
+Every hit carries `video_t`, its time in the source video in seconds (Ostrava: clip start frame + hit frame at 25 fps;
+predicted matches: window start `t0_s` + hit frame / 25). Within a tracked window the replay clock and video time
+advance together, so the page maps `video = clock + offset` per window. Sessions run in match order.
+
+How well it lines up, measured:
+
+- **Data vs picture** (`tools/f3tennis_model/swing_alignment.py`): the frame where the hitter's racket moves fastest
+  falls a median 1-2 frames (40-80 ms) after the data's hit frame in all 8 predicted matches, 76-89% within 3 frames,
+  against +1 frame (96% within 3) for the human-labelled Ostrava reference. The data's hit times land on the visible
+  swing about as well as human labels do.
+- **Data vs audio** (`tools/f3tennis_model/align_check.py`): ball-hit sounds cluster tightly around the data's hits
+  (Wimbledon 90%, Shelton 77%, Alcaraz 62%, Sabalenka 59%, against 5-11% by chance), so there is no gross offset. The
+  sound arrives 0.1-0.28 s after the picture's hit by a different amount per broadcast (audio delay and mic distance), which
+  is why no audio offset is applied; the other matches were inconclusive (crowd and commentary noise).
+- **Player vs replay clock**: after each seek the page measures how far the player missed and corrects it once, then
+  watches for drift. Measured on a live session: signed median +0.01 s at 1x and +0.02 s at 2x, 90% of samples within
+  0.14-0.18 s. A hit's first frames after a window jump can be off by up to about 0.8 s until the correction lands.
+- **Racket swing pace** (Emulator controls, outside the phone): *Slower* (default) stretches each swing around contact
+  by 1/0.6 so it is easy to follow; *Real time* plays it at the video's speed. The contact instant is identical in both.
+
+An optional per-match `session.video_bias` (seconds) is added to the video time if a picture-based measurement ever shows
+a consistent offset. It is 0 for every match today.
+
 ## Estimated figures
 
 Footage only gives shot times and a unitless intensity `i` (0-1). Everything else is estimated:

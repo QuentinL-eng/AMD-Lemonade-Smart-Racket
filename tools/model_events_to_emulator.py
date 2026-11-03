@@ -70,7 +70,8 @@ def convert_dir(slug, sam_dir):
                 untracked += 1
             t_s = round(offset + (f0 - first) / fe.FPS, 3)
             last_t = max(last_t, t_s)
-            shot = {"clip": d.get("clip", os.path.basename(p)), "contact_frame": f0, "t_s": t_s, "stroke": e["type"],
+            shot = {"clip": d.get("clip", os.path.basename(p)), "contact_frame": f0, "t_s": t_s,
+                    "video_t": round(float(d.get("t0_s", 0.0)) + f0 / fe.FPS, 2), "stroke": e["type"],
                     "kind": "serve" if e["type"] == "serve" else "stroke",
                     "side": e["type"] if e["type"] in ("forehand", "backhand") else "unknown",
                     "side_source": "model_prediction", "hitter": e["hitter"], "conf": round(float(e.get("conf", 0)), 3),
@@ -88,7 +89,8 @@ def convert_dir(slug, sam_dir):
     for i, s in enumerate(shots):
         s["index"] = i
     name, title, up, url = MATCHES.get(slug, (slug, slug, "", None))
-    return {"name": name, "video_url": url, "predicted": True, "session": {
+    vid = url.split("v=")[-1] if url and "v=" in url else None
+    return {"name": name, "video_url": url, "video_id": vid, "predicted": True, "session": {
         "provenance": {"player": "both players (near and far)", "source": f"{title} ({up})", "video_url": url,
                        "tracker": "SAM 3.1 video API (cached tracks, no live calls)", "fps_assumed": fe.FPS,
                        "predicted": True,
