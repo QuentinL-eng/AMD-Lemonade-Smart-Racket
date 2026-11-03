@@ -16,7 +16,7 @@ would do, then plans a drill that the Watch and glasses track.
 | Rubric | Where to look |
 |---|---|
 | Impact (30%) | [Impact](#impact) |
-| Use of Meta AI tooling (25%) | [Use of Meta AI tooling](#use-of-meta-ai-tooling): Muse Spark agent with 10 tools, Ray-Ban Display HUD, a 2,164-conversation tool-use dataset |
+| Use of Meta AI tooling (25%) | [Use of Meta AI tooling](#use-of-meta-ai-tooling): Muse Spark agent with 10 tools, Ray-Ban Display HUD, a 2,263-conversation tool-use dataset |
 | Technical depth and execution (20%) | [Technical depth and execution](#technical-depth-and-execution): firmware, apps, ML, tests |
 | Demo (25%) | [Demo](#demo) |
 
@@ -58,7 +58,7 @@ state, and a robot-arm rig for repeatable ground truth ([`TennisRobot/`](TennisR
 | **Muse Spark through a server proxy** | A Supabase edge function holds the Meta API key; the app never ships one | [`backend/supabase/functions/muse/`](backend/supabase/functions/muse/index.ts) |
 | **Muse Spark directs the swing film** | Muse tests swing changes with `simulate_change` and returns a short, validated script; the What-if screen animates the player's swing and the change in 3D | [`SwingFilm.swift`](apple/Shared/Coach/SwingFilm.swift), [`SwingAnimationView.swift`](apple/Shared/Views/SwingAnimationView.swift), [`docs/SWING_FILM.md`](docs/SWING_FILM.md) |
 | **Meta Wearables Device Access Toolkit** (`MWDATCore`, `MWDATDisplay`) | Live HUD on **Meta Ray-Ban Display**: latest shot, sweet-spot rate, score, drill progress | [`apple/iOS/Glasses/`](apple/iOS/Glasses/) |
-| **Tool-use dataset for Muse** | 2,164 synthetic conversations whose tool results match the app exactly, for evals and tuning | [`ml/whatif_synth.py`](ml/whatif_synth.py), [`docs/WHATIF_DATASET.md`](docs/WHATIF_DATASET.md) |
+| **Tool-use dataset for Muse** | 2,263 synthetic conversations whose tool results match the app exactly, for evals and tuning | [`ml/whatif_synth.py`](ml/whatif_synth.py), [`docs/WHATIF_DATASET.md`](docs/WHATIF_DATASET.md) |
 
 **Beyond a basic integration.**
 

@@ -33,13 +33,13 @@ off), so on-court contact uses that shape scaled by 0.55–1.0. The result is 46
 
 ## Generated files (`data/whatif/`, git-ignored)
 
-- `conversations_{train,val,test}.jsonl`: 2,164 examples split by player (80/10/10), in OpenAI chat format with
+- `conversations_{train,val,test}.jsonl`: 2,263 examples split by player (80/10/10), in OpenAI chat format with
   `tools` (the same schemas as `CoachTools.schemas`, including the racket and memory tools). The first two messages
   are exactly what `MuseCoach` sends for a question (system prompt, then the question with no data), and Muse's
   first move is to call `get_session_digest` itself. `metadata` holds the
-  ground truth: the injected flaw, whether the chosen change addresses it (`flaw_found`, 78%), link conditions
+  ground truth: the injected flaw, whether the chosen change addresses it (`flaw_found`, 77%), link conditions
   and units.
-- `whatif_table.csv`: 80,920 simulated changes (baseline, deltas, before/after, whether each passes the
+- `whatif_table.csv`: 85,552 simulated changes (baseline, deltas, before/after, whether each passes the
   guardrail and reaches the target, and which one was chosen). Use it for evals or to train a ranker.
 - `shots.csv`, `sessions.csv`, `players.jsonl`: the synthetic shots, session conditions, and player truth.
 - `manifest.json`: counts, seed, and a hash of the priors.
@@ -48,12 +48,12 @@ off), so on-court contact uses that shape scaled by 0.55–1.0. The result is 46
 
 | Kind | Count | What Muse learns |
 |---|---:|---|
-| `objective` | 1,242 | A goal (more spin, more pace, cleaner contact, slice→topspin). It tests the best single change on two levers in parallel, then a combination if needed, and picks the **smallest change that reaches the target**. The pick is guided by what the digest shows (an open face points to closing the face; a flat path to swinging more low-to-high). |
-| `player_whatif` | 489 | The player proposes the change (e.g. "open the face 3° and swing 5% slower"). Muse runs exactly that and says whether it's worth it. |
-| `player_whatif_extreme` | 93 | The request is beyond the tool's limits. Muse reports the capped change and suggests a smaller step. |
-| `unmodeled` | 174 | Questions about depth or net clearance. Muse reports speed and spin and says flight isn't modeled. |
-| `contact_spread` | 72 | The average contact is already centered. Muse explains that the issue is scatter, which the simulator can't model. |
-| `no_motion`, `*_error` | 94 | Mic-only or saturated data. Muse says it can't simulate, with no made-up numbers. |
+| `objective` | 1,326 | A goal (more spin, more pace, cleaner contact, slice→topspin). It tests the best single change on two levers in parallel, then a combination if needed, and picks the **smallest change that reaches the target**. The pick is guided by what the digest shows (an open face points to closing the face; a flat path to swinging more low-to-high). |
+| `player_whatif` | 465 | The player proposes the change (e.g. "open the face 3° and swing 5% slower"). Muse runs exactly that and says whether it's worth it. |
+| `player_whatif_extreme` | 122 | The request is beyond the tool's limits. Muse reports the capped change and suggests a smaller step. |
+| `unmodeled` | 222 | Questions about depth or net clearance. Muse reports speed and spin and says flight isn't modeled. |
+| `contact_spread` | 83 | The average contact is already centered. Muse explains that the issue is scatter, which the simulator can't model. |
+| `no_motion`, `*_error` | 45 | Mic-only or saturated data. Muse says it can't simulate, with no made-up numbers. |
 
 Every final answer is under 80 words and calls the result an estimate, and the tests check that every number in it
 appears in a tool result.
