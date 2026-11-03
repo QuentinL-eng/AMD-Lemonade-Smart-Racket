@@ -4,48 +4,58 @@
 <meta charset="utf-8">
 <meta name="viewport" content="width=device-width, initial-scale=1">
 <title>Tennis Buddee — Pro-match emulator</title>
-<meta name="description" content="The Tennis Buddee Live tab in your browser, replaying a SAM 3.1-tracked pro match. Derived timing and intensity only; speeds and contacts are illustrative.">
+<meta name="description" content="Replay a SAM 3.1-tracked pro match through the Tennis Buddee app: live shot feed, post-match insights, what-if predictions and Muse questions. Timing and intensity come from video; speeds, spin and contacts are model estimates.">
 <style>
 :root{
-  --accent:#B0DA1C; --accent-dark:#7A9A10;
+  --accent:#B0DA1C; --accent-dark:#6F8E0C;
   --page:#F2F2F7; --card:#FFFFFF; --tile:#ECECF1;
   --ink:#1C1C1E; --secondary:#6B6B70; --separator:#E5E5EA;
-  --green:#34C759; --red:#FF3B30;
+  --green:#34C759; --red:#FF3B30; --blue:#0A84FF;
   --rounded:ui-rounded,"SF Pro Rounded",-apple-system,"Helvetica Neue",Arial,sans-serif;
   --sys:-apple-system,BlinkMacSystemFont,"SF Pro Text","Helvetica Neue",Arial,sans-serif;
 }
 *{box-sizing:border-box}
-body{margin:0;background:var(--page);color:var(--ink);font:400 16px/1.45 var(--sys);-webkit-font-smoothing:antialiased}
-.chrome{max-width:480px;margin:0 auto;padding:14px 16px 4px}
-.brandrow{display:flex;justify-content:space-between;align-items:center;font-size:14px;margin-bottom:8px}
+body{margin:0;background:#E4E4EA;color:var(--ink);font:400 16px/1.45 var(--sys);-webkit-font-smoothing:antialiased}
+button{font-family:var(--sys)}
+.wrap{max-width:1020px;margin:0 auto;padding:14px 16px 40px;display:grid;grid-template-columns:1fr;gap:16px}
+@media(min-width:900px){.wrap{grid-template-columns:340px 430px;justify-content:center;align-items:start}.side{position:sticky;top:14px}}
+.brandrow{display:flex;justify-content:space-between;align-items:center;font-size:14px;margin-bottom:10px}
 .brandrow a{color:var(--ink);text-decoration:none;font-weight:700}
 .brandrow a.sub{color:var(--secondary);font-weight:400}
-.prov{background:var(--ink);color:#F2F2F7;border-radius:14px;padding:11px 14px;font-size:12.5px;line-height:1.5}
-.prov b{color:var(--accent)}
-.prov a{color:var(--accent)}
-.players{display:flex;gap:8px;overflow-x:auto;padding:10px 2px 2px}
+.prov{background:var(--ink);color:#F2F2F7;border-radius:14px;padding:12px 14px;font-size:12.5px;line-height:1.5}
+.prov b{color:var(--accent)} .prov a{color:var(--accent)}
+.guide{background:#fff;border-radius:14px;padding:14px 16px;margin-top:12px;font-size:14px}
+.guide h2{font-size:15px;margin:0 0 6px}
+.guide ol{margin:0;padding-left:20px} .guide li{margin:4px 0}
+.guide li button{border:0;background:none;color:var(--accent-dark);font:700 14px var(--sys);cursor:pointer;padding:0;text-decoration:underline}
+.players{display:flex;gap:8px;overflow-x:auto;padding:10px 2px 4px}
 .players button{flex:none;border:1.5px solid var(--separator);background:#fff;border-radius:999px;padding:7px 14px;font:600 13.5px var(--sys);cursor:pointer;color:var(--ink)}
 .players button.on{background:var(--ink);color:#fff;border-color:var(--ink)}
-.phone{max-width:430px;margin:10px auto 0;background:var(--page);border-radius:28px;padding:0 0 8px}
+.phone{background:var(--page);border-radius:34px;box-shadow:0 0 0 8px #1C1C1E,0 18px 50px rgba(0,0,0,.28);overflow:hidden;min-height:760px;display:flex;flex-direction:column}
 .statusbar{display:flex;justify-content:space-between;align-items:center;padding:12px 26px 2px;font-size:14px;font-weight:600}
-.statusbar svg{display:block}
 .navbar{padding:6px 16px 8px;border-bottom:0.5px solid var(--separator)}
-.navrow{display:flex;justify-content:space-between;align-items:center}
+.navrow{display:flex;justify-content:space-between;align-items:center;gap:8px}
 .navtitle{font-size:32px;font-weight:700;letter-spacing:-0.02em;margin:0}
-.pill{display:flex;align-items:center;gap:6px;font-size:12.5px;font-weight:500;color:var(--secondary);background:var(--tile);border-radius:999px;padding:6px 11px}
-.dot{width:8px;height:8px;border-radius:50%;background:var(--green);flex:none}
-.recenter{border:0;background:none;color:var(--accent-dark);font:600 13px var(--sys);cursor:pointer;padding:6px 4px}
-.screen{padding:12px 16px 4px;display:flex;flex-direction:column;gap:14px}
+.pill{display:flex;align-items:center;gap:6px;font-size:12.5px;font-weight:500;color:var(--secondary);background:var(--tile);border-radius:999px;padding:6px 11px;white-space:nowrap}
+.dot{width:8px;height:8px;border-radius:50%;background:var(--green);flex:none;display:inline-block}
+.screens{flex:1;overflow-y:auto;max-height:720px}
+.screen{padding:12px 16px 12px;display:none;flex-direction:column;gap:14px}
+.screen.on{display:flex}
 .card{background:var(--card);border-radius:18px;padding:16px;position:relative}
+.secttl{font-size:17px;font-weight:700;margin:0 0 8px}
+.note{font-size:12px;color:var(--secondary);line-height:1.45}
 #swingCanvas{width:100%;height:auto;display:block;border-radius:12px;background:linear-gradient(180deg,rgba(176,218,28,0.14),rgba(176,218,28,0.02))}
 .livestats{display:flex;gap:16px;font-size:12px;color:var(--secondary);padding:10px 4px 0;font-variant-numeric:tabular-nums}
-.sessionbtn{border:0;border-radius:14px;padding:14px;font:700 17px var(--sys);cursor:pointer;background:var(--accent);color:#000;width:100%}
+.bar{height:5px;background:var(--tile);border-radius:3px;margin-top:10px;overflow:hidden}
+.bar i{display:block;height:100%;background:var(--accent);width:0}
+.sessrow{display:flex;gap:8px;align-items:center;flex-wrap:wrap}
+.sessionbtn{border:0;border-radius:14px;padding:14px;font:700 17px var(--sys);cursor:pointer;background:var(--accent);color:#000;flex:1;min-width:150px}
 .sessionbtn.live{background:var(--red);color:#fff}
-.sessrow{display:flex;gap:10px;align-items:center}
+.ghost{border:1.5px solid var(--separator);background:#fff;border-radius:12px;padding:10px 12px;font:600 13.5px var(--sys);cursor:pointer;color:var(--ink)}
 .seg{display:flex;background:var(--tile);border-radius:10px;padding:2px;font-size:13px;font-weight:600}
 .seg button{border:0;background:none;padding:6px 10px;border-radius:8px;cursor:pointer;color:var(--secondary);font:inherit}
 .seg button.on{background:#fff;color:var(--ink);box-shadow:0 1px 2px rgba(0,0,0,.12)}
-.tiles{display:grid;grid-template-columns:1fr 1fr 1fr 1fr;gap:8px}
+.tiles{display:grid;grid-template-columns:repeat(4,1fr);gap:8px}
 .tile{background:var(--tile);border-radius:12px;padding:10px 8px}
 .tile .l{font-size:11px;color:var(--secondary)}
 .tile .v{font:600 20px/1.2 var(--sys);font-variant-numeric:tabular-nums}
@@ -55,272 +65,443 @@ body{margin:0;background:var(--page);color:var(--ink);font:400 16px/1.45 var(--s
 .badge{font-size:12px;font-weight:600;padding:4px 9px;border-radius:999px}
 .badge.sweet{background:rgba(52,199,89,.18);color:#1F8A3D}
 .badge.off{background:rgba(255,59,48,.16);color:#C42B23}
-.bignum{font:700 48px/1 var(--rounded);font-variant-numeric:tabular-nums;letter-spacing:-0.01em}
+.bignum{font:700 48px/1 var(--rounded);font-variant-numeric:tabular-nums}
 .bigunit{font-size:12px;color:var(--secondary);margin-top:2px}
 .metrics{display:grid;grid-template-columns:1fr 1fr;gap:8px 14px;margin-top:12px}
-.metric .l{font-size:11px;color:var(--secondary)}
-.metric .v{font-size:15px;font-weight:500;font-variant-numeric:tabular-nums}
+.metric .l{font-size:11px;color:var(--secondary)} .metric .v{font-size:15px;font-weight:500;font-variant-numeric:tabular-nums}
 .shotgrid{display:flex;gap:12px;align-items:flex-start}
 .shotgrid .left{flex:1;min-width:0}
 #miniBed{width:96px;height:auto;flex:none}
 #shotCard{transition:box-shadow 1.2s ease-out,border-color 1.2s ease-out;border:2px solid transparent}
 #shotCard.flash-sweet{box-shadow:0 0 26px rgba(52,199,89,.65);border-color:var(--green)}
 #shotCard.flash-off{box-shadow:0 0 26px rgba(255,59,48,.6);border-color:var(--red)}
-.secttl{font-size:17px;font-weight:700;margin:0 0 8px}
 #bedCanvas{width:100%;height:auto;display:block}
-.illtag{display:inline-block;font-size:11px;font-weight:600;background:var(--tile);color:var(--secondary);border-radius:999px;padding:2px 9px;margin-left:8px;vertical-align:2px}
 .rrow{display:flex;align-items:center;gap:10px;font-size:15px;padding:8px 0;border-top:0.5px solid var(--separator)}
 .rrow .sp{margin-left:auto;font-variant-numeric:tabular-nums;color:var(--secondary)}
-.empty{text-align:center;color:var(--secondary);padding:34px 10px;font-size:15px}
-.empty .big{font-size:44px;display:block;margin-bottom:8px}
-.tabbar{display:flex;background:rgba(255,255,255,.92);border-top:0.5px solid var(--separator);border-radius:0 0 28px 28px;padding:8px 4px 20px;margin-top:6px}
-.tab{flex:1;border:0;background:none;display:flex;flex-direction:column;align-items:center;gap:3px;font-size:10.5px;color:#8E8E93;cursor:pointer;font-family:var(--sys)}
-.tab.on{color:var(--accent-dark)}
+.empty{text-align:center;color:var(--secondary);padding:30px 10px;font-size:15px}
+.empty button{margin-top:12px}
+.tabbar{display:flex;background:rgba(255,255,255,.95);border-top:0.5px solid var(--separator);padding:8px 4px 18px}
+.tab{flex:1;border:0;background:none;display:flex;flex-direction:column;align-items:center;gap:3px;font-size:10.5px;color:#8E8E93;cursor:pointer}
+.tab.on{color:var(--accent-dark);font-weight:600}
 .tab svg{width:24px;height:24px}
-.foot{max-width:480px;margin:0 auto;padding:10px 16px 34px;font-size:12.5px;color:var(--secondary)}
+/* insights */
+.krow{display:flex;justify-content:space-between;padding:8px 0;border-top:0.5px solid var(--separator);font-size:15px}
+.krow:first-of-type{border-top:0} .krow span:last-child{font-variant-numeric:tabular-nums;font-weight:600}
+.krow small{display:block;color:var(--secondary);font-size:11.5px;font-weight:400}
+/* what if */
+.lever{margin:12px 0 4px}
+.lever label{display:flex;justify-content:space-between;font-size:14px;font-weight:600}
+.lever label span{font-variant-numeric:tabular-nums;color:var(--accent-dark)}
+.lever input[type=range]{width:100%;accent-color:#7DA10A}
+.cmp{display:grid;grid-template-columns:1fr auto auto;gap:6px 14px;font-size:15px;font-variant-numeric:tabular-nums;align-items:baseline}
+.cmp .h{font-size:11px;color:var(--secondary);text-transform:uppercase;letter-spacing:.04em}
+.cmp .up{color:#1F8A3D;font-weight:700} .cmp .dn{color:#C42B23;font-weight:700}
+.says{font-size:17px;font-weight:600;line-height:1.3;margin:0 0 4px}
+/* muse */
+.chips{display:flex;flex-wrap:wrap;gap:8px}
+.chip{border:1.5px solid var(--separator);background:#fff;border-radius:999px;padding:8px 13px;font:600 13.5px var(--sys);cursor:pointer;color:var(--ink);text-align:left}
+.chip:hover{border-color:var(--accent-dark)}
+.q{align-self:flex-end;background:var(--ink);color:#fff;border-radius:16px 16px 4px 16px;padding:9px 13px;font-size:14.5px;max-width:85%}
+.a{background:#fff;border-radius:16px 16px 16px 4px;padding:12px 14px;font-size:15px;max-width:96%}
+.tool{font:12px/1.4 ui-monospace,Menlo,Consolas,monospace;background:var(--tile);border-radius:8px;padding:6px 8px;margin:0 0 6px;overflow-wrap:anywhere}
+.tool b{color:var(--accent-dark)}
+.tool details summary{cursor:pointer;color:var(--secondary)}
+.foot{grid-column:1/-1;font-size:12.5px;color:var(--secondary);max-width:820px}
 @media (prefers-reduced-motion:reduce){#shotCard{transition:none}}
 </style>
 </head>
 <body>
-<div class="chrome">
+<div class="wrap">
+ <div class="side">
   <div class="brandrow"><a href="index.html">Tennis Buddee</a>
     <a class="sub" href="https://github.com/QuentinL-eng/Tennis-Buddy-Smart-Racket/blob/main/docs/EMULATOR_DATA.md">How this data was made</a></div>
   <div class="prov" id="provenance">Loading sessions…</div>
   <div class="players" id="playerRow"></div>
-</div>
-
-<div class="phone">
-  <div class="statusbar"><span id="clock">9:41</span>
-    <svg width="54" height="12" viewBox="0 0 54 12" aria-hidden="true"><rect x="0" y="7" width="3" height="5" rx="1" fill="#1C1C1E"/><rect x="5" y="5" width="3" height="7" rx="1" fill="#1C1C1E"/><rect x="10" y="3" width="3" height="9" rx="1" fill="#1C1C1E"/><rect x="15" y="1" width="3" height="11" rx="1" fill="#1C1C1E"/><rect x="24" y="2" width="22" height="10" rx="3" fill="none" stroke="#1C1C1E" opacity=".5"/><rect x="26" y="4" width="14" height="6" rx="1.5" fill="#1C1C1E"/><rect x="47" y="5" width="2.5" height="4" rx="1" fill="#1C1C1E" opacity=".5"/></svg>
+  <div class="guide"><h2>Try it like a post-match review</h2>
+    <ol>
+      <li><button data-go="Live" data-act="play">Play the match</button> — each racket hit lands in the feed as it would on court. Or <button data-go="Live" data-act="skip">jump to the end</button>.</li>
+      <li><button data-go="Insights">Insights</button> — what the racket would have collected over the whole session.</li>
+      <li><button data-go="What if">What if</button> — change one thing about this player's swing and see the predicted effect.</li>
+      <li><button data-go="Muse">Muse</button> — ask questions; see the tool calls Muse makes on the session.</li>
+    </ol>
   </div>
+ </div>
+
+ <div class="phone">
+  <div class="statusbar"><span>9:41</span><span aria-hidden="true">●●●● ▮</span></div>
   <div class="navbar"><div class="navrow">
     <h1 class="navtitle" id="navTitle">Live</h1>
-    <span style="display:flex;gap:8px;align-items:center"><span class="pill"><span class="dot"></span><span id="connLabel">Pro replay</span></span><button class="recenter" id="recenterBtn">Recenter</button></span>
+    <span class="pill"><span class="dot"></span><span id="connLabel">Pro replay</span></span>
   </div></div>
-
-  <div class="screen" id="liveScreen">
+  <div class="screens">
+   <div class="screen on" data-s="Live">
     <div class="card" style="padding:12px">
       <canvas id="swingCanvas" width="380" height="190"></canvas>
       <div class="livestats"><span id="statClock">0:00</span><span id="statCount">0 shots</span><span id="statCover">track cover –</span></div>
+      <div class="bar"><i id="progress"></i></div>
     </div>
     <div class="sessrow">
-      <button class="sessionbtn" id="sessionBtn" style="flex:1">Start Session</button>
+      <button class="sessionbtn" id="sessionBtn">Start Session</button>
+      <button class="ghost" id="skipBtn">Skip to end</button>
+    </div>
+    <div class="sessrow" style="justify-content:space-between">
       <div class="seg" id="speedSeg"><button data-s="1" class="on">1×</button><button data-s="2">2×</button><button data-s="4">4×</button></div>
       <div class="seg" id="unitSeg"><button data-u="kmh" class="on">km/h</button><button data-u="mph">mph</button></div>
     </div>
     <div class="tiles" id="statTiles"></div>
     <div id="shotCardWrap"></div>
-    <div class="card">
-      <h2 class="secttl">This session</h2>
-      <canvas id="bedCanvas" width="380" height="380"></canvas>
-      <div id="recentList"></div>
-    </div>
-  </div>
-  <div class="screen" id="altScreen" style="display:none"><div class="card"><div class="empty" id="altEmpty"></div></div></div>
+    <div class="card"><h2 class="secttl">This session</h2>
+      <canvas id="bedCanvas" width="380" height="380"></canvas><div id="recentList"></div></div>
+   </div>
 
+   <div class="screen" data-s="Insights" id="insightsScreen"></div>
+   <div class="screen" data-s="What if" id="whatifScreen"></div>
+   <div class="screen" data-s="Muse" id="museScreen"></div>
+  </div>
   <div class="tabbar" id="tabBar">
     <button class="tab on" data-t="Live"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8"><ellipse cx="9" cy="8" rx="6" ry="6.5" transform="rotate(-20 9 8)"/><line x1="13" y1="13" x2="20" y2="20"/></svg>Live</button>
-    <button class="tab" data-t="Score"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8"><path d="M7 4h10v5a5 5 0 0 1-10 0V4z"/><path d="M7 5H4v2a3 3 0 0 0 3 3M17 5h3v2a3 3 0 0 1-3 3M12 14v4M8 20h8"/></svg>Score</button>
-    <button class="tab" data-t="Together"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8"><circle cx="9" cy="8" r="3.2"/><path d="M3.5 19c.6-3 2.8-4.5 5.5-4.5s4.9 1.5 5.5 4.5"/><circle cx="17" cy="9" r="2.4"/><path d="M16 14.6c2.3.2 3.9 1.6 4.4 4"/></svg>Together</button>
-    <button class="tab" data-t="Insights"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8"><path d="M12 3l1.9 5.6L19.5 10l-5.6 1.9L12 17.5l-1.9-5.6L4.5 10l5.6-1.4L12 3z"/><path d="M19 15l.8 2.2L22 18l-2.2.8L19 21l-.8-2.2L16 18l2.2-.8L19 15z"/></svg>Insights</button>
-    <button class="tab" data-t="Racket"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8"><circle cx="12" cy="12" r="2"/><path d="M8.5 15.5a5 5 0 0 1 0-7M15.5 8.5a5 5 0 0 1 0 7M6 18a9 9 0 0 1 0-12M18 6a9 9 0 0 1 0 12"/></svg>Racket</button>
+    <button class="tab" data-t="Insights"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8"><path d="M4 20V10M10 20V4M16 20v-7M22 20H2"/></svg>Insights</button>
+    <button class="tab" data-t="What if"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8"><path d="M4 7h10M18 7h2M4 17h2M10 17h10"/><circle cx="16" cy="7" r="2"/><circle cx="8" cy="17" r="2"/></svg>What if</button>
+    <button class="tab" data-t="Muse"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8"><path d="M12 3l1.9 5.6L19.5 10l-5.6 1.9L12 17.5l-1.9-5.6L4.5 10l5.6-1.4L12 3z"/><path d="M19 15l.8 2.2L22 18l-2.2.8L19 21l-.8-2.2L16 18l2.2-.8L19 15z"/></svg>Muse</button>
   </div>
+ </div>
+ <p class="foot">Not a measured match. Video gives shot times and a unitless swing intensity per hit (SAM 3.1 racket tracking).
+ Everything else here — speeds, spin, face and path angles, contact points — is what the racket's impact model would
+ plausibly produce for that swing, computed with the app's own physics (<code>ShotSimulator</code> ported to JavaScript).
+ Tracked windows are short clips around contacts, not the full match. Method and limits:
+ <a href="https://github.com/QuentinL-eng/Tennis-Buddy-Smart-Racket/blob/main/docs/EMULATOR_DATA.md">docs/EMULATOR_DATA.md</a>.</p>
 </div>
-<p class="foot">Derived from video: shot times, stroke side/kind, unitless intensity. Speeds, spin, angles and
-contacts are illustrative figures computed from intensity — never measured. Method and limits:
-<a href="https://github.com/QuentinL-eng/Tennis-Buddy-Smart-Racket/blob/main/docs/EMULATOR_DATA.md">docs/EMULATOR_DATA.md</a>.</p>
 
 <script>
 "use strict";
-/* Mirrors apple/Shared/Views/LiveView.swift + Components.swift (StringBedView geometry ported
-   1:1: 24.8 x 32.4 cm head, 16x19 strings, 4 cm sweet spot). Illustrative figures below are
-   deterministic per shot and documented in docs/EMULATOR_DATA.md. */
+/* ---------- model (ports of apple/RacketKit ShotSimulator + ImpactModel defaults, WhatIf.swift) ---------- */
+var ACOR=0.42, SPIN_GAIN=0.7, SWEET_CM=4.0, LIM={swing:30,angle:15,contact:5};
+function clamp(v,a,b){v=isFinite(v)?v:0;return Math.min(b,Math.max(a,v));}
+function simulate(p){
+  p={swing:clamp(p.swing,0,200),path:clamp(p.path,-80,80),face:clamp(p.face,-60,60),
+     cx:clamp(p.cx,-12,12),cy:clamp(p.cy,-14,14),inc:clamp(p.inc==null?43.2:p.inc,0,200)};
+  var dist=Math.hypot(p.cx,p.cy), e=ACOR*Math.max(0.55,1-0.035*dist);
+  var v=p.swing/3.6, brush=v*Math.sin((p.path-p.face)*Math.PI/180);
+  var rpm=SPIN_GAIN*Math.abs(brush)/0.0335*60/(2*Math.PI);
+  return {p:p,ball:e*p.inc+(1+e)*p.swing,rpm:rpm,spin:rpm<600?"flat":(brush>0?"topspin":"slice"),dist:dist};
+}
+function applyDeltas(b,d){
+  return {swing:b.swing*(1+clamp(d.swing,-LIM.swing,LIM.swing)/100),face:b.face+clamp(d.face,-LIM.angle,LIM.angle),
+    path:b.path+clamp(d.path,-LIM.angle,LIM.angle),cx:b.cx+clamp(d.cx,-LIM.contact,LIM.contact),
+    cy:b.cy+clamp(d.cy,-LIM.contact,LIM.contact),inc:b.inc};
+}
+function describe(d){
+  function n(v){v=Math.abs(v);return v===Math.round(v)?""+v:v.toFixed(1);}
+  var a=[];
+  if(d.face)a.push(d.face<0?"close the face "+n(d.face)+"°":"open the face "+n(d.face)+"°");
+  if(d.path)a.push(d.path>0?"swing "+n(d.path)+"° more low-to-high":"flatten the path "+n(d.path)+"°");
+  if(d.swing)a.push(d.swing>0?"swing "+n(d.swing)+"% faster":"swing "+n(d.swing)+"% slower");
+  if(d.cy)a.push("hit "+n(d.cy)+" cm closer to the "+(d.cy>0?"tip":"throat"));
+  if(d.cx)a.push("hit "+n(d.cx)+" cm further "+(d.cx>0?"right":"left"));
+  if(!a.length)return "keep everything the same";
+  return a.length<3?a.join(" and "):a.slice(0,-1).join(", ")+" and "+a[a.length-1];
+}
+/* ---------- illustrative per-shot parameters from video intensity (deterministic) ---------- */
 function mulberry32(a){return function(){a|=0;a=a+0x6D2B79F5|0;var t=Math.imul(a^a>>>15,1|a);t=t+Math.imul(t^t>>>7,61|t)^t;return((t^t>>>14)>>>0)/4294967296;};}
-function illust(shot){
+function params(shot){
   var r=mulberry32(shot.index*2654435761+7), i=shot.intensity;
-  var swing=60+90*i, ball=swing*1.35+8+r()*6;
-  var slice=i<0.25&&(shot.index%3===0);
-  var spread=7.0*(1.15-0.6*i);
-  var cx=Math.max(-11,Math.min(11,(r()-0.5)*2*spread*0.8));
-  var cy=Math.max(-14,Math.min(14,(r()-0.5)*2*spread));
-  return {swing:swing, ball:ball, spin:Math.round(800+2200*i), slice:slice,
-    face:Math.round(i*8*(shot.index%2?1:-1)),
+  var slice=i<0.25&&(shot.index%3===0), spread=7.0*(1.15-0.6*i);
+  return {swing:60+90*i, face:Math.round(i*8*(shot.index%2?1:-1)),
     path:slice?-Math.round(8+10*r()):Math.round(10+20*i),
-    cx:cx, cy:cy, sweet:Math.hypot(cx,cy)<=4.0};
+    cx:clamp((r()-0.5)*2*spread*0.8,-11,11), cy:clamp((r()-0.5)*2*spread,-14,14), inc:43.2};
 }
-function drawBed(ctx,W,H,shots,hlIdx){
-  var hw=12.4,hl=16.2,sc=Math.min(W/(2*hw+3),H/(2*hl+3)),cx=W/2,cy=H/2;
-  function P(x,y){return [cx+x*sc,cy-y*sc];}
+function enrich(shot){
+  var p=params(shot), r=simulate(p);
+  return {shot:shot,p:p,r:r,sweet:r.dist<=SWEET_CM,name:shot.kind==="serve"?"Serve":shot.side==="forehand"?"Forehand":shot.side==="backhand"?"Backhand":"Hit"};
+}
+function mean(a){return a.length?a.reduce(function(x,y){return x+y;},0)/a.length:0;}
+function baselineOf(rows){
+  if(!rows.length)return null;
+  return {swing:mean(rows.map(function(x){return x.p.swing;})),face:mean(rows.map(function(x){return x.p.face;})),
+    path:mean(rows.map(function(x){return x.p.path;})),cx:mean(rows.map(function(x){return x.p.cx;})),
+    cy:mean(rows.map(function(x){return x.p.cy;})),inc:43.2};
+}
+/* ---------- drawing ---------- */
+function drawBed(ctx,W,H,rows,hl){
+  var hw=12.4,hh=16.2,sc=Math.min(W/(2*hw+3),H/(2*hh+3)),cx=W/2,cy=H/2;
   ctx.clearRect(0,0,W,H);
-  var head={x:cx-hw*sc,y:cy-hl*sc,w:2*hw*sc,h:2*hl*sc};
-  ctx.beginPath();ctx.ellipse(cx,cy,hw*sc,hl*sc,0,0,7);
-  ctx.fillStyle="rgba(28,28,30,0.04)";ctx.fill();
-  ctx.save();ctx.beginPath();ctx.ellipse(cx,cy,hw*sc,hl*sc,0,0,7);ctx.clip();
+  ctx.beginPath();ctx.ellipse(cx,cy,hw*sc,hh*sc,0,0,7);ctx.fillStyle="rgba(28,28,30,0.04)";ctx.fill();
+  ctx.save();ctx.beginPath();ctx.ellipse(cx,cy,hw*sc,hh*sc,0,0,7);ctx.clip();
   ctx.strokeStyle="rgba(28,28,30,0.12)";ctx.lineWidth=0.6;ctx.beginPath();
-  for(var a=-7;a<=8;a++){var x=cx+(a-0.5)*1.5*sc;ctx.moveTo(x,head.y);ctx.lineTo(x,head.y+head.h);}
-  for(var b=-9;b<=9;b++){var y=cy+b*1.6*sc;ctx.moveTo(head.x,y);ctx.lineTo(head.x+head.w,y);}
+  for(var a=-7;a<=8;a++){var x=cx+(a-0.5)*1.5*sc;ctx.moveTo(x,cy-hh*sc);ctx.lineTo(x,cy+hh*sc);}
+  for(var b=-9;b<=9;b++){var y=cy+b*1.6*sc;ctx.moveTo(cx-hw*sc,y);ctx.lineTo(cx+hw*sc,y);}
   ctx.stroke();ctx.restore();
-  ctx.beginPath();ctx.ellipse(cx,cy,hw*sc,hl*sc,0,0,7);
-  ctx.strokeStyle="rgba(28,28,30,0.7)";ctx.lineWidth=Math.max(3,sc*0.9);ctx.stroke();
-  var rr=4.0*sc;
-  ctx.beginPath();ctx.ellipse(cx,cy,rr,rr,0,0,7);
-  ctx.fillStyle="rgba(52,199,89,0.10)";ctx.fill();
-  ctx.setLineDash([4,3]);ctx.strokeStyle="rgba(52,199,89,0.6)";ctx.lineWidth=1.2;ctx.stroke();ctx.setLineDash([]);
-  for(var i=0;i<shots.length;i++){
-    var f=illust(shots[i]),p=P(f.cx,f.cy),d=Math.max(3,0.75*sc),hl=(i===hlIdx);
-    ctx.beginPath();ctx.ellipse(p[0],p[1],d,d,0,0,7);
-    ctx.fillStyle=f.sweet?"rgba(52,199,89,"+(hl?1:0.55)+")":"rgba(255,59,48,"+(hl?1:0.55)+")";ctx.fill();
-    if(hl){ctx.strokeStyle="#1C1C1E";ctx.lineWidth=2;ctx.stroke();}
-  }
+  ctx.beginPath();ctx.ellipse(cx,cy,hw*sc,hh*sc,0,0,7);ctx.strokeStyle="rgba(28,28,30,0.7)";ctx.lineWidth=Math.max(3,sc*0.9);ctx.stroke();
+  var rr=SWEET_CM*sc;ctx.beginPath();ctx.ellipse(cx,cy,rr,rr,0,0,7);
+  ctx.fillStyle="rgba(52,199,89,0.10)";ctx.fill();ctx.setLineDash([4,3]);ctx.strokeStyle="rgba(52,199,89,0.6)";ctx.lineWidth=1.2;ctx.stroke();ctx.setLineDash([]);
+  rows.forEach(function(row,i){
+    var d=Math.max(3,0.75*sc),h=(i===hl),px=cx+row.p.cx*sc,py=cy-row.p.cy*sc;
+    ctx.beginPath();ctx.ellipse(px,py,d,d,0,0,7);
+    ctx.fillStyle=(row.sweet?"rgba(52,199,89,":"rgba(255,59,48,")+(h?1:0.55)+")";ctx.fill();
+    if(h){ctx.strokeStyle="#1C1C1E";ctx.lineWidth=2;ctx.stroke();}
+  });
 }
-function angleTxt(d,pos,neg){d=Math.round(d);return d===0?"0°":Math.abs(d)+"° "+(d>0?pos:neg);}
-function shotName(s){return s.kind==="serve"?"Serve":s.side==="forehand"?"Forehand":s.side==="backhand"?"Backhand":"Hit";}
-function el(doc,tag,cls,html){var e=doc.createElement(tag);if(cls)e.className=cls;if(html!=null)e.innerHTML=html;return e;}
-function initEmulator(doc,players){
-  var shots=[];
-  var prov=doc.getElementById("provenance"),tiles=doc.getElementById("statTiles");
-  var cardWrap=doc.getElementById("shotCardWrap"),recent=doc.getElementById("recentList");
-  var bed=doc.getElementById("bedCanvas").getContext("2d");
-  var swing=doc.getElementById("swingCanvas"),sctx=swing.getContext("2d");
-  var sBtn=doc.getElementById("sessionBtn"),clockEl=doc.getElementById("statClock");
-  var countEl=doc.getElementById("statCount"),coverEl=doc.getElementById("statCover");
-  var state={shown:0,playing:false,speed:1,t:0,last:0,metric:true,swingV:0,swingA:0,pi:0};
-  function setSession(i){
-    state.pi=i;state.shown=0;state.t=0;setPlaying(false);
-    var P=players[i],session=P.session;
-    shots=session.shots||[];
-    doc.getElementById("connLabel").textContent=P.name;
-    prov.innerHTML="<b>Data:</b> "+session.provenance.source+" · <b>derived:</b> timing, side/kind, intensity · "+
-      "<b>illustrative:</b> speeds, spin, angles, contacts"+
-      (P.video_url?" · <a href=\""+P.video_url+"\">source video</a>":"");
-    var row=doc.getElementById("playerRow");
-    for(var k=0;k<row.children.length;k++)row.children[k].classList.toggle("on",k===i);
-    recent.innerHTML="";paintCard();paint();
-  }
-  function spd(kmh){return state.metric?kmh.toFixed(0):(kmh*0.621371).toFixed(0);}
-  function spdUnit(){return state.metric?"km/h":"mph";}
-  function clockStr(s){s=Math.floor(s);return Math.floor(s/60)+":"+(s%60<10?"0":"")+(s%60);}
+function el(tag,cls,html){var e=document.createElement(tag);if(cls)e.className=cls;if(html!=null)e.innerHTML=html;return e;}
+function clockStr(s){s=Math.floor(s);return Math.floor(s/60)+":"+(s%60<10?"0":"")+(s%60);}
+
+function initEmulator(players){
+  var rows=[],S={shown:0,playing:false,speed:1,t:0,last:0,metric:true,swingV:0,swingA:0,pi:0,
+                d:{swing:0,face:0,path:0,cx:0,cy:0}};
+  var $=function(id){return document.getElementById(id);};
+  var bed=$("bedCanvas").getContext("2d"),sctx=$("swingCanvas").getContext("2d"),sBtn=$("sessionBtn");
+  function shownRows(){return rows.slice(0,S.shown);}
+  function spd(k){return (S.metric?k:k*0.621371).toFixed(0);}
+  function su(){return S.metric?"km/h":"mph";}
+  function endT(){return rows.length?rows[rows.length-1].shot.t_s+2:0;}
+
+  /* ----- Live ----- */
   function paintTiles(){
-    var n=state.shown,sw=shots.slice(0,n).map(illust),sweet=sw.filter(function(f){return f.sweet;}).length;
-    var balls=sw.map(function(f){return f.ball;});
-    var avg=balls.length?balls.reduce(function(a,b){return a+b;},0)/balls.length:0;
-    var mx=balls.length?Math.max.apply(null,balls):0;
-    var defs=[["Shots",""+n,""],["Sweet spot",n?Math.round(100*sweet/n)+"":"–","%"],
-      ["Avg ball",n?spd(avg):"–",spdUnit()+"*"],["Best",n?spd(mx):"–",spdUnit()+"*"]];
-    tiles.innerHTML="";
-    defs.forEach(function(d){tiles.appendChild(el(doc,"div","tile",
-      "<div class='l'>"+d[0]+"</div><div class='v'>"+d[1]+" <span class='u'>"+d[2]+"</span></div>"));});
+    var r=shownRows(),n=r.length,sw=r.filter(function(x){return x.sweet;}).length,balls=r.map(function(x){return x.r.ball;});
+    var defs=[["Shots",""+n,""],["Sweet spot",n?Math.round(100*sw/n)+"":"–","%"],["Avg ball",n?spd(mean(balls)):"–",su()],
+      ["Best",n?spd(Math.max.apply(null,balls)):"–",su()]];
+    var t=$("statTiles");t.innerHTML="";
+    defs.forEach(function(d){t.appendChild(el("div","tile","<div class='l'>"+d[0]+"</div><div class='v'>"+d[1]+" <span class='u'>"+d[2]+"</span></div>"));});
   }
   function paintCard(){
-    cardWrap.innerHTML="";
-    if(!state.shown){
-      var e=el(doc,"div","card","<div class='empty'><svg width='44' height='44' viewBox='0 0 24 24' fill='none' stroke='#8E8E93' stroke-width='1.6'><ellipse cx='9' cy='8' rx='6' ry='6.5' transform='rotate(-20 9 8)'/><line x1='13' y1='13' x2='20' y2='20'/></svg><br>Start the session.<br>Every hit shows up here.</div>");
-      e.id="shotCard";cardWrap.appendChild(e);return;
+    var w=$("shotCardWrap");w.innerHTML="";
+    if(!S.shown){
+      w.appendChild(el("div","card","<div class='empty'>Start the session.<br>Every hit shows up here.</div>"));return;
     }
-    var s=shots[state.shown-1],f=illust(s);
-    var c=el(doc,"div","card");c.id="shotCard";
-    var name=shotName(s);
-    c.appendChild(el(doc,"div","cardhead","<span class='shotname'>"+name+"</span>"+
-      "<span class='badge "+(f.sweet?"sweet":"off")+"'>"+(f.sweet?"Sweet spot":"Off center")+"</span>"));
-    var g=el(doc,"div","shotgrid");
-    var left=el(doc,"div","left","<div class='bignum'>"+spd(f.ball)+"</div><div class='bigunit'>"+spdUnit()+" ball speed (illustrative)</div>");
-    var m=el(doc,"div","metrics");
-    m.appendChild(el(doc,"div","metric","<div class='l'>Swing</div><div class='v'>"+spd(f.swing)+" "+spdUnit()+"</div>"));
-    m.appendChild(el(doc,"div","metric","<div class='l'>Spin</div><div class='v'>"+f.spin+" rpm "+(f.slice?"slice":"topspin")+"</div>"));
-    m.appendChild(el(doc,"div","metric","<div class='l'>Face</div><div class='v'>"+angleTxt(f.face,"open","closed")+"</div>"));
-    m.appendChild(el(doc,"div","metric","<div class='l'>Path</div><div class='v'>"+angleTxt(f.path,"up","down")+"</div>"));
+    var x=rows[S.shown-1],c=el("div","card");c.id="shotCard";
+    c.appendChild(el("div","cardhead","<span class='shotname'>"+x.name+"</span><span class='badge "+(x.sweet?"sweet":"off")+"'>"+(x.sweet?"Sweet spot":"Off center")+"</span>"));
+    var g=el("div","shotgrid"),left=el("div","left","<div class='bignum'>"+spd(x.r.ball)+"</div><div class='bigunit'>"+su()+" ball speed (estimate)</div>"),m=el("div","metrics");
+    function ang(d,p,n){d=Math.round(d);return d===0?"0°":Math.abs(d)+"° "+(d>0?p:n);}
+    m.appendChild(el("div","metric","<div class='l'>Swing</div><div class='v'>"+spd(x.p.swing)+" "+su()+"</div>"));
+    m.appendChild(el("div","metric","<div class='l'>Spin</div><div class='v'>"+Math.round(x.r.rpm)+" rpm "+x.r.spin+"</div>"));
+    m.appendChild(el("div","metric","<div class='l'>Face</div><div class='v'>"+ang(x.p.face,"open","closed")+"</div>"));
+    m.appendChild(el("div","metric","<div class='l'>Path</div><div class='v'>"+ang(x.p.path,"up","down")+"</div>"));
     left.appendChild(m);g.appendChild(left);
-    var mini=doc.createElement("canvas");mini.id="miniBed";mini.width=180;mini.height=220;
-    g.appendChild(mini);c.appendChild(g);cardWrap.appendChild(c);
-    drawBed(mini.getContext("2d"),180,220,[s],0);
-    c.classList.add(f.sweet?"flash-sweet":"flash-off");
-    setTimeout(function(){c.classList.remove("flash-sweet","flash-off");},1300);
+    var mini=document.createElement("canvas");mini.id="miniBed";mini.width=180;mini.height=220;g.appendChild(mini);
+    c.appendChild(g);w.appendChild(c);drawBed(mini.getContext("2d"),180,220,[x],0);
+    c.classList.add(x.sweet?"flash-sweet":"flash-off");setTimeout(function(){c.classList.remove("flash-sweet","flash-off");},1300);
   }
   function paintRecent(){
-    recent.innerHTML="";
-    var last=shots.slice(0,state.shown).slice(-6).reverse();
-    last.forEach(function(s){
-      var f=illust(s);
-      var r=el(doc,"div","rrow","<span>"+shotName(s)+"</span><span class='sp'>"+spd(f.ball)+" "+spdUnit()+"</span><span class='dot' style='background:"+(f.sweet?"var(--green)":"var(--red)")+"'></span>");
-      recent.appendChild(r);
+    var r=$("recentList");r.innerHTML="";
+    shownRows().slice(-6).reverse().forEach(function(x){
+      r.appendChild(el("div","rrow","<span>"+x.name+"</span><span class='sp'>"+spd(x.r.ball)+" "+su()+"</span><span class='dot' style='background:"+(x.sweet?"var(--green)":"var(--red)")+"'></span>"));
     });
   }
   function drawSwing(){
-    var W=380,H=190;var x=sctx;
-    x.clearRect(0,0,W,H);
-    x.save();x.translate(190,150);x.rotate(state.swingA);
-    x.strokeStyle="#1C1C1E";x.lineWidth=7;
-    x.beginPath();x.ellipse(0,-72,44,54,0,0,7);x.stroke();
+    var x=sctx;x.clearRect(0,0,380,190);x.save();x.translate(190,150);x.rotate(S.swingA);
+    x.strokeStyle="#1C1C1E";x.lineWidth=7;x.beginPath();x.ellipse(0,-72,44,54,0,0,7);x.stroke();
     x.strokeStyle="rgba(28,28,30,0.25)";x.lineWidth=1.5;x.beginPath();
     for(var i=-3;i<=3;i++){x.moveTo(i*11,-118);x.lineTo(i*11,-26);}
     for(var j=-4;j<=4;j++){x.moveTo(-40,-72+j*11);x.lineTo(40,-72+j*11);}
-    x.stroke();
-    x.strokeStyle="#1C1C1E";x.lineWidth=9;x.beginPath();x.moveTo(0,-18);x.lineTo(0,34);x.stroke();
-    x.restore();
+    x.stroke();x.strokeStyle="#1C1C1E";x.lineWidth=9;x.beginPath();x.moveTo(0,-18);x.lineTo(0,34);x.stroke();x.restore();
   }
-  function paint(){paintTiles();paintRecent();drawBed(bed,380,380,shots.slice(0,state.shown),state.shown-1);drawSwing();}
+  function paintLive(){
+    paintTiles();paintRecent();drawBed(bed,380,380,shownRows(),S.shown-1);drawSwing();
+    $("statClock").textContent=clockStr(S.t);$("statCount").textContent=S.shown+" shots";
+    $("statCover").textContent=S.shown?"track cover "+Math.round(100*rows[S.shown-1].shot.track_cover)+"%":"track cover –";
+    $("progress").style.width=(endT()?Math.min(100,100*S.t/endT()):0)+"%";
+  }
   function step(now){
-    if(!state.playing)return;
-    var dt=(now-state.last)/1000*state.speed;state.last=now;state.t+=dt;
-    state.swingV+=(-state.swingA*90-state.swingV*8)*dt;state.swingA+=state.swingV*dt;
-    var endT=shots.length?shots[shots.length-1].t_s+2:0;
+    if(!S.playing)return;
+    var dt=Math.min(0.1,(now-S.last)/1000)*S.speed;S.last=now;S.t+=dt;
+    S.swingV+=(-S.swingA*90-S.swingV*8)*dt;S.swingA+=S.swingV*dt;
     var added=false;
-    while(state.shown<shots.length&&shots[state.shown].t_s<=state.t){
-      state.shown++;state.swingV+=2.2+3*shots[state.shown-1].intensity;added=true;
-    }
+    while(S.shown<rows.length&&rows[S.shown].shot.t_s<=S.t){S.shown++;S.swingV+=2.2+3*rows[S.shown-1].shot.intensity;added=true;}
     if(added)paintCard();
-    clockEl.textContent=clockStr(state.t);
-    countEl.textContent=state.shown+" shots";
-    coverEl.textContent=state.shown?("track cover "+Math.round(100*shots[state.shown-1].track_cover)+"%"):"track cover –";
-    paintTiles();paintRecent();drawBed(bed,380,380,shots.slice(0,state.shown),state.shown-1);drawSwing();
-    if(state.t>=endT){setPlaying(false);return;}
+    paintLive();refreshOthers(false);
+    if(S.t>=endT()){setPlaying(false);return;}
     requestAnimationFrame(step);
   }
   function setPlaying(p){
-    state.playing=p;sBtn.textContent=p?"End Session":"Start Session";
+    S.playing=p;sBtn.textContent=p?"End Session":(S.shown&&S.shown>=rows.length?"Replay Session":"Start Session");
     sBtn.classList.toggle("live",p);
-    if(p){state.last=performance.now();requestAnimationFrame(step);}
+    if(p){S.last=performance.now();requestAnimationFrame(step);}
   }
+  function skipToEnd(){S.playing=false;S.shown=rows.length;S.t=endT();S.swingA=0;S.swingV=0;setPlaying(false);paintCard();paintLive();refreshOthers(true);}
   sBtn.addEventListener("click",function(){
-    if(!state.playing&&state.shown>=shots.length){state.shown=0;state.t=0;paintCard();}
-    setPlaying(!state.playing);
+    if(!S.playing&&S.shown>=rows.length){S.shown=0;S.t=0;paintCard();}
+    setPlaying(!S.playing);
   });
-  doc.getElementById("recenterBtn").addEventListener("click",function(){state.swingA=0;state.swingV=0;drawSwing();});
-  function seg(id,fn){
-    var node=doc.getElementById(id);
-    var btns=node.children||[];
-    for(var i=0;i<btns.length;i++)(function(b){b.addEventListener("click",function(){
-      for(var j=0;j<btns.length;j++)btns[j].classList.remove("on");
-      b.classList.add("on");fn(b);});})(btns[i]);
+  $("skipBtn").addEventListener("click",skipToEnd);
+  function seg(id,fn){var n=$(id).children;for(var i=0;i<n.length;i++)(function(b){b.addEventListener("click",function(){
+    for(var j=0;j<n.length;j++)n[j].classList.remove("on");b.classList.add("on");fn(b);});})(n[i]);}
+  seg("speedSeg",function(b){S.speed=+b.getAttribute("data-s");});
+  seg("unitSeg",function(b){S.metric=b.getAttribute("data-u")==="kmh";paintLive();paintCard();refreshOthers(true);});
+
+  /* ----- empty-state helper ----- */
+  function emptyCard(){
+    var c=el("div","card","<div class='empty'>No shots yet.<br>Play the match, or jump straight to the post-match view.<br><button class='ghost'>Skip to end</button></div>");
+    c.querySelector("button").addEventListener("click",function(){skipToEnd();});return c;
   }
-  seg("speedSeg",function(b){state.speed=+b.getAttribute("data-s");});
-  seg("unitSeg",function(b){state.metric=b.getAttribute("data-u")==="kmh";paintTiles();paintCard();paintRecent();});
-  var tabs=doc.getElementById("tabBar").children;
-  for(var ti=0;ti<tabs.length;ti++)(function(b){b.addEventListener("click",function(){
-    for(var j=0;j<tabs.length;j++)tabs[j].classList.remove("on");
-    b.classList.add("on");
-    var t=b.getAttribute("data-t");
-    doc.getElementById("navTitle").textContent=t;
-    var live=t==="Live";
-    doc.getElementById("liveScreen").style.display=live?"flex":"none";
-    doc.getElementById("altScreen").style.display=live?"none":"flex";
-    if(!live)doc.getElementById("altEmpty").innerHTML="<b>"+t+"</b> isn't part of this emulator.<br>It replays the Live tab only.";
-  });})(tabs[ti]);
-  if(doc.getElementById("clock"))doc.getElementById("clock").textContent="9:41";
-  var prow=doc.getElementById("playerRow");
-  for(var pi=0;pi<players.length;pi++)(function(i){
-    var b=doc.createElement("button");b.textContent=players[i].name;
-    b.addEventListener("click",function(){setSession(i);});
-    prow.appendChild(b);
-  })(pi);
+
+  /* ----- Insights ----- */
+  function paintInsights(){
+    var scr=$("insightsScreen");scr.innerHTML="";var r=shownRows();
+    if(!r.length){scr.appendChild(emptyCard());return;}
+    var n=r.length,sw=r.filter(function(x){return x.sweet;}).length,balls=r.map(function(x){return x.r.ball;});
+    var dur=r[n-1].shot.t_s-r[0].shot.t_s,third=Math.max(1,Math.floor(n/3));
+    var f3=mean(r.slice(0,third).map(function(x){return x.p.swing;})),l3=mean(r.slice(-third).map(function(x){return x.p.swing;}));
+    var c=el("div","card");c.appendChild(el("h2","secttl","Session summary"));
+    function k(a,b,sub){c.appendChild(el("div","krow","<span>"+a+(sub?"<small>"+sub+"</small>":"")+"</span><span>"+b+"</span>"));}
+    k("Shots",n+"","in "+clockStr(dur)+" of tracked play");
+    k("Sweet spot",Math.round(100*sw/n)+"%",sw+" of "+n+" hits within "+SWEET_CM+" cm of center");
+    k("Average ball speed",spd(mean(balls))+" "+su(),"estimate from the impact model");
+    k("Top ball speed",spd(Math.max.apply(null,balls))+" "+su());
+    k("Average spin",Math.round(mean(r.map(function(x){return x.r.rpm;})))+" rpm");
+    k("Swing speed, first third → last third",spd(f3)+" → "+spd(l3)+" "+su(),l3<f3-1?"swing speed faded "+Math.round(100*(f3-l3)/f3)+"%":l3>f3+1?"swing speed rose":"held steady");
+    scr.appendChild(c);
+    var W=360,H=110,bw=W/n,mx=Math.max.apply(null,balls),svg="<svg viewBox='0 0 "+W+" "+H+"' width='100%' role='img' aria-label='Ball speed per shot'>";
+    r.forEach(function(x,i){var h=Math.max(3,(H-6)*x.r.ball/mx);
+      svg+="<rect x='"+(i*bw+0.5).toFixed(1)+"' y='"+(H-h).toFixed(1)+"' width='"+Math.max(1,bw-1).toFixed(1)+"' height='"+h.toFixed(1)+"' rx='1.5' fill='"+(x.sweet?"#34C759":"#FF3B30")+"' opacity='.8'/>";});
+    var c2=el("div","card");c2.appendChild(el("h2","secttl","Every shot, in order"));
+    c2.insertAdjacentHTML("beforeend",svg+"</svg><div class='note'>Bar height = estimated ball speed. Green = sweet spot, red = off center.</div>");
+    scr.appendChild(c2);
+    var c3=el("div","card");c3.appendChild(el("h2","secttl","Where the ball met the strings"));
+    var cv=document.createElement("canvas");cv.width=380;cv.height=380;cv.style.width="100%";c3.appendChild(cv);scr.appendChild(c3);
+    drawBed(cv.getContext("2d"),380,380,r,-1);
+  }
+
+  /* ----- What if ----- */
+  var LEVERS=[["swing","Swing speed","%",LIM.swing,1],["path","Path (low-to-high)","°",LIM.angle,1],["face","Face angle","°",LIM.angle,1],["cy","Contact toward tip","cm",LIM.contact,0.5],["cx","Contact toward right","cm",LIM.contact,0.5]];
+  function paintWhatIf(){
+    var scr=$("whatifScreen");scr.innerHTML="";var r=shownRows(),b=baselineOf(r);
+    if(!b){scr.appendChild(emptyCard());return;}
+    var head=el("div","card");head.appendChild(el("h2","secttl","Change one thing"));
+    head.appendChild(el("div","note","Start from this player's average swing ("+r.length+" shots: "+spd(b.swing)+" "+su()+" swing, path "+b.path.toFixed(0)+"°, face "+b.face.toFixed(0)+"°). Move a lever; the app's impact model predicts the result. It estimates speed and spin only — no ball flight or landing."));
+    var out=el("div","card"),says=el("p","says"),cmp=el("div","cmp");out.appendChild(says);out.appendChild(cmp);
+    function update(){
+      var A=simulate(b),B=simulate(applyDeltas(b,S.d)),zero=!S.d.swing&&!S.d.face&&!S.d.path&&!S.d.cx&&!S.d.cy;
+      says.textContent=zero?"Move a lever to try a change.":"If you "+describe(S.d)+"…";
+      function dl(x,y,f,u,hi){var d=y-x,cls=Math.abs(d)<0.5?"":(d>0===hi?"up":"dn");
+        return "<span class='"+cls+"'>"+(d>0?"+":"")+f(d)+u+"</span>";}
+      cmp.innerHTML="<span class='h'></span><span class='h'>Now</span><span class='h'>After</span>"+
+        "<span>Ball speed</span><span>"+spd(A.ball)+" "+su()+"</span><span>"+spd(B.ball)+" "+su()+" "+dl(A.ball,B.ball,function(d){return spd(d);},"",true)+"</span>"+
+        "<span>Spin</span><span>"+Math.round(A.rpm)+" rpm</span><span>"+Math.round(B.rpm)+" rpm "+dl(A.rpm,B.rpm,function(d){return Math.round(d);},"",true)+"</span>"+
+        "<span>Spin type</span><span>"+A.spin+"</span><span>"+B.spin+"</span>"+
+        "<span>Off center</span><span>"+A.dist.toFixed(1)+" cm</span><span>"+B.dist.toFixed(1)+" cm "+dl(A.dist,B.dist,function(d){return d.toFixed(1);},"",false)+"</span>";
+    }
+    LEVERS.forEach(function(L){
+      var w=el("div","lever"),lab=el("label",null,"<span style='color:var(--ink)'>"+L[1]+"</span><span></span>"),inp=document.createElement("input");
+      inp.type="range";inp.min=-L[3];inp.max=L[3];inp.step=L[4];inp.value=S.d[L[0]];
+      function show(){lab.lastChild.textContent=(S.d[L[0]]>0?"+":"")+S.d[L[0]]+" "+L[2];}
+      inp.addEventListener("input",function(){S.d[L[0]]=+inp.value;show();update();});
+      show();w.appendChild(lab);w.appendChild(inp);head.appendChild(w);
+    });
+    var btns=el("div","sessrow");btns.style.marginTop="12px";
+    var best=el("button","ghost","Find the best change"),reset=el("button","ghost","Reset");
+    best.addEventListener("click",function(){S.d=bestChange(b);paintWhatIf();});
+    reset.addEventListener("click",function(){S.d={swing:0,face:0,path:0,cx:0,cy:0};paintWhatIf();});
+    btns.appendChild(best);btns.appendChild(reset);head.appendChild(btns);
+    scr.appendChild(out);scr.appendChild(head);update();
+  }
+  function candidates(b){
+    var c=[],base=simulate(b).ball;
+    [[{swing:10},"swing 10% faster"],[{swing:-10},"swing 10% slower"]].forEach(function(x){c.push(x);});
+    c.push([{cx:clamp(-b.cx,-5,5),cy:clamp(-b.cy,-5,5)},"re-center contact"]);
+    c.push([{path:5},"5° more low-to-high"]);c.push([{face:-4},"close face 4°"]);
+    return c.map(function(x){var d={swing:0,face:0,path:0,cx:0,cy:0};for(var k in x[0])d[k]=Math.round(x[0][k]*2)/2;
+      var s=simulate(applyDeltas(b,d));return {d:d,label:x[1],dBall:s.ball-base,dRpm:s.rpm-simulate(b).rpm};});
+  }
+  function bestChange(b){var c=candidates(b).sort(function(a,z){return z.dBall-a.dBall;});return c[0].d;}
+
+  /* ----- Muse (offline demo of the tool-calling loop) ----- */
+  var museLog=[];
+  function toolBox(name,args,result){
+    return "<div class='tool'><b>"+name+"</b>("+JSON.stringify(args)+")<details><summary>result</summary>"+JSON.stringify(result)+"</details></div>";
+  }
+  function r1(v){return Math.round(v*10)/10;}
+  var QUESTIONS=[
+    ["How did this match go?",function(r){
+      var n=r.length,sw=r.filter(function(x){return x.sweet;}).length,bs=r.map(function(x){return x.r.ball;});
+      var d={shots:n,sweet_spot_percent:r1(100*sw/n),avg_ball_kmh:r1(mean(bs)),max_ball_kmh:r1(Math.max.apply(null,bs))};
+      return {tools:[["get_session_digest",{session:"current"},d]],
+        text:"Over "+clockStr(r[n-1].shot.t_s)+" of tracked play you hit "+n+" balls. "+d.sweet_spot_percent+"% found the sweet spot, the average ball was "+spd(d.avg_ball_kmh)+" "+su()+" and the fastest "+spd(d.max_ball_kmh)+" "+su()+"."};}],
+    ["Did the swing fade late on?",function(r){
+      var t=Math.max(1,Math.floor(r.length/3)),a=r.slice(0,t),z=r.slice(-t);
+      var fa=mean(a.map(function(x){return x.p.swing;})),fz=mean(z.map(function(x){return x.p.swing;}));
+      return {tools:[["query_shots",{metric:"swing_speed",from:"start",to:"first third"},{count:a.length,mean_kmh:r1(fa)}],
+        ["query_shots",{metric:"swing_speed",from:"last third",to:"end"},{count:z.length,mean_kmh:r1(fz)}]],
+        text:Math.abs(fz-fa)<1?"Swing speed held steady: "+spd(fa)+" "+su()+" early and "+spd(fz)+" "+su()+" late.":
+          "Average swing speed went from "+spd(fa)+" "+su()+" in the first third to "+spd(fz)+" "+su()+" in the last third ("+(fz<fa?"down ":"up ")+Math.round(100*Math.abs(fz-fa)/fa)+"%)."};}],
+    ["Why do I miss the sweet spot?",function(r){
+      var off=r.filter(function(x){return !x.sweet;});
+      if(!off.length)return {tools:[["list_shots",{contact:"off_center"},{count:0}]],text:"Every hit was in the sweet spot, so there is nothing to fix."};
+      var mx=mean(off.map(function(x){return x.p.cx;})),my=mean(off.map(function(x){return x.p.cy;}));
+      var tip=off.filter(function(x){return x.p.cy>0;}).length,right=off.filter(function(x){return x.p.cx>0;}).length;
+      var d={count:off.length,mean_distance_cm:r1(mean(off.map(function(x){return x.r.dist;}))),toward_tip:tip,toward_throat:off.length-tip,right:right,left:off.length-right};
+      return {tools:[["list_shots",{contact:"off_center",limit:50},d]],
+        text:off.length+" of "+r.length+" hits were off center, by "+d.mean_distance_cm+" cm on average. "+tip+" landed toward the tip and "+(off.length-tip)+" toward the throat; "+right+" right of center and "+(off.length-right)+" left. "+
+          (Math.abs(tip-(off.length-tip))<=off.length*0.25&&Math.abs(right-(off.length-right))<=off.length*0.25?"There is no consistent direction, so this looks like scatter rather than one habit to fix.":"The lean is worth a look.")};}],
+    ["What if I swing 10% faster?",function(r){
+      var b=baselineOf(r),d={swing:10,face:0,path:0,cx:0,cy:0},A=simulate(b),B=simulate(applyDeltas(b,d));
+      return {tools:[["simulate_change",{swing_percent:10},{baseline_ball_kmh:r1(A.ball),changed_ball_kmh:r1(B.ball),baseline_rpm:Math.round(A.rpm),changed_rpm:Math.round(B.rpm)}]],
+        text:"The model predicts the average ball goes from "+spd(A.ball)+" to "+spd(B.ball)+" "+su()+" and spin from "+Math.round(A.rpm)+" to "+Math.round(B.rpm)+" rpm. It does not model where the ball lands, so faster is not automatically better."};}],
+    ["What is the single best change?",function(r){
+      var b=baselineOf(r),c=candidates(b).sort(function(a,z){return z.dBall-a.dBall;});
+      return {tools:c.slice(0,3).map(function(x){return ["simulate_change",x.d,{ball_kmh_gain:r1(x.dBall),spin_rpm_change:Math.round(x.dRpm)}];}),
+        text:"Of the changes I tried, \""+c[0].label+"\" adds the most ball speed (+"+spd(c[0].dBall)+" "+su()+"). Open What if to try it yourself."};}]
+  ];
+  function paintMuse(){
+    var scr=$("museScreen");scr.innerHTML="";
+    var intro=el("div","card");intro.appendChild(el("h2","secttl","Ask Muse about this match"));
+    intro.appendChild(el("div","note","In the app, Muse Spark calls these same tools on your real sessions. This page can't reach Muse, so the replies below are written from the tool results by a template — the numbers are real model output for this replay."));
+    var chips=el("div","chips");chips.style.marginTop="12px";
+    QUESTIONS.forEach(function(q,i){var b=el("button","chip",q[0]);b.addEventListener("click",function(){ask(i);});chips.appendChild(b);});
+    intro.appendChild(chips);scr.appendChild(intro);
+    var r=shownRows();
+    if(!r.length){scr.appendChild(emptyCard());return;}
+    museLog.forEach(function(m){
+      scr.appendChild(el("div","q",m.q));
+      var a=el("div","a",m.tools.map(function(t){return toolBox(t[0],t[1],t[2]);}).join("")+"<div>"+m.text+"</div>");scr.appendChild(a);
+    });
+  }
+  function ask(i){
+    var r=shownRows();if(!r.length){skipToEnd();r=shownRows();}
+    var res=QUESTIONS[i][1](r);museLog.push({q:QUESTIONS[i][0],tools:res.tools,text:res.text});
+    paintMuse();var sc=document.querySelector(".screens");sc.scrollTop=sc.scrollHeight;
+  }
+
+  /* ----- plumbing ----- */
+  function refreshOthers(force){
+    var on=document.querySelector(".tab.on").getAttribute("data-t");
+    if(on==="Insights")paintInsights();
+    else if(on==="What if"&&force)paintWhatIf();
+    else if(on==="Muse"&&force)paintMuse();
+  }
+  function showTab(t){
+    var tabs=$("tabBar").children;for(var i=0;i<tabs.length;i++)tabs[i].classList.toggle("on",tabs[i].getAttribute("data-t")===t);
+    var scr=document.querySelectorAll(".screen");for(var j=0;j<scr.length;j++)scr[j].classList.toggle("on",scr[j].getAttribute("data-s")===t);
+    $("navTitle").textContent=t;document.querySelector(".screens").scrollTop=0;
+    if(t==="Insights")paintInsights();if(t==="What if")paintWhatIf();if(t==="Muse")paintMuse();
+  }
+  var tabs=$("tabBar").children;
+  for(var ti=0;ti<tabs.length;ti++)(function(b){b.addEventListener("click",function(){showTab(b.getAttribute("data-t"));});})(tabs[ti]);
+  Array.prototype.forEach.call(document.querySelectorAll(".guide [data-go]"),function(b){
+    b.addEventListener("click",function(){
+      var act=b.getAttribute("data-act");showTab(b.getAttribute("data-go"));
+      if(act==="play"){if(!S.playing){if(S.shown>=rows.length){S.shown=0;S.t=0;paintCard();}setPlaying(true);}}
+      if(act==="skip")skipToEnd();
+      if(!act&&!shownRows().length)skipToEnd(),showTab(b.getAttribute("data-go"));
+      if(window.innerWidth<900)document.querySelector(".phone").scrollIntoView({behavior:"smooth"});
+    });});
+
+  function setSession(i){
+    S.pi=i;S.shown=0;S.t=0;S.d={swing:0,face:0,path:0,cx:0,cy:0};museLog=[];setPlaying(false);
+    var P=players[i],ses=P.session;rows=(ses.shots||[]).map(enrich);
+    $("connLabel").textContent=P.name;
+    $("provenance").innerHTML="<b>From video:</b> "+ses.provenance.source+" — shot times and swing intensity, tracked with SAM 3.1 (short windows around contacts, not the full match). "+
+      "<b>Estimated:</b> speeds, spin, angles, contact points.<br>"+(P.video_url?"<a href=\""+P.video_url+"\">Source video</a>":"");
+    var row=$("playerRow").children;for(var k=0;k<row.length;k++)row[k].classList.toggle("on",k===i);
+    paintCard();paintLive();showTab($("tabBar").querySelector(".on").getAttribute("data-t"));
+  }
+  players.forEach(function(p,i){var b=document.createElement("button");b.textContent=p.name;b.addEventListener("click",function(){setSession(i);});$("playerRow").appendChild(b);});
   setSession(0);
-  return state;
+  return {state:S,simulate:simulate,describe:describe};
 }
 if(typeof window!=="undefined"&&window.document){
-  fetch("emulator_sessions.json").then(function(r){return r.json();}).then(function(d){initEmulator(document,d.players);})
+  fetch("emulator_sessions.json").then(function(r){return r.json();}).then(function(d){initEmulator(d.players);})
   .catch(function(){return fetch("emulator_session.json").then(function(r){return r.json();}).then(function(s){
-    initEmulator(document,[{name:"Demo",video_url:null,session:s}]);});})
-  .catch(function(){document.getElementById("provenance").textContent="Could not load emulator_sessions.json — serve this folder over HTTP or deploy the files together.";});
+    initEmulator([{name:"Demo",video_url:null,session:s}]);});})
+  .catch(function(e){document.getElementById("provenance").textContent="Could not load emulator_sessions.json — serve this folder over HTTP or deploy the files together. "+e;});
 }
 </script>
 </body>

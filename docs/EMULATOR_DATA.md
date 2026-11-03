@@ -49,18 +49,26 @@ frames across runs. A full 2-hour match at 30 fps is ~216k frames (~$43) — alw
 around contacts instead. Delete source video after tracking unless you are entitled to keep
 it; F3Set access follows that dataset's own terms.
 
-## Illustrative figures (web emulator only)
+## Estimated figures (web emulator only)
 
-[`website/emulator.html`](../website/emulator.html) mirrors the app's Live tab
-(`apple/Shared/Views/LiveView.swift`, `Components.swift`: string-bed geometry ported 1:1),
-so it needs speeds the footage cannot supply. These are computed deterministically from
-intensity `i` (0-1) and shot index, and every surface labels them illustrative:
+[`website/emulator.html`](../website/emulator.html) has four tabs: Live (replay), Insights (post-match
+summary), What if (levers) and Muse (offline tool-call demo). Footage only gives shot times and a
+unitless intensity `i` (0-1), so the swing parameters below are derived deterministically from `i` and
+shot index, then run through a JavaScript port of the app's own
+[`ShotSimulator`](../apple/RacketKit/Sources/RacketKit/ShotSimulator.swift) (acor 0.42, spin gain 0.7,
+4 cm sweet spot). Every surface labels the results as estimates.
 
-- swing = 60 + 90·i km/h; ball = swing·1.35 + 8 (+ small deterministic jitter)
-- spin = 800 + 2200·i rpm (topspin; slice below i = 0.25 on every third shot)
-- face = ±8·i° (sign alternates); path = 10 + 20·i° up (slice: 8-18° down)
-- contact (cm): deterministic scatter, spread 7·(1.15 − 0.6·i), clamped to the head;
-  sweet iff within 4 cm. Sweet-spot verdicts and the green/red flash follow from this.
+- swing = 60 + 90·i km/h; face = ±8·i° (sign alternates); path = 10 + 20·i° up (slice: 8-18° down on
+  every third shot below i = 0.25)
+- contact (cm): deterministic scatter, spread 7·(1.15 − 0.6·i), clamped to the head; sweet iff within 4 cm
+- ball speed, spin rpm and spin type come from `simulate()` (same formulas as `ShotSimulator.simulate`)
+- What if: baseline is the mean of the shots played so far; levers and limits match `WhatIf.Deltas`
+  (±30 % swing, ±15° angles, ±5 cm contact); the sentence matches `WhatIf.describe`
+- Muse tab: the chips run local ports of `get_session_digest`, `query_shots`, `list_shots` and
+  `simulate_change` on the replay, and the reply text is a template over those results. It does not
+  call Muse Spark.
+- Stroke side is unknown for all current clips, so the page shows every hit as "Hit" and offers no
+  forehand/backhand split.
 
 ## Schema (`emulator_sessions.json`)
 
