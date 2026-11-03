@@ -220,7 +220,7 @@ svg.i .f{fill:currentColor;stroke:none}
 </head>
 <body>
 <div class="wrap">
- <div class="mobnote"><b style="color:#B0DA1C">Pro-match replay.</b> Shot times come from video; speeds, spin and contacts are model estimates. Details below the phone.</div>
+ <div class="mobnote"><b style="color:#B0DA1C">Pro-match replay.</b> Strokes and timing come from labelled data and video; speeds, spin and contacts are model estimates. Details below the phone.</div>
  <div class="side">
   <div class="brandrow"><a href="index.html">Tennis Buddee</a><a href="https://github.com/QuentinL-eng/Tennis-Buddy-Smart-Racket/blob/main/docs/EMULATOR_DATA.md">How this data was made</a></div>
   <div class="panel prov" id="prov">Loading…</div>
@@ -245,9 +245,7 @@ svg.i .f{fill:currentColor;stroke:none}
   <div class="tabs" id="tabs"></div>
   <div class="toast" id="toast" hidden></div>
  </div>
- <p class="foot">This is a browser emulator of the iPhone app, not a recording of a real match. Video gives shot times and a unitless swing
- intensity per hit (SAM 3.1 racket tracking, short windows around contacts). Speeds, spin, face and path angles, contact points, the racket's
- 3D motion and the gyro/g readouts are estimates produced by the app's own physics model and swing template, ported to JavaScript.
+ <p class="foot">This is a browser emulator of the iPhone app, not a recording of a real match. In the labelled Ostrava match, stroke types and outcomes are the F3Tennis dataset's labels and the swing timing follows the SAM-tracked racket (a 2D box, so a rough guide). In the other matches the video gives only shot times and a unitless swing intensity, with no stroke labels. Speeds, spin, face and path angles, contact points, the 3D swing and the gyro/g readouts are estimates from the app's own physics model and swing template, ported to JavaScript.
  Method and limits: <a href="https://github.com/QuentinL-eng/Tennis-Buddy-Smart-Racket/blob/main/docs/EMULATOR_DATA.md">docs/EMULATOR_DATA.md</a>.</p>
 </div>
 
@@ -272,42 +270,59 @@ const apply=(b,d)=>({swing:b.swing*(1+clamp(d.swing,-30,30)/100),face:b.face+cla
 const Z=()=>({swing:0,face:0,path:0,cx:0,cy:0});
 const isZero=d=>!d.swing&&!d.face&&!d.path&&!d.cx&&!d.cy;
 
-const SHAPE={reach:1.1,maxTurn:2.0,side:new THREE.Vector3(0,0,1),camera:new THREE.Vector3(-.75,.7,1.45),target:new THREE.Vector3(.05,-.08,-.45),floorY:-.75};
-const _v=()=>new THREE.Vector3();
-function swingFrame(p,phi){
-  const path=p.path*Math.PI/180, face=p.face*Math.PI/180, R=SHAPE.reach;
+const V3=(x,y,z)=>new THREE.Vector3(x,y,z);
+const SHAPES={
+  forehand:{reach:1.1,maxTurn:2.0,side:V3(0,0,1),serve:false,camera:V3(-.75,.7,1.45),target:V3(.05,-.08,-.45),floorY:-.75,dist:1.05},
+  backhand:{reach:1.1,maxTurn:2.0,side:V3(0,0,-1),serve:false,camera:V3(-.75,.7,-1.45),target:V3(.05,-.08,.45),floorY:-.75,dist:1.05},
+  serve:{reach:1.15,maxTurn:2.6,side:V3(0,1,0),serve:true,camera:V3(-.55,-.45,2.9),target:V3(.05,-.6,0),floorY:-2.45,dist:1.35},
+  volley:{reach:.85,maxTurn:.7,side:V3(0,0,1),serve:false,camera:V3(-.6,.5,1.25),target:V3(.05,-.05,-.3),floorY:-.9,dist:1.05}};
+SHAPES.hit=SHAPES.forehand;
+const shapeOf=t=>SHAPES[t]||SHAPES.forehand;
+function swingFrame(p,phi,shape){
+  shape=shape||SHAPES.forehand;
+  const path=p.path*Math.PI/180, face=p.face*Math.PI/180, R=shape.reach;
   const e2=new THREE.Vector3(Math.cos(path),Math.sin(path),0);
-  const e1=SHAPE.side.clone().addScaledVector(e2,-SHAPE.side.dot(e2)).normalize();
+  const e1=shape.side.clone().addScaledVector(e2,-shape.side.dot(e2)).normalize();
   let n=new THREE.Vector3().crossVectors(e1,e2).normalize(); if(n.y<0)n.negate();
-  const r=e1.clone().multiplyScalar(Math.cos(phi)).addScaledVector(e2,Math.sin(phi));
+  let r=e1.clone().multiplyScalar(Math.cos(phi)).addScaledVector(e2,Math.sin(phi));
   const tan=e1.clone().multiplyScalar(-Math.sin(phi)).addScaledVector(e2,Math.cos(phi));
-  const normal=tan.clone().multiplyScalar(Math.cos(face)).addScaledVector(n,Math.sin(face));
+  let normal;
+  if(shape.serve){
+    // a vertical swing plane: opening the face leans the racket back about the swing axis
+    const q=new THREE.Quaternion().setFromAxisAngle(new THREE.Vector3().crossVectors(e2,e1).normalize(),face);
+    r=r.applyQuaternion(q);normal=tan.clone().applyQuaternion(q);
+  }else normal=tan.clone().multiplyScalar(Math.cos(face)).addScaledVector(n,Math.sin(face));
   const across=new THREE.Vector3().crossVectors(normal,r);
   const head=e1.clone().multiplyScalar(-R).addScaledVector(e1,R*Math.cos(phi)).addScaledVector(e2,R*Math.sin(phi));
   const bed=head.clone().addScaledVector(across,-p.cx/100).addScaledVector(r,-p.cy/100);
   const butt=bed.clone().addScaledVector(r,-BED);
   return {m:new THREE.Matrix4().makeBasis(r,across,normal).setPosition(butt),bed,normal,up:n};
 }
-const omegaOf=p=>(p.swing/3.6)/SHAPE.reach;
-const phiAt=(p,t)=>SHAPE.maxTurn*Math.tanh(omegaOf(p)*t/SHAPE.maxTurn);
-const poseAt=(p,t)=>swingFrame(p,phiAt(p,t));
+const omegaOf=(p,sh)=>(p.swing/3.6)/sh.reach;
+const phiAt=(p,t,sh)=>sh.maxTurn*Math.tanh(omegaOf(p,sh)*t/sh.maxTurn);
+const poseAt=(p,t,sh)=>swingFrame(p,phiAt(p,t,sh),sh);
 
 /* =====================================================================
    Data: video-derived shots -> estimated swing parameters -> ShotSimulator
    ===================================================================== */
 function mulberry32(a){return function(){a|=0;a=a+0x6D2B79F5|0;let t=Math.imul(a^a>>>15,1|a);t=t+Math.imul(t^t>>>7,61|t)^t;return((t^t>>>14)>>>0)/4294967296;};}
 function params(s){
-  const r=mulberry32(s.index*2654435761+7), i=s.intensity, slice=i<.25&&s.index%3===0;
-  const path=slice?-Math.round(8+10*r()):Math.round(10+20*i);
+  const r=mulberry32(s.index*2654435761+7), i=s.intensity, slice=s.technique==="slice"||(s.technique==null&&i<.25&&s.index%3===0);
+  const path=slice?-Math.round(8+10*r()):s.path_deg!=null?Math.round(s.path_deg):Math.round(10+20*i);
   // Contact point is NOT observable in video. Assumption: a pro's contact is bell-shaped around the sweet spot,
   // sigma ~2.2 cm (a bit looser for harder swings), which puts roughly 85% of hits inside the 4 cm sweet spot.
   const gauss=()=>Math.sqrt(-2*Math.log(1-r()))*Math.cos(2*Math.PI*r());
-  const sg=2.0+.5*i;
+  const sg=2.0+.5*i, type=s.stroke||"hit";
   return {swing:60+90*i,face:Math.round(i*8*(s.index%2?1:-1)),path,
-          cx:clamp(gauss()*sg*.9,-11,11),cy:clamp(gauss()*sg*1.1,-14,14),inc:43.2};
+          cx:clamp(gauss()*sg*.9,-11,11),cy:clamp(gauss()*sg*1.1,-14,14),
+          inc:type==="serve"?0:type==="volley"?54:43.2};   // incoming ball speed as WhatIf.baseline uses
 }
-const enrich=s=>{const p=params(s),r=simulate(p);return {s,p,r,t:s.t_s,i:s.intensity,sweet:r.dist<=SWEET,id:s.index};};
-const baselineOf=rows=>rows.length?{swing:mean(rows.map(x=>x.p.swing)),face:mean(rows.map(x=>x.p.face)),path:mean(rows.map(x=>x.p.path)),cx:mean(rows.map(x=>x.p.cx)),cy:mean(rows.map(x=>x.p.cy)),inc:43.2}:null;
+const LABEL={forehand:"Forehand",backhand:"Backhand",serve:"Serve",volley:"Volley",hit:"Hit"};
+const enrich=s=>{const p=params(s),r=simulate(p),type=s.stroke||"hit";
+  return {s,p,r,type,name:LABEL[type],t:s.t_s,i:s.intensity,sweet:r.dist<=SWEET,id:s.index,outcome:s.outcome||null,prog:s.prog||null};};
+const baselineOf=rows=>rows.length?{swing:mean(rows.map(x=>x.p.swing)),face:mean(rows.map(x=>x.p.face)),path:mean(rows.map(x=>x.p.path)),cx:mean(rows.map(x=>x.p.cx)),cy:mean(rows.map(x=>x.p.cy)),inc:mean(rows.map(x=>x.p.inc))}:null;
+const STROKES=["forehand","backhand","serve","volley","hit"];
+const strokesIn=rs=>STROKES.filter(t=>rs.some(x=>x.type===t));
 
 /* units: the app defaults to mph / inches */
 const U={metric:false,
@@ -332,6 +347,7 @@ const IC={
  chev:'<path d="M9 5l7 7-7 7"/>', chevl:'<path d="M15 5l-7 7 7 7"/>', chevd:'<path d="M6 9l6 6 6-6"/>',
  up:'<path d="M12 19V5M5 12l7-7 7 7"/>', sliders:'<path d="M4 7h10M18 7h2M4 17h2M10 17h10"/><circle cx="16" cy="7" r="2"/><circle cx="8" cy="17" r="2"/>',
  brain:'<path d="M9 4a3 3 0 0 0-3 3 3 3 0 0 0-2 2.800A3 3 0 0 0 5 14a3 3 0 0 0 4 4.500V4zM15 4a3 3 0 0 1 3 3 3 3 0 0 1 2 2.800A3 3 0 0 1 19 14a3 3 0 0 1-4 4.500V4z"/>',
+ turnl:'<path d="M9 4L4 9l5 5"/><path d="M4 9h9a6 6 0 0 1 6 6v5"/>', turnr:'<path d="M15 4l5 5-5 5"/><path d="M20 9h-9a6 6 0 0 0-6 6v5"/>', upc:'<circle cx="12" cy="12" r="9"/><path d="M12 17V8M8 12l4-4 4 4"/>', hand:'<path d="M8 12V6a1.500 1.500 0 0 1 3 0v5M11 11V4.500a1.500 1.500 0 0 1 3 0V11M14 11V6a1.500 1.500 0 0 1 3 0v8a6 6 0 0 1-6 6h-1a5 5 0 0 1-4-2l-3-4a1.500 1.500 0 0 1 2.400-1.800L8 15"/>',
  ball:'<circle cx="12" cy="12" r="9"/><path d="M4.500 6.500c4 2 4 9 0 11M19.500 6.500c-4 2-4 9 0 11"/>',
  check:'<path d="M5 12.500l4.500 4.500L19 7.500"/>', x:'<path d="M6 6l12 12M18 6L6 18"/>', undo:'<path d="M9 8L4 12.500 9 17M4.500 12.500H15a5 5 0 0 1 0 10"/>',
  flag:'<path d="M6 21V4M6 5h12l-2.500 4L18 13H6"/>', racket:'<ellipse cx="10" cy="9" rx="6" ry="7" transform="rotate(-25 10 9)"/><path d="M14.500 14.500L20 21"/>',
@@ -340,6 +356,7 @@ const IC={
  account:'<circle cx="12" cy="12" r="9"/><circle cx="12" cy="10" r="3"/><path d="M6.500 18c1-2.500 3-3.500 5.500-3.500s4.500 1 5.500 3.500"/>',
  tap:'<path d="M9 11V5a1.500 1.500 0 0 1 3 0v5.500l5 1a2 2 0 0 1 1.500 2l-.5 4.500a3 3 0 0 1-3 2.500h-3a3 3 0 0 1-2.400-1.200L6 14"/>'
 };
+const SYM={forehand:"turnl",backhand:"turnr",serve:"upc",volley:"hand",hit:"ball"};
 const ic=(n,c="")=>`<svg class="i ${c}" viewBox="0 0 24 24" aria-hidden="true">${IC[n]}</svg>`;
 document.getElementById("sbr").innerHTML='<svg class="i" viewBox="0 0 24 24" style="font-size:17px"><path class="f" d="M3 17h2.500v3H3zM8 14h2.500v6H8zM13 11h2.500v9H13zM18 8h2.500v12H18z"/></svg><svg class="i" viewBox="0 0 24 24" style="font-size:17px"><path d="M2 9a14 14 0 0 1 20 0M5 12.500a9.500 9.500 0 0 1 14 0M8.500 16a5 5 0 0 1 7 0"/></svg><svg viewBox="0 0 30 14" width="28" height="14"><rect x=".5" y=".5" width="25" height="13" rx="4" fill="none" stroke="#000" opacity=".4"/><rect x="2" y="2" width="22" height="10" rx="2.500"/><rect x="27" y="4.500" width="2" height="5" rx="1" opacity=".4"/></svg>';
 
@@ -428,24 +445,35 @@ const endT=()=>rows.length?rows[rows.length-1].t+2:0;
 let toastT;function toast(t){const e=$("toast");e.textContent=t;e.hidden=false;clearTimeout(toastT);toastT=setTimeout(()=>e.hidden=true,2600);}
 
 /* ---------- racket motion for the Live scene ---------- */
-const LEAD=1.4, SLOW=.3, READY=-.8, REST={swing:80,face:0,path:10,cx:0,cy:0,inc:43.2};
+const LEAD=1.4, SLOW=.3, HALF=12, FPS=25, REST={swing:80,face:0,path:10,cx:0,cy:0,inc:43.2}, READYF=-.4;
+// racket progress in -1..1 (fraction of the stroke's turn) at `tau` seconds from contact for one hit.
+// Hits with a SAM track use that track's real timing (sampled at 25 fps); the rest use the template's tanh profile.
+function rowFrac(r,tau){
+  const sh=shapeOf(r.type);
+  if(r.prog){
+    const x=clamp(tau*FPS+HALF,0,2*HALF),i=Math.min(2*HALF-1,Math.floor(x)),w=x-i;
+    return r.prog[i]*(1-w)+r.prog[i+1]*w;
+  }
+  return Math.tanh(omegaOf(r.p,sh)*tau*SLOW/sh.maxTurn);
+}
 function motion(clock){
-  let sum=0,dom=null,dw=0,ph=0;const w=[];
+  let sum=0,dom=null,dw=0,fr=0;const w=[];
   for(let i=0;i<rows.length;i++){
     const tau=clock-rows[i].t;if(tau<-1.1||tau>1.6)continue;
     const up=Math.min(1,Math.max(0,(tau+1.1)/.5)),dn=Math.min(1,Math.max(0,(1.6-tau)/.6)),wi=up*up*(3-2*up)*(dn*dn*(3-2*dn));
     if(wi<=0)continue;w.push([i,tau,wi]);sum+=wi;if(wi>dw){dw=wi;dom=i;}
   }
   const wn=Math.max(1,sum);
-  for(const [i,tau,wi] of w)ph+=wi/wn*(phiAt(rows[i].p,tau*SLOW)-READY);
-  const phi=READY+ph+.04*Math.sin(clock*1.3);
-  return {phi,p:dom!=null?rows[dom].p:REST,dom,w:Math.min(1,sum)};
+  for(const [i,tau,wi] of w)fr+=wi/wn*(rowFrac(rows[i],tau)-READYF);
+  const row=dom!=null?rows[dom]:null,sh=row?shapeOf(row.type):SHAPES.forehand;
+  const phi=(READYF+fr)*sh.maxTurn+.04*Math.sin(clock*1.3);
+  return {phi,p:row?row.p:REST,shape:sh,dom,slow:row&&row.prog?1:SLOW,w:Math.min(1,sum)};
 }
 let gyroSm=0;
 function liveSensors(clock){
-  const e=.02,a=motion(clock-e).phi,b=motion(clock+e).phi;
-  // the racket moves on slowed time, so the real angular rate is the animated rate divided by SLOW
-  const real=Math.abs(b-a)/(2*e)/SLOW*180/Math.PI;
+  const e=.02,A=motion(clock-e),a=A.phi,b=motion(clock+e).phi;
+  // template-timed swings run slowed (SLOW); tracked swings run in real time
+  const real=Math.abs(b-a)/(2*e)/A.slow*180/Math.PI;
   gyroSm+=(real-gyroSm)*.35;
   let g=1;for(const r of rows){const tau=clock-r.t;if(Math.abs(tau)<.6)g+=(8+60*r.i)*Math.exp(-((tau/.09)**2));}
   return {gyro:gyroSm,g};
@@ -460,7 +488,7 @@ function buildLive(){
    <div id="sess"></div><div id="shotPanel"></div><div id="recent"></div>`;
   paintSess();paintShot();paintRecent();
   if(!glOK)$("rkgl").innerHTML='<div class="msg">The 3D racket needs WebGL, which this browser has turned off.</div>';
-  else liveStage=new Stage($("rkgl"),{pos:SHAPE.camera.clone().normalize().multiplyScalar(1.05),target:new THREE.Vector3(0,0,0),fov:40,key:2.2,amb:1.5});
+  else liveStage=new Stage($("rkgl"),{pos:SHAPES.forehand.camera.clone().normalize().multiplyScalar(1.05),target:new THREE.Vector3(0,0,0),fov:40,key:2.2,amb:1.5});
 }
 let liveStage=null;
 function paintSess(){
@@ -480,7 +508,7 @@ function paintSess(){
 function shotCardHTML(r,anim=true){
   const p=r.p,m=r.r,ang=(d,pos,neg)=>{d=Math.round(d);return d===0?"0°":`${Math.abs(d)}° ${d>0?pos:neg}`;};
   return `<div class="shotcard ${r.sweet?"sweet":"off"}" ${anim?"":'style="animation:none"'}>
-   <div class="sc-head"><span class="t">${ic("ball")} Hit</span><span class="badge">${r.sweet?"Sweet spot":"Off center"}</span></div>
+   <div class="sc-head"><span class="t">${ic(SYM[r.type])} ${r.name}</span><span class="badge">${r.sweet?"Sweet spot":"Off center"}</span></div>
    <div class="sc-body"><div><div class="big">${U.sv(m.ball)}</div><div class="cap">${U.su()} ball speed (est.)</div>
     <div class="grid2"><div class="mt"><div class="l">Swing</div><div class="v">${U.sv(p.swing)} ${U.su()}</div></div>
      <div class="mt"><div class="l">Spin</div><div class="v">${Math.round(m.rpm)} rpm ${m.spin}</div></div>
@@ -496,7 +524,7 @@ function paintRecent(){
   const rs=shownRows();
   if(!(S.active&&rs.length>1)){$("recent").innerHTML="";return;}
   $("recent").innerHTML=`<div class="card2"><div class="h">This session</div>${bedSVG(rs,rs.length-1,168)}
-   ${rs.slice(-6).reverse().map(x=>`<div class="rrow">${ic("ball")}<span>Hit</span><span class="sp">${U.sv(x.r.ball)} ${U.su()}</span><span class="dot" style="background:${x.sweet?"var(--green)":"var(--red)"}"></span></div>`).join("")}</div>`;
+   ${rs.slice(-6).reverse().map(x=>`<div class="rrow">${ic(SYM[x.type])}<span>${x.name}</span><span class="sp">${U.sv(x.r.ball)} ${U.su()}</span><span class="dot" style="background:${x.sweet?"var(--green)":"var(--red)"}"></span></div>`).join("")}</div>`;
 }
 function setActive(a){
   S.active=a;S.last=performance.now();
@@ -516,7 +544,10 @@ function frameLive(now){
     if(S.clock>=endT()){setActive(false);toast("Replay finished — see Insights for the session.");}
   }
   if(S.tab==="live"&&liveStage){
-    const m=motion(S.clock),pose=swingFrame(m.p,m.phi),sens=liveSensors(S.clock);
+    const m=motion(S.clock),pose=swingFrame(m.p,m.phi,m.shape),sens=liveSensors(S.clock);
+    // the camera eases to each stroke's own viewpoint (serves overhead, backhands from the other side)
+    const want=m.shape.camera.clone().normalize().multiplyScalar(m.shape.dist),k=1-Math.exp(-dt*5);
+    liveStage.cam.position.lerp(want,k);liveStage.cam.lookAt(0,0,0);
     // like the app, the IMU only gives orientation: turn the racket about a point near the grip (0.3 m from the butt)
     const rr=new THREE.Vector3().setFromMatrixColumn(pose.m,0),gm=pose.m.clone().setPosition(rr.multiplyScalar(-.3));
     liveStage.setPose(gm);liveStage.render(now);
@@ -562,6 +593,7 @@ function navChanged(){disposeWI();renderNav();refreshOther();if(top()==="live")$
 function refreshOther(){
   const v=top();if(v==="live")return;
   const el=$("v-other"),keep=el.scrollTop;
+  if(v==="whatif")disposeWI();
   el.innerHTML="";
   ({score:scoreHTML,together:togetherHTML,insights:insightsHTML,racket:racketHTML,muse:museHTML,whatif:whatifHTML,memory:memoryHTML,detail:detailHTML,account:accountHTML})[v](el);
   el.scrollTop=keep;
@@ -580,7 +612,7 @@ function insightsHTML(el){
   if(!rs.length)return el.innerHTML=h+empty("No data yet","Play a session and your trends show up here.","ecg"),bind(el);
   h+=`<div class="chips">${[null,"Forehand","Backhand","Serve","Volley"].map(s=>`<button class="${(S.stroke||null)===s?"on":""}" data-act="stroke" data-v="${s||""}">${s||"All"}</button>`).join("")}</div>`;
   h+=`<div class="mtabs">${METRICS.map(m=>`<button class="${S.metric===m[0]?"on":""}" data-act="metric" data-v="${m[0]}">${m[1]}<span></span></button>`).join("")}</div>`;
-  const use=all?rs:[];   // every replayed hit is a plain "Hit": no stroke split exists in this data
+  const use=all?rs:rs.filter(x=>x.type===S.stroke.toLowerCase());
   if(!use.length){h+=`<div class="card22" style="min-height:140px;display:flex;align-items:center;justify-content:center;color:var(--sec);text-align:center">No ${(S.stroke||"").toLowerCase()} shots in this period</div>`;return el.innerHTML=h,bind(el);}
   let avg,tp,lo,vals;
   if(S.metric==="shots"){avg=use.length;}else if(S.metric==="sweetSpot"){avg=100*use.filter(x=>x.sweet).length/use.length;}
@@ -597,8 +629,13 @@ function insightsHTML(el){
   else ch+=`<line x1="${x}" x2="${x}" y1="${pyv(tp)}" y2="${pyv(lo)}" stroke="rgba(176,218,28,.28)" stroke-width="16" stroke-linecap="round"/><circle cx="${x}" cy="${pyv(avg)}" r="6.500" fill="#B0DA1C"/>`;
   ch+=`<text x="${x}" y="${H-4}" font-size="11" text-anchor="middle" fill="rgba(60,60,67,.6)">${sessionDate()}</text></svg>`;
   h+=`<div class="card22">${S.metric!=="shots"&&S.metric!=="sweetSpot"?`<div class="cap" style="margin-bottom:4px">${munit(S.metric)}</div>`:""}${ch}</div>`;
-  // by stroke (every replayed hit is "Hit")
-  if(all&&vals)h+=`<div class="card22"><div class="h">By stroke</div><div style="display:flex;align-items:center;gap:10px"><span style="width:50px;font-size:12px;color:var(--sec)">Hit</span><div style="flex:1;height:22px;background:#B0DA1C;border-radius:4px"></div><span class="cap">${f(avg)}</span></div></div>`;
+  // by stroke, one bar per stroke the session has
+  const grp=strokesIn(rs);
+  if(all&&grp.length>1){
+    const val=g=>{const q=rs.filter(x=>x.type===g);return S.metric==="shots"?q.length:S.metric==="sweetSpot"?100*q.filter(x=>x.sweet).length/q.length:mean(q.map(mval[S.metric]));};
+    const vs=grp.map(val),mx=Math.max(...vs.map(Math.abs),1e-6);
+    h+=`<div class="card22"><div class="h">By stroke</div>${grp.map((g,k)=>`<div style="display:flex;align-items:center;gap:10px;margin:8px 0"><span style="width:62px;font-size:12px;color:var(--sec)">${LABEL[g]}</span><div style="flex:1"><div style="height:22px;width:${Math.max(2,100*Math.abs(vs[k])/mx)}%;background:#B0DA1C;border-radius:4px"></div></div><span class="cap" style="width:42px;text-align:right">${f(vs[k])}</span></div>`).join("")}</div>`;
+  }
   h+=`<div class="card22"><div class="h">Shot by shot</div>${shotsChart(use)}<div class="cap" style="margin-top:4px">Ball speed per hit. Green = sweet spot, red = off center.</div></div>`;
   h+=`<div><div style="display:flex;justify-content:space-between;align-items:baseline;margin-bottom:10px"><span class="h" style="margin:0">Sessions</span><span style="color:var(--blue);font-size:15px">All sessions</span></div>
    <button class="srow" data-act="detail"><span><div class="a">${sessionDate(true)}</div><div class="b">${rs.length} shots · ${Math.max(1,Math.round((rs[rs.length-1].t-rs[0].t)/60))}m</div></span>
@@ -616,7 +653,7 @@ function detailHTML(el){
    <div class="tile"><div class="l">Shots</div><div class="v">${rs.length}</div></div><div class="tile"><div class="l">Sweet spot</div><div class="v">${rs.length?Math.round(100*sw/rs.length):0}<small>%</small></div></div>
    <div class="tile"><div class="l">Avg ball</div><div class="v">${U.sv(mean(rs.map(x=>x.r.ball)))}<small>${U.su()}</small></div></div><div class="tile"><div class="l">Best</div><div class="v">${rs.length?U.sv(Math.max(...rs.map(x=>x.r.ball))):0}<small>${U.su()}</small></div></div></div>
    <div class="card2"><div class="h">Impacts</div>${bedSVG(rs,-1,300)}</div>
-   <div class="card2"><div class="h">Shots</div>${rs.slice().reverse().map(x=>`<div class="rrow">${ic("ball")}<span>Hit</span><span class="sp">${U.sv(x.r.ball)} ${U.su()}</span><span class="dot" style="background:${x.sweet?"var(--green)":"var(--red)"}"></span></div>`).join("")}</div>`;
+   <div class="card2"><div class="h">Shots</div>${rs.slice().reverse().map(x=>`<div class="rrow">${ic(SYM[x.type])}<span>${x.name}</span><span class="sp">${U.sv(x.r.ball)} ${U.su()}</span><span class="dot" style="background:${x.sweet?"var(--green)":"var(--red)"}"></span></div>`).join("")}</div>`;
 }
 
 /* ---------- Muse (offline demo engine over real local tool ports) ---------- */
@@ -631,10 +668,10 @@ function evalCands(b){
     return {...c,d,gain:B.ball/A.ball-1,rpm:B.rpm,rpm0:A.rpm,ball:B.ball,score:(B.ball/A.ball-1)+.5*(B.rpm/Math.max(A.rpm,1)-1)};}).sort((a,z)=>z.score-a.score);
 }
 function museHTML(el){
-  const rs=shownRows(),b=baselineOf(rs),f=S.film;
+  const rs=shownRows(),f=S.film,st=f?f.stroke:curStroke(rs),b=baselineOf(strokeRows(rs,st));
   let h=`<div class="mh"><span class="t">Muse</span><span class="s"><span class="dot" style="background:var(--m-muted)"></span>Demo engine · offline</span></div>`;
-  h+=`<div class="hero" ${f?'data-act="openwi" style="cursor:pointer"':""}><div class="top"><div class="eyebrow" style="opacity:.7">BEST CHANGE · HIT</div><div class="ti">${f?f.title:"Find your best change"}</div>
-   <div class="cu2">${f?f.cue:"Muse tests changes on your average hit and shows you the one that helps most."}</div></div>
+  h+=`<div class="hero" ${f?'data-act="openwi" style="cursor:pointer"':""}><div class="top"><div class="eyebrow" style="opacity:.7">BEST CHANGE · ${st.toUpperCase()}</div><div class="ti">${f?f.title:"Find your best change"}</div>
+   <div class="cu2">${f?f.cue:`Muse tests changes on your average ${LABEL[st].toLowerCase()} and shows you the one that helps most.`}</div></div>
    <svg class="sk" viewBox="0 0 300 110" preserveAspectRatio="none"><path d="M18 42C75 130 190 118 246 28" fill="none" stroke="rgba(17,19,12,.35)" stroke-width="3" stroke-dasharray="6 7"/><path d="M18 52C75 140 190 118 246 20" fill="none" stroke="#11130C" stroke-width="6" stroke-linecap="round"/><circle cx="214" cy="62" r="10" fill="#FBFBF4" stroke="#11130C" stroke-width="3"/></svg>
    <div class="ft">${f?(()=>{const A=simulate(b),B=simulate(apply(b,f.d));return `<div><div class="v">${(B.ball/A.ball-1>=0?"+":"")+Math.round((B.ball/A.ball-1)*100)}%</div><div class="l">ball speed</div></div><div><div class="v">${Math.round(B.rpm)}</div><div class="l">rpm, was ${Math.round(A.rpm)}</div></div><span class="go">Watch ›</span>`;})():
    `<span class="e">${rs.length?"Runs on this page, not Muse Spark":"Play or skip to the end of the match first"}</span><button class="go" data-act="findfilm" ${rs.length?"":"disabled"} style="min-height:44px">Find it ›</button>`}</div></div>`;
@@ -655,6 +692,10 @@ function museHTML(el){
 }
 const SUGG=["What's my weakest stroke?","Am I getting tired?","Show my last 5 off-center hits","Is the racket working right?"];
 const f1=v=>Math.round(v*10)/10;
+const strokeRows=(rs,t)=>rs.filter(x=>x.type===t);
+function curStroke(rs){const st=strokesIn(rs);return st.includes(S.wiStroke)?S.wiStroke:(st[0]||"hit");}
+function wiBase(){const rs=shownRows(),st=curStroke(rs),q=strokeRows(rs,st);return {rs,st,q,b:baselineOf(q)};}
+
 function answer(q){
   const rs=shownRows(),n=rs.length,low=q.toLowerCase();
   if(!n)return {a:"Play or skip to the end of the match first, then ask again.",tools:[]};
@@ -667,8 +708,12 @@ function answer(q){
     if(!off.length)return {tools:["list_shots"],a:"Every hit so far was in the sweet spot."};
     return {tools:["list_shots"],a:`Your last ${off.length} off-center hits:\n`+off.map(x=>`• ${clockStr(x.t)} — ${U.lt(x.r.dist)} from center, ${U.sv(x.r.ball)} ${U.su()}`).join("\n")+`\nOverall ${rs.filter(x=>!x.sweet).length} of ${n} hits missed the sweet spot.`};}
   if(/weak|stroke|worst|best/.test(low)){
-    const sw=rs.filter(x=>x.sweet).length;
-    return {tools:["get_session_digest"],a:`Every hit in this replay is logged as a plain "Hit", because the video can't tell forehand from backhand, so there's no stroke to compare. What the data does show: ${Math.round(100*sw/n)}% of ${n} hits found the sweet spot, and the average ball was ${U.sv(mean(rs.map(x=>x.r.ball)))} ${U.su()}.`};}
+    const sw=rs.filter(x=>x.sweet).length,grp=strokesIn(rs),lab=rs.some(x=>x.outcome);
+    if(grp.length<2||!lab)return {tools:["get_session_digest"],a:`Every hit in this replay is logged as a plain "Hit", because this match's clips carry no stroke labels, so there is no stroke to compare. What the data does show: ${Math.round(100*sw/n)}% of ${n} hits found the sweet spot, and the average ball was ${U.sv(mean(rs.map(x=>x.r.ball)))} ${U.su()}.`};
+    // the dataset labels each hit's outcome, so this one is real data, not the contact prior
+    const st=grp.map(g=>{const q=strokeRows(rs,g),e=q.filter(x=>/err/.test(x.outcome||"")).length;return {g,n:q.length,e,rate:e/q.length,ball:mean(q.map(x=>x.r.ball))};}).filter(x=>x.n>=3).sort((a,z)=>z.rate-a.rate);
+    const w=st[0];
+    return {tools:grp.map(()=>"query_shots"),a:`By the dataset's own labels, your ${LABEL[w.g].toLowerCase()} lost the most points: ${w.e} errors in ${w.n} hits (${Math.round(100*w.rate)}%).\n`+st.map(x=>`• ${LABEL[x.g]}: ${x.e} errors in ${x.n} hits, average ball ${U.sv(x.ball)} ${U.su()}`).join("\n")+`\nSmall numbers, so read it as a hint. Errors are the dataset's labels (forced and unforced); sweet-spot rates here are an assumption and not used for this.`};}
   if(/racket|working|battery|sensor|firmware/.test(low))
     return {tools:["get_racket_status"],a:"This is a video replay, so no racket hardware is connected and there is no battery or firmware to report. With a real racket, Muse reads those straight from its status packet."};
   return {tools:[],a:"In this demo I can answer the four suggested questions. Tap one above."};
@@ -686,7 +731,7 @@ const CAP={
   cy:v=>v?`${U.lt(Math.abs(v))} toward ${v>0?"tip":"throat"}`:"same",
   cx:v=>v?`${U.lt(Math.abs(v))} ${v>0?"right":"left"}`:"same"};
 const cap1=s=>s[0].toUpperCase()+s.slice(1);
-const curFilm=()=>S.film&&JSON.stringify(S.film.d)===JSON.stringify(S.d)?S.film:null;
+const curFilm=()=>S.film&&S.film.stroke===wiBase().st&&JSON.stringify(S.film.d)===JSON.stringify(S.d)?S.film:null;
 function wiTiles(){
   const d=S.d,stat={Speed:d.swing?`${d.swing>0?"+":"−"}${Math.abs(d.swing)}%`:"0%",Path:d.path?`${d.path>0?"+":"−"}${Math.abs(d.path)}°`:"0°",Face:d.face?`${d.face>0?"+":"−"}${Math.abs(d.face)}°`:"0°",
     Contact:Math.hypot(d.cx,d.cy)?U.lt(Math.hypot(d.cx,d.cy)):"0 "+U.lu()};
@@ -700,7 +745,7 @@ function wiResults(b){
     <div class="pbar"><i style="width:${100*b0/t}%;background:var(--m-ghost)"></i>${Math.abs(up)>=.5?`<i style="width:${100*a0/t}%;background:${up>0?"var(--m-lime)":"#FF998C"};opacity:.9"></i>`:""}</div>${note?`<div class="nt">${note}</div>`:""}</div>`;};
   return bar("Ball speed",U.speed(A.ball),U.speed(B.ball),U.su(),"",Math.max(U.speed(A.ball),U.speed(B.ball),1)*1.15)+
     bar("Spin",A.rpm,B.rpm,"rpm",A.spin===B.spin?"":`${cap1(A.spin)} → ${cap1(B.spin)}`,Math.max(A.rpm,B.rpm,1)*1.15)+
-    `<div class="mfoot" style="margin:0">${f?"Estimated by the racket's physics model. Picked and tested by Muse (demo engine).":"Estimated by the racket's physics model on your average swing. Ball flight isn't modeled."} The swing is drawn with the forehand template because the video can't tell stroke side.</div>`;
+    `<div class="mfoot" style="margin:0">${f?"Estimated by the racket's physics model. Picked and tested by Muse (demo engine).":"Estimated by the racket's physics model on your average swing. Ball flight isn't modeled."} Ball flight, landing and net clearance are not modeled.</div>`;
 }
 function wiEditor(){
   const sl=(t,key,lim,step)=>`<div class="sl"><div class="tp"><b>${t}</b><span data-cap="${key}">${CAP[key](S.d[key])}</span></div><input type="range" data-d="${key}" min="${-lim}" max="${lim}" step="${step}" value="${S.d[key]}" aria-label="${t}"></div>`;
@@ -712,13 +757,13 @@ function bindSlider(i){
     if(cp)cp.textContent=CAP[i.dataset.d](S.d[i.dataset.d]);wiUpdate();});
 }
 function whatifHTML(el){
-  const rs=shownRows(),b=baselineOf(rs);
+  const {rs:all,st,q:rs,b}=wiBase();
   if(!b)return el.innerHTML=`<div class="mcard" style="text-align:center;padding:40px 20px;color:var(--m-text)"><div style="font-size:44px;color:var(--m-lime)">${ic("sliders")}</div><div style="font:800 20px var(--rounded);margin:8px 0">No swings to test yet</div><div style="color:var(--m-muted)">Play a session with the racket's motion sensors on, then try changes here.</div></div>`;
-  let h=`<div class="sw"><button class="on">Hit</button></div>
+  let h=`<div class="sw">${strokesIn(all).map(t=>`<button class="${t===st?"on":""}" data-act="wistroke" data-v="${t}">${LABEL[t]}</button>`).join("")}</div>
    <div class="stage3d"><div class="gl" id="wigl"></div><div class="tg" id="witag"></div>
     <div class="modes" id="wimodes">${["Both","Yours","Change"].map(m=>`<button class="${(S.wiMode||"Both")===m?"on":""}" data-act="wimode" data-v="${m}">${m}</button>`).join("")}</div></div>
    <div id="wi-cue" style="margin-bottom:12px">${wiCue()}</div>
-   <div class="bl">Your average hit: ${rs.length} swings, ${U.sv(b.swing)} ${U.su()}, path ${Math.abs(Math.round(b.path))}° ${b.path>=0?"up":"down"}, face ${Math.abs(Math.round(b.face))}° ${b.face>=0?"open":"closed"}, contact ${Math.hypot(b.cx,b.cy)<.5?"centered":U.lt(Math.hypot(b.cx,b.cy))}.</div>
+   <div class="bl">Your average ${LABEL[st].toLowerCase()}: ${rs.length} swings, ${U.sv(b.swing)} ${U.su()}, path ${Math.abs(Math.round(b.path))}° ${b.path>=0?"up":"down"}, face ${Math.abs(Math.round(b.face))}° ${b.face>=0?"open":"closed"}, contact ${Math.hypot(b.cx,b.cy)<.5?"centered":U.lt(Math.hypot(b.cx,b.cy))}.</div>
    <div class="lt" id="wi-tiles">${wiTiles()}</div>
    <div class="mcard" style="margin-bottom:12px" id="wi-ed">${wiEditor()}</div>
    <div class="mcard res" id="wi-res">${wiResults(b)}</div>`;
@@ -729,15 +774,16 @@ function whatifHTML(el){
   el.querySelectorAll("input[data-d]").forEach(bindSlider);
 }
 function wiUpdate(){
-  const b=baselineOf(shownRows());if(!b||!$("wi-res"))return;
+  const b=wiBase().b;if(!b||!$("wi-res"))return;
   $("wi-tiles").innerHTML=wiTiles();$("wi-res").innerHTML=wiResults(b);$("wi-cue").innerHTML=wiCue();
   const rb=document.querySelector('.nav [data-act="wireset"]');if(rb)rb.style.opacity=isZero(S.d)?".4":"1";
 }
 function mountWI(){
   if(wiStage||!glOK)return;
   const el=$("wigl");if(!el)return;
-  wiStage=new Stage(el,{bg:0x0b0c09,pos:new THREE.Vector3(-.75,.7,1.45),target:SHAPE.target,key:2.4,amb:1.2,rim:true,wide:true});
-  const grid=new THREE.GridHelper(4,20,0x3a3d2c,0x1d2016);grid.position.y=SHAPE.floorY;wiStage.scene.add(grid);
+  const sh=shapeOf(wiBase().st);
+  wiStage=new Stage(el,{bg:0x0b0c09,pos:sh.camera.clone(),target:sh.target,key:2.4,amb:1.2,rim:true,wide:true});
+  const grid=new THREE.GridHelper(4,20,0x3a3d2c,0x1d2016);grid.position.y=sh.floorY;wiStage.scene.add(grid);
   const bm=new THREE.MeshStandardMaterial({color:0xd9ed40,emissive:0x2a2e0a,roughness:.7});
   wiStage.ball=new THREE.Mesh(new THREE.SphereGeometry(BALL_R,32,24),bm);
   const seam=new THREE.Mesh(new THREE.TorusGeometry(BALL_R*1.002,.0024,8,48),new THREE.MeshBasicMaterial({color:0xf5f5f5}));seam.rotation.x=Math.PI/2;wiStage.ball.add(seam);wiStage.scene.add(wiStage.ball);
@@ -749,21 +795,20 @@ function tube(pts,rad,color,op=1){
   return {g,m:new THREE.MeshBasicMaterial({color,transparent:op<1,opacity:op})};
 }
 function frameWhatIf(now){
-  const rs=shownRows(),b=baselineOf(rs);if(!b||!wiStage)return;
+  const {st:stk,b}=wiBase();if(!b||!wiStage)return;const sh=shapeOf(stk),st=wiStage;
   const a=simulate(b),A=simulate(apply(b,S.d)),hasChange=!isZero(S.d),mode=S.wiMode||"Both";
   const clock=(now-wiStart)/1000,both=mode==="Both"&&hasChange,H=WI_TIMING.half;
   const u=clock%(both?2*H:H),changed=both?u>=H:(mode==="Change"&&hasChange),t=(((both&&changed)?u-H:u)-WI_TIMING.contactAt)*WI_TIMING.slow;
-  const p=changed?apply(b,S.d):b,res=changed?A:a,st=wiStage;
-  const pose=poseAt(p,t);st.setPose(pose.m);
-  const key=JSON.stringify([p,changed,hasChange]);
-  const pts=[];for(let x=-.32;x<=Math.min(t,.32);x+=.0075)pts.push(poseAt(p,x).bed);
+  const p=changed?apply(b,S.d):b,res=changed?A:a;
+  const pose=poseAt(p,t,sh);st.setPose(pose.m);
+  const key=JSON.stringify([p,changed,hasChange,stk]);
+  const pts=[];for(let x=-.32;x<=Math.min(t,.32);x+=.0075)pts.push(poseAt(p,x,sh).bed);
   if(pts.length>=2){const T=tube(pts,.008,0xdde85b);st.trail.geometry.dispose();st.trail.geometry=T.g;st.trail.material=T.m;st.trail.visible=true;}else st.trail.visible=false;
   if(key!==wiKey){wiKey=key;
-    if(changed){const gp=[];for(let x=-.32;x<=.32;x+=.0075)gp.push(poseAt(b,x).bed);const T=tube(gp,.006,0x7d856a,.7);st.ghost.geometry.dispose();st.ghost.geometry=T.g;st.ghost.material=T.m;st.ghost.visible=true;}else st.ghost.visible=false;}
+    if(changed){const gp=[];for(let x=-.32;x<=.32;x+=.0075)gp.push(poseAt(b,x,sh).bed);const T=tube(gp,.006,0x7d856a,.7);st.ghost.geometry.dispose();st.ghost.geometry=T.g;st.ghost.material=T.m;st.ghost.visible=true;}else st.ghost.visible=false;}
   const ballOut=t>.11;st.ball.visible=!ballOut;
   if(t<0)st.ball.position.set(1,.04,0).normalize().multiplyScalar(p.inc/3.6*-t);
-  else{st.ball.position.copy(pose.normal).multiplyScalar(res.ball/3.6*t);const c=poseAt(p,0);st.ball.quaternion.setFromAxisAngle(c.up,-res.rpm/60*2*Math.PI*t);}
-  st.ball.material.opacity=1;
+  else{st.ball.position.copy(pose.normal).multiplyScalar(res.ball/3.6*t);const c=poseAt(p,0,sh);st.ball.quaternion.setFromAxisAngle(c.up,-res.rpm/60*2*Math.PI*t);}
   const tag=$("witag");if(tag){const html=hasChange?`<span class="${changed?"hot":""}">${changed?"With change":"Yours"}</span>`:`<span>Yours</span>`;if(tag.dataset.k!==html){tag.innerHTML=html;tag.dataset.k=html;}}
   st.render(now);
 }
@@ -878,7 +923,7 @@ $("phone").addEventListener("click",e=>{
    case"detail":go("detail");break;
    case"memory":go("memory");break;
    case"openwi":go("whatif");break;
-   case"findfilm":{const b=baselineOf(shownRows());if(!b)break;const c=evalCands(b)[0];S.film=c;S.d={...c.d};refreshOther();break;}
+   case"findfilm":{const w=wiBase();if(!w.b)break;const c=evalCands(w.b)[0];S.film={...c,stroke:w.st};S.wiStroke=w.st;S.d={...c.d};refreshOther();break;}
    case"drill":{const rs=shownRows(),sw=rs.filter(x=>x.sweet).length/Math.max(1,rs.length),goal=Math.round(clamp(5+10*(1-sw),5,15));
      S.drill={title:"Sweet-spot streak",goal:`Land ${goal} sweet-spot hits.`,why:`${Math.round(100*sw)}% of your hits were sweet-spot, so the target is ${goal}.`};S.drillRun=false;refreshOther();break;}
    case"rundrill":S.drillRun=true;refreshOther();break;
@@ -887,7 +932,8 @@ $("phone").addEventListener("click",e=>{
    case"lever":S.lever=v;{const el=$("v-other"),b=baselineOf(shownRows());if(b&&$("wi-ed")){wiUpdate();const sl=el.querySelector("#wi-ed");sl.innerHTML=wiEditor();el.querySelectorAll("#wi-ed input[data-d]").forEach(bindSlider);}}break;
    case"wimode":S.wiMode=v;wiStart=performance.now();document.querySelectorAll("#wimodes button").forEach(b=>b.classList.toggle("on",b.dataset.v===v));break;
    case"wireset":S.d=Z();S.film=null;refreshOther();break;
-   case"bestchange":{const b=baselineOf(shownRows()),c=evalCands(b),i=S.film?(c.findIndex(x=>x.title===S.film.title)+1)%c.length:0;S.film=c[i];S.d={...c[i].d};refreshOther();break;}
+   case"bestchange":{const w=wiBase(),c=evalCands(w.b),i=S.film&&S.film.stroke===w.st?(c.findIndex(x=>x.title===S.film.title)+1)%c.length:0;S.film={...c[i],stroke:w.st};S.d={...c[i].d};refreshOther();break;}
+   case"wistroke":S.wiStroke=v;S.d=Z();S.film=null;refreshOther();break;
    case"rule":{const r=S.rules;if(k==="simple")r.simple=v==="1";if(k==="sets")r.setsToWin=+v;if(k==="noad")r.noAd=!r.noAd;if(k==="mtb")r.matchTB=!r.matchTB;refreshOther();break;}
    case"startmatch":S.match=newMatchState(S.rules);renderNav();refreshOther();break;
    case"endmatch":S.match=null;renderNav();refreshOther();break;
@@ -905,7 +951,9 @@ $("speed").addEventListener("click",e=>{const b=e.target.closest("button");if(!b
 function setPlayer(i){
   S.pi=i;S.active=false;S.shown=0;S.clock=-LEAD;S.lastRow=null;S.d=Z();S.film=null;S.chat=[];S.drill=null;S.drillRun=false;
   const P=PLAYERS[i],ses=P.session;rows=(ses.shots||[]).map(enrich);
-  $("prov").innerHTML=`<b>From video:</b> ${ses.provenance.source} — shot times and swing intensity, tracked with SAM 3.1 in short windows around contacts (not the full match). <b>Estimated:</b> speeds, spin, angles, contact points, and the racket's 3D motion.${P.video_url?`<br><a href="${P.video_url}">Source video</a>`:""}`;
+  const lab=ses.provenance.labels;
+  $("prov").innerHTML=lab?`<b>From the dataset (real):</b> each hit's stroke, forehand/backhand, technique and outcome — ${ses.provenance.labels}. <b>From video:</b> when each hit happened and how the hitter's racket moved, tracked with SAM 3.1 (box centre, 25 fps). <b>Estimated:</b> speeds, spin, angles, contact points, and the 3D swing built from that motion.<br><a href="${P.video_url}">F3Tennis dataset</a>`:
+   `<b>From video:</b> ${ses.provenance.source} — shot times and swing intensity, tracked with SAM 3.1 in short windows around contacts (not the full match). Stroke types aren't labelled for this match, so every hit shows as "Hit" with a generic swing. <b>Estimated:</b> speeds, spin, angles, contact points, and the racket's 3D motion.${P.video_url?`<br><a href="${P.video_url}">Source video</a>`:""}`;
   [...$("players").children].forEach((b,k)=>b.classList.toggle("on",k===i));
   paintSess();paintShot();paintRecent();renderNav();refreshOther();
 }

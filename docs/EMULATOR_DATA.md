@@ -5,6 +5,23 @@ through the app's data path: SAM 3.1 tracks the racket on video, the tracks conv
 app's session format, and a static web page plays the sessions back. Live page:
 [`website/emulator.html`](../website/emulator.html) (needs `emulator_sessions.json` beside it).
 
+## Honesty rules (non-negotiable)
+
+1. The page always shows its provenance banner: video source, tracker, what is derived,
+   and what is illustrative. No mode hides it.
+2. Broadcast footage supports exactly three quantities: shot times, stroke side/kind from
+   dataset labels (never guessed from pixels), and unitless swing intensity. The labelled
+   match adds the hitter's racket timing from the SAM box centre (a rough 2D guide). Ball
+   speed, spin, face angle, and contact point are not observable and are never presented
+   as measured; the contact point is an assumed prior (see Estimated figures).
+3. No real player's name is attached to measured data. Style presets are illustrative and
+   say so. Never commit source footage; derived tracks + this provenance note are the artifact.
+4. The committed `emulator_sessions.json` carries one entry per player, each with its own
+   provenance block (video title, uploader, URL). Current file: the labelled Ostrava 2022
+   final (60 hits, real stroke labels, both players, from F3Tennis clips) plus 8 pro players,
+   291 hits from SAM 3.1-tracked broadcast windows (29,296 billed frames, $5.86) with no
+   stroke labels, source videos deleted after tracking.
+
 ## Why this is a fair analogy for racket data
 
 The emulator exercises the same pipeline the racket feeds: contact timestamps at realistic
@@ -13,6 +30,31 @@ feed, and the what-if questions a judge can ask. What it cannot show — sensor 
 is covered separately by real racket recordings, the C++/Swift/Python parity checks, and
 the labeled-session tests. The emulator answers "what does the app do with a session";
 the hardware evidence answers "does the racket measure truly".
+
+## Pipeline (runs on your machine, video stays local)
+
+```bash
+# 1. Detect contacts in a clip, track +-1 s windows with SAM 3.1 (NOT the full match
+#    through the API; --budget caps dollars. ~$0.20 per 1000 frames billed.)
+python3 tools/sam_clip_hits.py clip.mp4 --player alcaraz --out work/alcaraz --probe
+python3 tools/sam_clip_hits.py clip.mp4 --player alcaraz --out work/alcaraz \
+    --max-windows 25 --budget 3 --yes
+
+# 2. Tracks -> per-player emulator sessions (offline, no key, no network)
+python3 tools/sam_players_to_emulator.py work/alcaraz work/sinner \
+    -o website/emulator_sessions.json
+
+# 2b. Labelled match (F3Tennis clips already tracked by tools/sam_f3set_video.py): real stroke
+#     labels + the hitter's racket timing per hit. Replaces the 'Ostrava' entry, keeps the rest.
+python3 tools/f3set_to_emulator.py data/external/f3set/sam_video --merge website/emulator_sessions.json
+
+# 3. Deploy: copy both files into .website-dist/ next to index.html, then publish.
+```
+
+Cost control: `--budget` caps every SAM run; ledgers (`sam_video_ledger.json`) count billed
+frames across runs. A full 2-hour match at 30 fps is ~216k frames (~$43) — always window
+around contacts instead. Delete source video after tracking unless you are entitled to keep
+it; F3Set access follows that dataset's own terms.
 
 ## What the emulator is (web page)
 
@@ -41,10 +83,12 @@ Footage only gives shot times and a unitless intensity `i` (0-1). Everything els
   show where the ball met the strings, so Insights' contact and off-center results reflect this prior only.
 - Ball speed, spin rpm and spin type: a JavaScript port of
   [`ShotSimulator`](../apple/RacketKit/Sources/RacketKit/ShotSimulator.swift) (acor 0.42, spin gain 0.7).
-- Racket motion: a port of `SwingTemplate` (`apple/Shared/Coach/SwingFilm.swift`) with the forehand shape.
-  Live turns the racket about a point 0.3 m from the butt, as the app's IMU view does, easing to a ready pose
-  between hits (slowed to 0.3× so the swing is visible). Gyro °/s is the animated rate; g is a spike at contact
-  scaled by `i`. Stroke side is unknown for all clips, so every hit is "Hit" and What if uses the forehand template.
+- Racket motion: a port of `SwingTemplate` (`apple/Shared/Coach/SwingFilm.swift`), using each stroke's own shape
+  (forehand, backhand from the other side, overhead serve, short volley). Live turns the racket about a point 0.3 m
+  from the butt, as the app's IMU view does, easing to a ready pose between hits and moving the camera to each
+  stroke's viewpoint. For labelled hits the swing's timing is that hit's own SAM track in real time; for the rest it
+  is the template's profile, slowed to 0.3×. Gyro °/s is the animated rate; g is a spike at contact scaled by `i`.
+  In the 8 unlabelled matches every hit is "Hit" and drawn as a forehand.
 - What if: baseline = mean of shots so far; levers and limits match `WhatIf.Deltas`; the sentence matches
   `WhatIf.describe`.
 - Muse: the suggested questions and the "Find it" button run local ports of `get_session_digest`, `query_shots`,
@@ -58,3 +102,11 @@ caches converted with [`tools/sam_track_to_session.py`](../tools/sam_track_to_se
 Fields per shot: `t_s`, `kind`, `side` (+ `side_source`), `intensity` (unitless 0-1),
 `track_cover`, `clip`. Each session carries `provenance` (player, source, video URL),
 `units_note`, `time_note`, and `omitted`.
+
+The labelled entry ([`tools/f3set_to_emulator.py`](../tools/f3set_to_emulator.py), tested by
+`tools/test_f3set_emulator.py`) adds per hit: `stroke` (forehand/backhand/serve/volley, as the app's `ShotType`),
+`technique`, `hitter` (near/far), `court`, `dir`, `outcome` (in/winner/forced-err/unforced-err), and, when the
+hitter's racket was tracked, `prog` (25 values from -1 to +1: how far through the stroke the racket is each frame
+from -12 to +12 around contact, by path length) and `path_deg` (direction of the racket centre at contact, halved
+and clamped to -20..35). 50 of the 60 hits have a usable track; the other 10 still carry their real stroke type and
+use the template's timing. F3Set video is 25 fps. `data/external/` is not committed; only this derived entry is.
