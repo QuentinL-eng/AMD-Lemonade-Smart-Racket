@@ -28,6 +28,10 @@ class Scorer(unittest.TestCase):
     def test_grounded_flags_foreign_numbers(self):
         self.assertEqual(ev.grounded("try 45 degrees", [30.0, 15.0]), [45.0])
 
+    def test_grounded_allows_rounding_like_the_dataset(self):
+        self.assertEqual(ev.grounded("1.78 cm toward the handle", [1.8]), [])
+        self.assertEqual(ev.grounded("contact -2.364 cm", [-2.4]), [])
+
     def test_question_numbers_are_legitimate(self):
         q = "What if I open the face 45 degrees?"
         messages = [{"role": "user", "content": q},

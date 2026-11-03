@@ -68,11 +68,15 @@ def answer_numbers(text):
 
 
 def grounded(answer, pool):
-    """Every number in the answer matches a tool number (rounded or 1% close)."""
+    """Every number in the answer matches a tool number. Same rule as the dataset's own
+    answers_only_cite_tool_numbers test: absolute 0.051, rounded match, or 1% relative."""
     bad = []
     for n in answer_numbers(answer):
-        ok = any(n == round(p) or (p and abs(n - p) / abs(p) < 0.01) for p in pool)
-        if not ok:
+        def ok(p):
+            a = abs(p)
+            return (abs(n - a) < 0.051 or n == round(a) or round(p, -1) == n
+                    or (a and abs(n - a) / a < 0.01))
+        if not any(ok(p) for p in pool):
             bad.append(n)
     return bad
 
