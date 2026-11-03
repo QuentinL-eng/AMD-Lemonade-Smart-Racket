@@ -22,6 +22,10 @@ body{margin:0;background:var(--page);color:var(--ink);font:400 16px/1.45 var(--s
 .brandrow a.sub{color:var(--secondary);font-weight:400}
 .prov{background:var(--ink);color:#F2F2F7;border-radius:14px;padding:11px 14px;font-size:12.5px;line-height:1.5}
 .prov b{color:var(--accent)}
+.prov a{color:var(--accent)}
+.players{display:flex;gap:8px;overflow-x:auto;padding:10px 2px 2px}
+.players button{flex:none;border:1.5px solid var(--separator);background:#fff;border-radius:999px;padding:7px 14px;font:600 13.5px var(--sys);cursor:pointer;color:var(--ink)}
+.players button.on{background:var(--ink);color:#fff;border-color:var(--ink)}
 .phone{max-width:430px;margin:10px auto 0;background:var(--page);border-radius:28px;padding:0 0 8px}
 .statusbar{display:flex;justify-content:space-between;align-items:center;padding:12px 26px 2px;font-size:14px;font-weight:600}
 .statusbar svg{display:block}
@@ -81,7 +85,8 @@ body{margin:0;background:var(--page);color:var(--ink);font:400 16px/1.45 var(--s
 <div class="chrome">
   <div class="brandrow"><a href="index.html">Tennis Buddee</a>
     <a class="sub" href="https://github.com/QuentinL-eng/Tennis-Buddy-Smart-Racket/blob/main/docs/EMULATOR_DATA.md">How this data was made</a></div>
-  <div class="prov" id="provenance">Loading session…</div>
+  <div class="prov" id="provenance">Loading sessions…</div>
+  <div class="players" id="playerRow"></div>
 </div>
 
 <div class="phone">
@@ -170,17 +175,27 @@ function drawBed(ctx,W,H,shots,hlIdx){
 }
 function angleTxt(d,pos,neg){d=Math.round(d);return d===0?"0°":Math.abs(d)+"° "+(d>0?pos:neg);}
 function el(doc,tag,cls,html){var e=doc.createElement(tag);if(cls)e.className=cls;if(html!=null)e.innerHTML=html;return e;}
-function initEmulator(doc,session){
-  var shots=session.shots||[];
+function initEmulator(doc,players){
+  var shots=[];
   var prov=doc.getElementById("provenance"),tiles=doc.getElementById("statTiles");
   var cardWrap=doc.getElementById("shotCardWrap"),recent=doc.getElementById("recentList");
   var bed=doc.getElementById("bedCanvas").getContext("2d");
   var swing=doc.getElementById("swingCanvas"),sctx=swing.getContext("2d");
   var sBtn=doc.getElementById("sessionBtn"),clockEl=doc.getElementById("statClock");
   var countEl=doc.getElementById("statCount"),coverEl=doc.getElementById("statCover");
-  var state={shown:0,playing:false,speed:1,t:0,last:0,metric:true,swingV:0,swingA:0};
-  prov.innerHTML="<b>Data:</b> "+session.provenance.source+" · <b>derived:</b> timing, side/kind, intensity · "+
-    "<b>illustrative:</b> speeds, spin, angles, contacts";
+  var state={shown:0,playing:false,speed:1,t:0,last:0,metric:true,swingV:0,swingA:0,pi:0};
+  function setSession(i){
+    state.pi=i;state.shown=0;state.t=0;setPlaying(false);
+    var P=players[i],session=P.session;
+    shots=session.shots||[];
+    doc.getElementById("connLabel").textContent=P.name;
+    prov.innerHTML="<b>Data:</b> "+session.provenance.source+" · <b>derived:</b> timing, side/kind, intensity · "+
+      "<b>illustrative:</b> speeds, spin, angles, contacts"+
+      (P.video_url?" · <a href=\""+P.video_url+"\">source video</a>":"");
+    var row=doc.getElementById("playerRow");
+    for(var k=0;k<row.children.length;k++)row.children[k].classList.toggle("on",k===i);
+    recent.innerHTML="";paintCard();paint();
+  }
   function spd(kmh){return state.metric?kmh.toFixed(0):(kmh*0.621371).toFixed(0);}
   function spdUnit(){return state.metric?"km/h":"mph";}
   function clockStr(s){s=Math.floor(s);return Math.floor(s/60)+":"+(s%60<10?"0":"")+(s%60);}
@@ -291,12 +306,20 @@ function initEmulator(doc,session){
     if(!live)doc.getElementById("altEmpty").innerHTML="<b>"+t+"</b> isn't part of this emulator.<br>It replays the Live tab only.";
   });})(tabs[ti]);
   if(doc.getElementById("clock"))doc.getElementById("clock").textContent="9:41";
-  paintCard();paint();
+  var prow=doc.getElementById("playerRow");
+  for(var pi=0;pi<players.length;pi++)(function(i){
+    var b=doc.createElement("button");b.textContent=players[i].name;
+    b.addEventListener("click",function(){setSession(i);});
+    prow.appendChild(b);
+  })(pi);
+  setSession(0);
   return state;
 }
 if(typeof window!=="undefined"&&window.document){
-  fetch("emulator_session.json").then(function(r){return r.json();}).then(function(s){initEmulator(document,s);})
-  .catch(function(){document.getElementById("provenance").textContent="Could not load emulator_session.json — serve this folder over HTTP or deploy both files together.";});
+  fetch("emulator_sessions.json").then(function(r){return r.json();}).then(function(d){initEmulator(document,d.players);})
+  .catch(function(){return fetch("emulator_session.json").then(function(r){return r.json();}).then(function(s){
+    initEmulator(document,[{name:"Demo",video_url:null,session:s}]);});})
+  .catch(function(){document.getElementById("provenance").textContent="Could not load emulator_sessions.json — serve this folder over HTTP or deploy the files together.";});
 }
 </script>
 </body>

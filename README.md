@@ -133,7 +133,7 @@ muse     Your backhand contact sits 2.0 cm toward the tip. Try this: move contac
 | Check | Result | Source |
 |---|---|---|
 | Swift tests | 93 test methods (62 RacketKit + 31 app): C++ ↔ Swift shot parity, labeled real sessions, replay, scoring, simulator, Muse agent with mocked HTTP | [`apple/RacketKit/Tests/`](apple/RacketKit/Tests/), [`apple/Tests/`](apple/Tests/) |
-| Python tests | 120 cases: ML and what-if tools (unittest), robot pipeline (pytest) | `ml/test_*.py`, `tools/test_*.py`, `TennisRobot/tests/` |
+| Python tests | 128 cases: ML and what-if tools (unittest), robot pipeline (pytest) | `ml/test_*.py`, `tools/test_*.py`, `TennisRobot/tests/` |
 | Backend tests | Migration + social logic in embedded PGlite (`npm test`) | [`backend/supabase/tests/`](backend/supabase/tests/) |
 | Firmware host test | Flash backlog against a fake flash, under ASan/UBSan | [`firmware/tools/backlog_test`](firmware/tools/backlog_test) |
 | Firmware ↔ Python ML parity | Same decision on 296 clips; max distance error 7e-7 cm | `ml/test_parity.py` |

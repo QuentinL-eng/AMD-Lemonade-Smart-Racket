@@ -2,8 +2,8 @@
 
 Judges can't swing the physical racket, so the emulator replays a real professional match
 through the app's data path: SAM 3.1 tracks the racket on video, the tracks convert to the
-app's session format, and a static web page plays the session back. Live page:
-[`website/emulator.html`](../website/emulator.html) (needs `emulator_session.json` beside it).
+app's session format, and a static web page plays the sessions back. Live page:
+[`website/emulator.html`](../website/emulator.html) (needs `emulator_sessions.json` beside it).
 
 ## Honesty rules (non-negotiable)
 
@@ -14,8 +14,9 @@ app's session format, and a static web page plays the session back. Live page:
    point are not observable and are never presented as measured.
 3. No real player's name is attached to measured data. Style presets are illustrative and
    say so. Never commit source footage; derived tracks + this provenance note are the artifact.
-4. The committed `emulator_session.json` is synthetic demo data (seed 7) until a real
-   `sam_track_to_session.py` run replaces it. Its provenance block says exactly that.
+4. The committed `emulator_sessions.json` carries one entry per player, each with its own
+   provenance block (video title, uploader, URL). Until the SAM runs land, entries are
+   synthetic demo data and say so.
 
 ## Why this is a fair analogy for racket data
 
@@ -29,15 +30,15 @@ the hardware evidence answers "does the racket measure truly".
 ## Pipeline (runs on your machine, video stays local)
 
 ```bash
-# 1. SAM 3.1 video tracking on labelled clips (NOT the full match through the API:
-#    F3Set labels pick the clips; --budget caps dollars. ~$0.20 per 1000 frames billed.)
-python3 tools/sam_f3set_video.py ~/tennis_data/f3set --clips 10   # pilot first
-python3 tools/sam_f3set_video.py ~/tennis_data/f3set --clips 80 --budget 25
+# 1. Detect contacts in a clip, track +-1 s windows with SAM 3.1 (NOT the full match
+#    through the API; --budget caps dollars. ~$0.20 per 1000 frames billed.)
+python3 tools/sam_clip_hits.py clip.mp4 --player alcaraz --out work/alcaraz --probe
+python3 tools/sam_clip_hits.py clip.mp4 --player alcaraz --out work/alcaraz \
+    --max-windows 25 --budget 3 --yes
 
-# 2. Tracks -> emulator session (offline, no key, no network)
-python3 tools/sam_track_to_session.py ~/tennis_data/f3set/sam_video/qf.json \
-    --fps 30 --source "F3Set broadcast footage (local, deleted after tracking)" \
-    -o website/emulator_session.json
+# 2. Tracks -> per-player emulator sessions (offline, no key, no network)
+python3 tools/sam_players_to_emulator.py work/alcaraz work/sinner \
+    -o website/emulator_sessions.json
 
 # 3. Deploy: copy both files into .website-dist/ next to index.html, then publish.
 ```
@@ -60,9 +61,11 @@ intensity `i` (0-1) and shot index, and every surface labels them illustrative:
 - contact (cm): deterministic scatter, spread 7·(1.15 − 0.6·i), clamped to the head;
   sweet iff within 4 cm. Sweet-spot verdicts and the green/red flash follow from this.
 
-## Schema (`emulator_session.json`)
+## Schema (`emulator_sessions.json`)
 
-Written by [`tools/sam_track_to_session.py`](../tools/sam_track_to_session.py), tested by
-[`tools/test_sam_track_session.py`](../tools/test_sam_track_session.py) against the fixture
-in `tools/fixtures/`. Fields per shot: `t_s`, `kind`, `side` (+ `side_source`), `intensity`
-(unitless 0-1), `track_cover`, `clip`. Top level: `provenance`, `units_note`, `omitted`.
+`{"players": [{"name", "video_url", "session"}]}`, written by
+[`tools/sam_players_to_emulator.py`](../tools/sam_players_to_emulator.py) over per-window
+caches converted with [`tools/sam_track_to_session.py`](../tools/sam_track_to_session.py).
+Fields per shot: `t_s`, `kind`, `side` (+ `side_source`), `intensity` (unitless 0-1),
+`track_cover`, `clip`. Each session carries `provenance` (player, source, video URL),
+`units_note`, `time_note`, and `omitted`.

@@ -80,7 +80,7 @@ grep -rln "MWDATCore\|MWDATDisplay" apple/iOS/Glasses
 | ML parity (296 clips) | `python3 ml/test_parity.py` | `PASS`, max distance error 7.22e-07 cm |
 | What-if simulator | `python3 -m unittest discover -s ml -p test_whatif_synth.py` | 11 tests, OK |
 | Full `ml` discovery | `python3 -m unittest discover -s ml` | 46 pass; 1 research-only module needs the local kymatio checkout under `firmware/.pio/` (git-ignored, not the supported path in `ml/README.md`) |
-| Tools | `python3 -m unittest discover -s tools` | 22 tests, OK |
+| Tools | `python3 -m unittest discover -s tools` | 30 tests, OK |
 | Robot rig | `.venv/bin/python -m pytest TennisRobot/tests/` | 51 cases; needs `pytest` + loopback sockets |
 | Backend | `npm test --prefix backend/supabase` | pass (embedded PGlite, no cloud needed) |
 | Firmware host test | `firmware/tools/backlog_test/` | flash backlog vs fake flash under ASan/UBSan |
