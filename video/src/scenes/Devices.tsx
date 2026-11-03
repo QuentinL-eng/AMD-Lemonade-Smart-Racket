@@ -45,7 +45,7 @@ export const Phone: React.FC = () => (
     <div style={{ fontSize: 22, color: colors.muted }}>{shot.sub}</div>
     <div style={{ flex: 1 }} />
     <div style={{ display: 'flex', justifyContent: 'space-between', fontSize: 16, color: colors.muted }}>
-      {['Live', 'Together', 'History', 'Insights', 'Racket'].map((t) => <span key={t} style={{ color: t === 'Live' ? colors.accent : undefined }}>{t}</span>)}
+      {copy.devices.tabs.map((t) => <span key={t} style={{ color: t === 'Live' ? colors.accent : undefined }}>{t}</span>)}
     </div>
   </div>
 );

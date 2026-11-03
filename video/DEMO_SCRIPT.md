@@ -25,7 +25,7 @@ judges watch muted. Every number on screen comes from the repo.
 | 1:17 | Muse Spark as an agent: real trace, 10 tools lighting up | CGI, new | Meta |
 | 1:29 | What-if: `simulate_change`, an estimate on an example shot | CGI, real simulator numbers | Meta |
 | 1:39 | Hero: real iPhone recording of the what-if and the drill | **Film** | Meta, Demo |
-| 2:07 | Watch counts down to "Drill complete!" | **Film** | Impact |
+| 2:07 | Watch counts down, phone says "Drill complete!" | **Film** | Impact |
 | 2:12 | SAM 3.1: the real cached boxes on your real 240 fps forehand | CGI over real, new | Meta |
 | 2:20 | Swing film from Muse's real script, on a demo session | CGI | Meta |
 | 2:28 | Three players, one line each | **Film** (or delete and give the time to the hero) | Impact |
@@ -46,8 +46,9 @@ it as `public/audio/vo/<id>.wav`. It starts playing and the music ducks, with no
 
 **Bedroom**
 1. `talk-intro.mp4`: landscape, racket in hand, 9 s. Change the slot's `caption` in `timeline.ts` to what you actually said.
-2. `muse-screen-recording.mp4`: portrait iPhone screen recording, slowly, from a build with the "Muse" strings.
-3. `drill-on-watch.mp4`: close on the Watch, ending on "Drill complete!".
+2. `muse-screen-recording.mp4`: portrait iPhone screen recording, slowly, from a build with the Nov 3 tabs (Live, Score,
+   Muse, Insights, Settings). Muse tab → What if → ask → wait for the numbers, then Next drill → Start on Watch.
+3. `drill-on-watch.mp4`: close on the Watch as the to-go count drops, ending on the phone's Live tab: "Drill complete!".
 4. The voiceover, one line at a time, with a duvet around you for a quiet room.
 
 **If anyone is around:** `testimonial-1.mp4` and so on, with their OK to use it on camera. If not, delete those entries. The

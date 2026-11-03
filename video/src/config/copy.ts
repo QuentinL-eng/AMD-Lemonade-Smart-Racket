@@ -170,6 +170,7 @@ export const copy = {
     phone: 'iPhone',
     watch: 'Apple Watch',
     glasses: 'Meta Ray-Ban Display',
+    tabs: ['Live', 'Score', 'Muse', 'Insights', 'Settings'], // TennisBuddyApp.swift
   },
 
   score: {
@@ -191,10 +192,10 @@ export const copy = {
       { label: 'Spin', before: Math.round(before.spinRpm), after: Math.round(after.spinRpm), unit: 'rpm' },
     ],
     note: 'Estimate on an example forehand, not a measurement',
-    drillButton: 'Plan my next drill', // CoachModel
+    drillButton: 'Next drill', // MuseScreen.swift
     drillName: 'Sweet-spot forehands',
     drillTarget: 10,
-    drillStart: 'Start drill (sends to Watch)',
+    drillStart: 'Start on Watch', // MuseScreen.swift
     drillRemaining: 'to go',
   },
 
