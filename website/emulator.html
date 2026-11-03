@@ -297,9 +297,14 @@ const poseAt=(p,t)=>swingFrame(p,phiAt(p,t));
    ===================================================================== */
 function mulberry32(a){return function(){a|=0;a=a+0x6D2B79F5|0;let t=Math.imul(a^a>>>15,1|a);t=t+Math.imul(t^t>>>7,61|t)^t;return((t^t>>>14)>>>0)/4294967296;};}
 function params(s){
-  const r=mulberry32(s.index*2654435761+7), i=s.intensity, slice=i<.25&&s.index%3===0, spread=7*(1.15-.6*i);
-  return {swing:60+90*i,face:Math.round(i*8*(s.index%2?1:-1)),path:slice?-Math.round(8+10*r()):Math.round(10+20*i),
-          cx:clamp((r()-.5)*2*spread*.8,-11,11),cy:clamp((r()-.5)*2*spread,-14,14),inc:43.2};
+  const r=mulberry32(s.index*2654435761+7), i=s.intensity, slice=i<.25&&s.index%3===0;
+  const path=slice?-Math.round(8+10*r()):Math.round(10+20*i);
+  // Contact point is NOT observable in video. Assumption: a pro's contact is bell-shaped around the sweet spot,
+  // sigma ~2.2 cm (a bit looser for harder swings), which puts roughly 85% of hits inside the 4 cm sweet spot.
+  const gauss=()=>Math.sqrt(-2*Math.log(1-r()))*Math.cos(2*Math.PI*r());
+  const sg=2.0+.5*i;
+  return {swing:60+90*i,face:Math.round(i*8*(s.index%2?1:-1)),path,
+          cx:clamp(gauss()*sg*.9,-11,11),cy:clamp(gauss()*sg*1.1,-14,14),inc:43.2};
 }
 const enrich=s=>{const p=params(s),r=simulate(p);return {s,p,r,t:s.t_s,i:s.intensity,sweet:r.dist<=SWEET,id:s.index};};
 const baselineOf=rows=>rows.length?{swing:mean(rows.map(x=>x.p.swing)),face:mean(rows.map(x=>x.p.face)),path:mean(rows.map(x=>x.p.path)),cx:mean(rows.map(x=>x.p.cx)),cy:mean(rows.map(x=>x.p.cy)),inc:43.2}:null;

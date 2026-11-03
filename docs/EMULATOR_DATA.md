@@ -36,7 +36,9 @@ Footage only gives shot times and a unitless intensity `i` (0-1). Everything els
 
 - Swing parameters from `i` and shot index (deterministic): swing = 60 + 90·i km/h; face = ±8·i°
   (sign alternates); path = 10 + 20·i° up (slice: 8-18° down on every third shot below i = 0.25);
-  contact scatter spread 7·(1.15 − 0.6·i) cm, sweet iff within 4 cm.
+  contact is an **assumption**, not data: bell-shaped around the sweet spot with sigma 2.0 + 0.5·i cm
+  (0.9× across, 1.1× along), about 85% of hits inside the 4 cm sweet spot (82-88% per player) (sweet iff within 4 cm). Video cannot
+  show where the ball met the strings, so Insights' contact and off-center results reflect this prior only.
 - Ball speed, spin rpm and spin type: a JavaScript port of
   [`ShotSimulator`](../apple/RacketKit/Sources/RacketKit/ShotSimulator.swift) (acor 0.42, spin gain 0.7).
 - Racket motion: a port of `SwingTemplate` (`apple/Shared/Coach/SwingFilm.swift`) with the forehand shape.
