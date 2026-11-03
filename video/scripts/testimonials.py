@@ -1,15 +1,16 @@
 #!/usr/bin/env python3
 """Cleans the speech in the filmed testimonials and writes them to public/footage/ as testimonial-N.mp4.
 
-The clips are camera-mic interviews in a loud tennis hall: strong rumble and hall noise under 800 Hz, little above
-3 kHz. So: take the centre of the stereo pair (the speaker), reduce the steady noise, cut the mud, lift the presence,
-even out the level, and normalize to a speech target. Picture is de-squeezed to 1920x1080 at 30 fps.
+The clips are camera-mic interviews in a loud tennis hall. So: take the centre of the stereo pair (the speaker), reduce
+the steady noise, duck the background between phrases, balance the tone against normal speech, even out the level and
+normalize. Measured against the long-term speech spectrum, the raw clips are already bright at 2-3 kHz and short of
+body under 300 Hz, so the tone goes that way, not toward more presence. Picture is de-squeezed to 1920x1080 at 30 fps.
 
     FFMPEG=path/to/ffmpeg python scripts/testimonials.py       # all, -> public/footage/
     FFMPEG=path/to/ffmpeg python scripts/testimonials.py 1     # only testimonial-1
 
 Files keep their full length. Pick the line with `from` and `seconds` on the slot in src/config/timeline.ts.
-Too watery or hollow? Raise FLOOR_DB. Too noisy? Lower it.
+Too watery or hollow? Raise FLOOR_DB. Too noisy? Lower it. Too thin or too boomy? Adjust TONE or LOW_FLOOR_DB.
 """
 import json
 import os
@@ -30,16 +31,18 @@ FFMPEG = os.environ.get("FFMPEG", "ffmpeg")
 
 CLIPS = {"testimonial-1": "MAH08215.MP4", "testimonial-2": "MAH08216.MP4"}
 
-FLOOR_DB = -14.0  # the most noise reduction any frequency gets: deeper is cleaner, but risks a watery sound
+FLOOR_DB = -14.0  # the most noise reduction above 800 Hz: deeper is cleaner, but risks a watery sound
+LOW_FLOOR_DB = -6.0  # the most under 300 Hz, where the voice's body shares the band with the hall: deeper sounds thin
+GAP_DB = -9.0  # how far the background ducks between phrases
 OVERSUBTRACT = 1.5  # how far above the measured noise to treat as noise
 LOUDNESS_LUFS = -16.0
 
-# Applied after noise reduction: rumble out, mud down, presence and air up, pops above the voice out, level evened.
+# Applied after noise reduction: rumble out, body back, the tinny 2-3 kHz band down, pops above the voice out, level evened.
 TONE = ",".join([
-    "highpass=f=90:poles=2", "highpass=f=90:poles=2",
-    "equalizer=f=280:t=q:w=1:g=-4",
-    "equalizer=f=3000:t=q:w=1.2:g=5",
-    "equalizer=f=6000:t=q:w=1:g=3",
+    "highpass=f=70:poles=2",
+    "equalizer=f=170:t=q:w=1:g=3",
+    "equalizer=f=260:t=q:w=0.7:g=4",
+    "equalizer=f=2500:t=q:w=1.4:g=-6",
     "lowpass=f=9500",
     "acompressor=threshold=-24dB:ratio=3:attack=8:release=120:makeup=2",
 ])
@@ -58,7 +61,14 @@ def reduce_noise(x, sr):
     quiet = speech_band <= np.percentile(speech_band, 15)
     noise = power[:, quiet].mean(axis=1) * OVERSUBTRACT + 1e-12
 
-    floor = 10 ** (FLOOR_DB / 20)
+    # Frames of speech, opened fast and closed slowly: everything else ducks by GAP_DB.
+    hop_s = (2048 - 1536) / sr
+    level = 10 * np.log10(speech_band + 1e-20)
+    is_speech = level > np.percentile(level[quiet], 90) + 4
+    is_speech = uniform_filter1d(is_speech.astype(float), size=int(0.25 / hop_s)) > 0  # hold across short gaps
+    duck = uniform_filter1d(np.where(is_speech, 1.0, 10 ** (GAP_DB / 20)), size=int(0.06 / hop_s))
+
+    floor = 10 ** (np.interp(freqs, [300, 800], [LOW_FLOOR_DB, FLOOR_DB]) / 20)
     gain = np.ones_like(power)
     previous = np.zeros(power.shape[0])
     for t in range(power.shape[1]):
@@ -68,7 +78,7 @@ def reduce_noise(x, sr):
         previous = (g ** 2) * snr_post
         gain[:, t] = g
     gain = uniform_filter1d(gain, size=3, axis=0)  # across frequency, to keep isolated bins from warbling
-    _, clean = istft(spec * gain, sr, nperseg=2048, noverlap=1536)
+    _, clean = istft(spec * gain * duck, sr, nperseg=2048, noverlap=1536)
     return clean[: len(x)]
 
 
