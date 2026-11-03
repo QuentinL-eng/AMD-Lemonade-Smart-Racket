@@ -72,14 +72,34 @@ struct CoachScreen: View {
 
     private var latest: SessionRecord? { sessions.last { $0.hasPlayableShots } }
     /// The newest session with motion shots, and its first stroke the swing film can draw.
-    private var filmSource: (SessionRecord, ShotType)? {
-        guard let s = sessions.last(where: { WhatIf.baseline($0.shots) != nil }),
-              let t = SwingFilm.strokes.first(where: { WhatIf.baseline(s.shots, type: $0) != nil }) else { return nil }
-        return (s, t)
-    }
+    private var filmSource: (SessionRecord, ShotType)? { baselines.filmSource }
     /// The player's average for a stroke from the newest session that has it, as the What-if screen uses.
-    private func baseline(_ stroke: ShotType) -> WhatIf.Baseline? {
-        sessions.last { WhatIf.baseline($0.shots, type: stroke) != nil }.flatMap { WhatIf.baseline($0.shots, type: stroke) }
+    private func baseline(_ stroke: ShotType) -> WhatIf.Baseline? { baselines.byStroke[stroke] }
+
+    /// Baselines decode every shot, so they are worked out once per data change, not on every redraw
+    /// (a redraw happens each time Muse starts or finishes an answer).
+    @State private var baselines = BaselineCache()
+    private struct BaselineCache {
+        var filmSource: (SessionRecord, ShotType)?
+        var byStroke: [ShotType: WhatIf.Baseline] = [:]
+    }
+    private var baselineKey: String {
+        "\(sessions.count)-\(sessions.last?.id.uuidString ?? "")-\(sessions.last?.shotRecords?.count ?? 0)"
+    }
+    private func computeBaselines() {
+        var cache = BaselineCache()
+        for session in sessions.reversed() {
+            let shots = session.shots
+            if cache.filmSource == nil, WhatIf.baseline(shots) != nil,
+               let t = SwingFilm.strokes.first(where: { WhatIf.baseline(shots, type: $0) != nil }) {
+                cache.filmSource = (session, t)
+            }
+            for stroke in SwingFilm.strokes where cache.byStroke[stroke] == nil {
+                if let b = WhatIf.baseline(shots, type: stroke) { cache.byStroke[stroke] = b }
+            }
+            if cache.filmSource != nil, cache.byStroke.count == SwingFilm.strokes.count { break }
+        }
+        baselines = cache
     }
     private var noteCount: Int { allNotes.filter { $0.playerID == model.activePlayerID }.count }
     private var pendingReviews: Int { pending.count }
@@ -116,6 +136,7 @@ struct CoachScreen: View {
         .safeAreaInset(edge: .bottom) { askBar }
         .navigationTitle("")
         .navigationDestination(isPresented: $openWhatIf) { WhatIfView() }
+        .task(id: baselineKey) { computeBaselines() }
         .museScreen()
     }
 
