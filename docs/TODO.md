@@ -1,3 +1,6 @@
+> **Working list from the build (Oct 2026).** Checked items are done; unchecked items may be stale.
+> Current state: [README](../README.md), [judging guide](../JUDGING.md).
+
 # To do once the racket is streaming real data
 
 Don't skip these: they're what make the demo numbers believable.

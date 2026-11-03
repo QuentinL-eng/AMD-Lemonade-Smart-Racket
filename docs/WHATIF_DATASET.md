@@ -1,4 +1,4 @@
-# "What if" coaching dataset for Muse Spark
+# "What if" tool-use dataset for Muse Spark
 
 Synthetic conversations that teach Muse to test a technique change instead of only describing a session. Muse
 reads the digest, proposes a change ("close the face 3°, swing 5% slower"), calls `simulate_change`, and reports
@@ -21,7 +21,7 @@ python -m unittest discover -s ml -p test_whatif_synth.py
 | `data/sessions/*/positions.csv`, 274 reviewed contacts | good | Shape of the contact cloud; the ridge model's 1.83 cm error for mic-only hits |
 | `data/club-2026-10-28/` raw-stream CSVs (17% of the stream arrived) | bad | Rally cadence, per-recording BLE throughput, the gyro clipping in 8 of 11 recordings, 27 real swings (median 75 km/h) |
 
-The club data can't measure strokes, but it does describe the conditions a coach has to cope with. Each synthetic
+The club data can't measure strokes, but it does describe the conditions the agent has to cope with. Each synthetic
 session gets club-like or phone-like link conditions. With a club-like link, a shot that comes before the previous
 448-sample window has finished sending becomes a mic-only hit (21% of club-like shots, against 7% on a phone-like
 link). With the gyro range bug, swings above 144 km/h are saturated. In 4% of sessions the motion stream never

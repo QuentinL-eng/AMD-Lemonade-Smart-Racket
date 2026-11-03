@@ -1,13 +1,14 @@
 <!doctype html>
+<!-- Superseded design draft, not published. The live page is index.html. -->
 <html lang="en">
 <head>
 <meta charset="utf-8">
 <meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover">
 <title>Tennis Buddee</title>
 <meta name="tennisbuddy:viewport-fit-sides" content="cover">
-<meta name="description" content="Tennis Buddee is a sensor module that lives inside a tennis racket handle. It measures every shot, detects sweet-spot hits with AI on the racket, and coaches you with AI on your phone.">
+<meta name="description" content="Tennis Buddee is a sensor module that lives inside a tennis racket handle. It measures every shot, detects sweet-spot hits with AI on the racket, and predicts what a swing change will do.">
 <meta property="og:title" content="Tennis Buddee">
-<meta property="og:description" content="A tennis coach that fits inside the handle.">
+<meta property="og:description" content="A smart racket that feels every shot.">
 <meta property="og:image" content="img/racket.jpg">
 <link rel="icon" href="img/icon.png">
 <link rel="preconnect" href="https://fonts.googleapis.com">
@@ -206,8 +207,8 @@ footer .wrap { display: flex; flex-wrap: wrap; gap: 12px 32px; justify-content: 
   <img src="img/racket.jpg" alt="The Tennis Buddee racket, rendered floating above Earth">
   <div class="wrap">
     <p class="eyebrow">Working prototype · October 2026</p>
-    <h1>A tennis coach that fits inside the <span>handle.</span></h1>
-    <p class="lede">A sensor module inside your racket. It measures every shot, finds the sweet spot and connects your shot data to Muse Spark coaching.</p>
+    <h1>A smart racket that feels every <span>shot.</span></h1>
+    <p class="lede">A sensor module inside your racket. It measures every shot, finds the sweet spot and connects your shot data to Muse Spark predictions.</p>
     <div class="cta-row">
       <a class="btn solid" href="#contact">Talk to the team</a>
       <a class="btn ghost" href="#today">See what works today</a>
@@ -227,13 +228,13 @@ footer .wrap { display: flex; flex-wrap: wrap; gap: 12px 32px; justify-content: 
       <p class="eyebrow">The opportunity</p>
       <div>
         <h2>Most players practice without feedback</h2>
-        <p class="lede">Coaching works, but it’s expensive. Between lessons, nobody is watching.</p>
+        <p class="lede">Lessons work, but they’re expensive. Between lessons, nobody is watching.</p>
       </div>
     </div>
     <div class="split">
       <img src="img/serve.jpg" alt="A player serving on an outdoor hard court">
       <div class="points">
-        <div><h3>Coaching is scarce</h3><p>Most players can’t afford a coach every week.</p></div>
+        <div><h3>Feedback is scarce</h3><p>Most players can’t get feedback on every session.</p></div>
         <div><h3>The racket sees the ball</h3><p>Impact, face angle and contact point, not just arm motion.</p></div>
         <div><h3>Under $100</h3><p>About the cost of one lesson, and it works every session.</p></div>
       </div>
@@ -264,7 +265,7 @@ footer .wrap { display: flex; flex-wrap: wrap; gap: 12px 32px; justify-content: 
           <tr><td>Speed and spin</td><td>Swing speed, ball speed, rpm</td><td><span class="chip ok">Working</span></td></tr>
           <tr><td>Face angle and path</td><td>Open or closed, low to high</td><td><span class="chip ok">Working</span></td></tr>
           <tr><td>Sweet-spot AI</td><td>How far off center, from the sound of the hit</td><td><span class="chip wip">Beta</span></td></tr>
-          <tr><td>AI coach</td><td>Reports and drills from your stats</td><td><span class="chip ok">Working</span></td></tr>
+          <tr><td>Muse AI</td><td>Predictions and drills from your stats</td><td><span class="chip ok">Working</span></td></tr>
           <tr><td>Apple Watch</td><td>A tap per shot, workouts, drills</td><td><span class="chip wip">Beta</span></td></tr>
           <tr><td>iPhone and Mac</td><td>History, heat maps, trends</td><td><span class="chip ok">Working</span></td></tr>
         </tbody>
@@ -278,7 +279,7 @@ footer .wrap { display: flex; flex-wrap: wrap; gap: 12px 32px; justify-content: 
     <div class="courtline" aria-hidden="true" style="margin-bottom:clamp(72px,10vw,128px)"></div>
     <div class="head">
       <p class="eyebrow">Technology</p>
-      <div><h2>Sense, think, coach</h2></div>
+      <div><h2>Sense, predict, drill</h2></div>
     </div>
 
     <div class="stack">
@@ -304,7 +305,7 @@ footer .wrap { display: flex; flex-wrap: wrap; gap: 12px 32px; justify-content: 
       </div>
       <div>
         <span class="num">COACH</span>
-        <h3>Muse Spark coach</h3>
+        <h3>Muse Spark AI</h3>
         <p>Turns your numbers into advice and drills.</p>
         <ul class="spec">
           <li><span>Model</span><span>Muse Spark 1.3</span></li>
@@ -343,7 +344,7 @@ footer .wrap { display: flex; flex-wrap: wrap; gap: 12px 32px; justify-content: 
       <div class="copy">
         <p class="eyebrow">The apps</p>
         <h3 style="font-size:clamp(26px,3vw,36px)">Feedback between points</h3>
-        <p>A card for every shot. After the session, the coach picks a drill and your Watch counts it down.</p>
+        <p>A card for every shot. After the session, Muse plans a drill and your Watch counts it down.</p>
       </div>
     </div>
   </div>
@@ -394,7 +395,7 @@ footer .wrap { display: flex; flex-wrap: wrap; gap: 12px 32px; justify-content: 
         <h3>A module anyone can buy</h3>
         <ul>
           <li>Retail module under $100</li>
-          <li>Coach and club dashboards</li>
+          <li>Club dashboards</li>
           <li>Pickleball, padel and more</li>
         </ul>
       </div>
@@ -407,7 +408,7 @@ footer .wrap { display: flex; flex-wrap: wrap; gap: 12px 32px; justify-content: 
     <div style="display:grid;gap:22px;min-width:0">
       <p class="eyebrow">Work with us</p>
       <h2>Let’s talk</h2>
-      <p class="lede">We’re looking for investors, coaches, clubs and hardware partners.</p>
+      <p class="lede">We’re looking for investors, clubs, academies and hardware partners.</p>
     </div>
     <div class="contact">
       <p class="email" id="email">quentin.lynch@wsu.edu</p>

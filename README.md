@@ -20,6 +20,9 @@ would do, then plans a drill that the Watch and glasses track.
 | Technical depth and execution (20%) | [Technical depth and execution](#technical-depth-and-execution): firmware, apps, ML, tests |
 | Demo (25%) | [Demo](#demo) |
 
+Judging? Start with [`JUDGING.md`](JUDGING.md): a map from each rubric item to the exact files and
+commands that prove it. Machines: [`llms.txt`](llms.txt) and [`hackathon.json`](hackathon.json).
+
 ## Impact
 
 **The problem.** A club player hits hundreds of shots a night and can't tell which ones were good. Lessons are
@@ -125,8 +128,9 @@ muse     Your backhand contact sits 2.0 cm toward the tip. Try this: move contac
 
 | Check | Result | Source |
 |---|---|---|
-| Swift tests | 76 tests: C++ ↔ Swift shot parity, labeled real sessions, replay, scoring, simulator, Muse agent with mocked HTTP | [`apple/RacketKit/Tests/`](apple/RacketKit/Tests/), [`apple/Tests/`](apple/Tests/) |
-| Python tests | 50 tests: ML, tools, robot pipeline | `ml/test_*.py`, `tools/test_*.py`, `TennisRobot/tests/` |
+| Swift tests | 93 test methods (62 RacketKit + 31 app): C++ ↔ Swift shot parity, labeled real sessions, replay, scoring, simulator, Muse agent with mocked HTTP | [`apple/RacketKit/Tests/`](apple/RacketKit/Tests/), [`apple/Tests/`](apple/Tests/) |
+| Python tests | 113 cases: ML and what-if tools (unittest), robot pipeline (pytest) | `ml/test_*.py`, `tools/test_*.py`, `TennisRobot/tests/` |
+| Backend tests | Migration + social logic in embedded PGlite (`npm test`) | [`backend/supabase/tests/`](backend/supabase/tests/) |
 | Firmware host test | Flash backlog against a fake flash, under ASan/UBSan | [`firmware/tools/backlog_test`](firmware/tools/backlog_test) |
 | Firmware ↔ Python ML parity | Same decision on 296 clips; max distance error 7e-7 cm | `ml/test_parity.py` |
 | Sweet-spot model, real hits | 67.2% accuracy (baseline 60.6%), 1.83 cm mean distance error, 274 labeled clips, grouped 5-fold | [`ml/runs/SUMMARY-20261028.md`](ml/runs/SUMMARY-20261028.md) |
@@ -174,8 +178,10 @@ Details: [`apple/README.md`](apple/README.md), [`firmware/README.md`](firmware/R
 | [`data/`](data/) | Small calibration and tap recordings (large raw sessions stay local) |
 | [`TennisRobot/`](TennisRobot/), [`robot/`](robot/) | Camera + Epson C8 arm rig to swing the racket repeatably for ground truth (framework, simulated) |
 | [`video/`](video/) | Remotion source for the 3-minute demo video |
-| [`website/`](website/) | [tennisbuddy.net](https://tennisbuddy.net) |
+| [`website/`](website/) | [tennisbuddy.net](https://tennisbuddy.net) (`index.html` is live; `option-*.html` are superseded drafts) |
+| [`baseten/`](baseten/) | Truss config to self-host Meta's open Muse Glimmer 30B (experiment) |
 | [`docs/`](docs/) | Wiring, data collection, club session report, privacy, TestFlight, original build plan |
+| [`JUDGING.md`](JUDGING.md), [`llms.txt`](llms.txt), [`hackathon.json`](hackathon.json) | Judging evidence map, LLM index, machine-readable metadata |
 
 ## Privacy
 

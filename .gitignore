@@ -66,3 +66,10 @@ robot/generated/
 # (Handle CAD lives in video/cad/handle.step.)
 robot/rcplus/api_reference.txt
 marketing/*.step
+# Huge local-only captures (GBs): keep clones small; small calibration files stay visible
+data/external/
+data/Tennis Camera/
+data/room-2026-10-29/*.tbrec
+data/room-2026-10-29/runs/
+data/room-2026-10-29/runs_gyrofix/
+TennisRobot/TennisBuddyDayOne_20261029/
