@@ -19,7 +19,7 @@ Key facts:
   cached observations feed the stroke baseline and the web emulator.
 - Firmware 1.6 computes each shot on the racket (C++ port of the Swift `ShotAnalyzer`, parity-tested), sends an 80-byte
   summary, then the raw 448-sample window with acks, resends and a flash backlog.
-- Evidence: 93 Swift test methods, 128 Python test cases, a passing backend suite, a firmware host test,
+- Evidence: 105 Swift test methods, 128 Python test cases, a passing backend suite, a firmware host test,
   C++/Python ML parity on 296 clips, an 86-minute real club session report, and honest model results
   (67.2% sweet-spot accuracy vs a 60.6% baseline).
 

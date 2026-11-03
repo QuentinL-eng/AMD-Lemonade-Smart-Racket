@@ -44,7 +44,7 @@
   "agent_limits": {"max_requests_per_round": 5, "max_tool_calls_per_round": 8, "timeout_s": 45, "fallback": "built-in deterministic engine, UI names the engine that answered"},
   "hardware": {"mcu": "ESP32-C3", "imu": "LSM6DSV320X (±4000 dps gyro, ±16 g and ±320 g accel, 1 kHz)", "mic": "INMP441", "battery": "1S LiPo", "form": "3D-printed core replacing the handle foam"},
   "evidence": {
-    "swift_tests": 93,
+    "swift_tests": 105,
     "python_unittest_ml": 47,
     "python_unittest_tools": 30,
     "python_pytest_robot": 51,

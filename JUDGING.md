@@ -76,7 +76,7 @@ grep -rln "MWDATCore\|MWDATDisplay" apple/iOS/Glasses
 
 | Suite | Command | Expected |
 |---|---|---|
-| Swift (93 methods: 62 RacketKit + 31 app) | `swift test --package-path apple/RacketKit` + `xcodebuild … TennisBuddy-macOS … test` | pass (2 replay utilities skip unless `REPLAY_DIRS` is set) |
+| Swift (105 methods: 62 RacketKit + 43 app) | `swift test --package-path apple/RacketKit` + `xcodebuild … TennisBuddy-macOS … test` | pass (2 replay utilities skip unless `REPLAY_DIRS` is set) |
 | ML parity (296 clips) | `python3 ml/test_parity.py` | `PASS`, max distance error 7.22e-07 cm |
 | What-if simulator | `python3 -m unittest discover -s ml -p test_whatif_synth.py` | 11 tests, OK |
 | Full `ml` discovery | `python3 -m unittest discover -s ml` | 46 pass; 1 research-only module needs the local kymatio checkout under `firmware/.pio/` (git-ignored, not the supported path in `ml/README.md`) |
