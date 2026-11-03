@@ -51,13 +51,13 @@ final class CoachPlanTests: XCTestCase {
     }
 
     func testTemplateScoutSelfScoutWithoutOpponent() async throws {
-        let d = SessionDigest(session: session(), weakBackhand: true)
+        let d = SessionDigest(session: session(weakBackhand: true))
         let text = try await TemplateCoach().scout(d, opponent: nil)
         XCTAssertTrue(text.contains("backhand"))
     }
 
     func testPracticePlanParsesThreeSteps() async throws {
-        let d = SessionDigest(session: session(), weakBackhand: true)
+        let d = SessionDigest(session: session(weakBackhand: true))
         let text = try await TemplateCoach().plan(d)
         let plan = PracticePlan.parse(text, sessionID: UUID())
         XCTAssertEqual(plan.steps.count, 3)

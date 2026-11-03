@@ -24,6 +24,7 @@
 		17A2D3BEB6B3516A3B652482 /* TapCalibrationView.swift in Sources */ = {isa = PBXBuildFile; fileRef = 39FA88E51FD976A8351A6535 /* TapCalibrationView.swift */; };
 		1841A606AC7BC27C12691B92 /* RacketKit in Frameworks */ = {isa = PBXBuildFile; productRef = A4E70D007D8B145569CBD58A /* RacketKit */; };
 		18ED092F8AD39F15C95F2472 /* AppModel.swift in Sources */ = {isa = PBXBuildFile; fileRef = 93FF9841989C788B5B2C46D4 /* AppModel.swift */; };
+		192CE25F0B9E6A8C346DB8CF /* PracticePlan.swift in Sources */ = {isa = PBXBuildFile; fileRef = 0F79F1A7E3D3108B8075408F /* PracticePlan.swift */; };
 		1BF92FFB370ADD9475898E75 /* AccountModel.swift in Sources */ = {isa = PBXBuildFile; fileRef = D7AF058FB24A66BF261A3613 /* AccountModel.swift */; };
 		1D917C4ECF632F4D057F0CBA /* RacketView.swift in Sources */ = {isa = PBXBuildFile; fileRef = 8F73C9942056B6F82D381273 /* RacketView.swift */; };
 		20C7D56510BA2336399B0466 /* Records.swift in Sources */ = {isa = PBXBuildFile; fileRef = 3F2C05509855869C61804935 /* Records.swift */; };
@@ -36,10 +37,12 @@
 		2FFE390154509ACA2C095B92 /* MuseCoach.swift in Sources */ = {isa = PBXBuildFile; fileRef = A95212CDD7E03E99DE2060E5 /* MuseCoach.swift */; };
 		318753221A01B8F20EFEDA9F /* WhatIfView.swift in Sources */ = {isa = PBXBuildFile; fileRef = 631AE84D17CB5BF53BA7E88F /* WhatIfView.swift */; };
 		3578E6B4D9E1B3E29A069483 /* GlassesHUD.swift in Sources */ = {isa = PBXBuildFile; fileRef = 236FFE32A5D82A97C42CC0DF /* GlassesHUD.swift */; };
+		36E935B1DFB21C4438B22EDE /* ReviewQueueView.swift in Sources */ = {isa = PBXBuildFile; fileRef = 34F57F5BC7609CBED7537EA2 /* ReviewQueueView.swift */; };
 		37629004E033DFB7367AD5D0 /* ConsumerFeatureTests.swift in Sources */ = {isa = PBXBuildFile; fileRef = 4FF8FDF2FFBFD51C15660DFC /* ConsumerFeatureTests.swift */; };
 		376DBE9C6F1BB56DB7CE06AD /* WorkoutManager.swift in Sources */ = {isa = PBXBuildFile; fileRef = F165496998F9443B17B628A8 /* WorkoutManager.swift */; };
 		37FECF58E2C1D7FB1CE48CAA /* AppleSignInChallenge.swift in Sources */ = {isa = PBXBuildFile; fileRef = 2FB650E789B25A3DC1BC3772 /* AppleSignInChallenge.swift */; };
 		405207A2807350930E06AF81 /* CalibrationView.swift in Sources */ = {isa = PBXBuildFile; fileRef = A47CDCF90CDD3213B7A94C42 /* CalibrationView.swift */; };
+		40625B3CAC15D1B540325DDA /* ReviewQueueView.swift in Sources */ = {isa = PBXBuildFile; fileRef = 34F57F5BC7609CBED7537EA2 /* ReviewQueueView.swift */; };
 		42C595C9D9C55F8E2DD00D30 /* Assets.xcassets in Resources */ = {isa = PBXBuildFile; fileRef = 396D35018B2F6B1101D869F2 /* Assets.xcassets */; };
 		42CE072E77A2A7DDB612E52F /* ScoreView.swift in Sources */ = {isa = PBXBuildFile; fileRef = 39F2F74C107A7D5F69D1DAFF /* ScoreView.swift */; };
 		4F15F2DACEF3786B8DD4DDDD /* AccountModel.swift in Sources */ = {isa = PBXBuildFile; fileRef = D7AF058FB24A66BF261A3613 /* AccountModel.swift */; };
@@ -48,6 +51,7 @@
 		54D0A472AD32FB216A2612B9 /* InsightsView.swift in Sources */ = {isa = PBXBuildFile; fileRef = F12AAA9C083779C5F7C4404A /* InsightsView.swift */; };
 		56845969B9D79319EBC7FC59 /* RacketKit in Frameworks */ = {isa = PBXBuildFile; productRef = DDAE53CB46C98158C43FF1C1 /* RacketKit */; };
 		5B7ED368B11894FC0BE5385A /* SwingFilm.swift in Sources */ = {isa = PBXBuildFile; fileRef = DC3B382A5B3D765E48B4CB77 /* SwingFilm.swift */; };
+		6102C0DCE6E2CEF7AAD5B91A /* ScoutView.swift in Sources */ = {isa = PBXBuildFile; fileRef = 5576D30CEF659DF3D0CDB461 /* ScoutView.swift */; };
 		62EBDCA9C808702796A63F85 /* HistoryView.swift in Sources */ = {isa = PBXBuildFile; fileRef = 5A34DFC69F764025C289A856 /* HistoryView.swift */; };
 		6378233C7A0268790A47CF6C /* Components.swift in Sources */ = {isa = PBXBuildFile; fileRef = 7E790DB056785306E5A4E26C /* Components.swift */; };
 		63A302D121580BFFF4E9551D /* AppleSignInChallenge.swift in Sources */ = {isa = PBXBuildFile; fileRef = 2FB650E789B25A3DC1BC3772 /* AppleSignInChallenge.swift */; };
@@ -58,7 +62,11 @@
 		679BC005B560A7AE4A5A91EF /* InsightsView.swift in Sources */ = {isa = PBXBuildFile; fileRef = F12AAA9C083779C5F7C4404A /* InsightsView.swift */; };
 		6F6453B3E2A133AFD0F375DB /* RacketFirmware.json in Resources */ = {isa = PBXBuildFile; fileRef = EAC10B9BA8B384E61A13C06C /* RacketFirmware.json */; };
 		719C505CF59A80AB372A02CA /* RacketFirmware.bin in Resources */ = {isa = PBXBuildFile; fileRef = 790582683D3D7A26D4F75DE5 /* RacketFirmware.bin */; };
+		72D8D4C4943D1689DA2D099C /* ScoutView.swift in Sources */ = {isa = PBXBuildFile; fileRef = 5576D30CEF659DF3D0CDB461 /* ScoutView.swift */; };
+		73CA4B1944AB4883D0F9A303 /* PracticePlan.swift in Sources */ = {isa = PBXBuildFile; fileRef = 0F79F1A7E3D3108B8075408F /* PracticePlan.swift */; };
+		750B55EA01F2715778C233A5 /* CoachPlanTests.swift in Sources */ = {isa = PBXBuildFile; fileRef = A33029151A3D4E690D31DECA /* CoachPlanTests.swift */; };
 		7994C77F1F1195681575B2E5 /* CalibrationView.swift in Sources */ = {isa = PBXBuildFile; fileRef = A47CDCF90CDD3213B7A94C42 /* CalibrationView.swift */; };
+		809EEA561D2EB51752E49F6F /* PracticePlanView.swift in Sources */ = {isa = PBXBuildFile; fileRef = 6BB608FCCB4AED0D0C4F9553 /* PracticePlanView.swift */; };
 		8229E1CA9A14DDE5D1A7E3AE /* MWDATCore in Frameworks */ = {isa = PBXBuildFile; productRef = ECE6263EB1969F99BC3EBB99 /* MWDATCore */; };
 		854651AB575F52DB7C6F69DB /* Supabase in Frameworks */ = {isa = PBXBuildFile; productRef = A89730073F6D55E1C7C7204C /* Supabase */; };
 		886B779B6E84BAB7928FFEBD /* RacketView.swift in Sources */ = {isa = PBXBuildFile; fileRef = 8F73C9942056B6F82D381273 /* RacketView.swift */; };
@@ -96,6 +104,7 @@
 		C6BEF6F26E632D614AAD425D /* WhatIf.swift in Sources */ = {isa = PBXBuildFile; fileRef = 54A828E7A08D24E4BBBC9A6A /* WhatIf.swift */; };
 		C73BC836A6D01063C408DF21 /* WhatIfView.swift in Sources */ = {isa = PBXBuildFile; fileRef = 631AE84D17CB5BF53BA7E88F /* WhatIfView.swift */; };
 		C778C31E3E5848A25F661A3A /* AppModel.swift in Sources */ = {isa = PBXBuildFile; fileRef = 93FF9841989C788B5B2C46D4 /* AppModel.swift */; };
+		CC1ED852598700B179A8D13E /* PracticePlanView.swift in Sources */ = {isa = PBXBuildFile; fileRef = 6BB608FCCB4AED0D0C4F9553 /* PracticePlanView.swift */; };
 		CD941D083EEC004726C80EE4 /* GLBLoader.swift in Sources */ = {isa = PBXBuildFile; fileRef = 28DF7CF160993EBAA8F2EB65 /* GLBLoader.swift */; };
 		CEAC34EDE534E58D9003ACA5 /* WhatIf.swift in Sources */ = {isa = PBXBuildFile; fileRef = 54A828E7A08D24E4BBBC9A6A /* WhatIf.swift */; };
 		D06127062F0CC45A1C3F14B3 /* Records.swift in Sources */ = {isa = PBXBuildFile; fileRef = 3F2C05509855869C61804935 /* Records.swift */; };
@@ -120,6 +129,7 @@
 		F4D3258438561EE80DBF3D90 /* ScoreView.swift in Sources */ = {isa = PBXBuildFile; fileRef = 39F2F74C107A7D5F69D1DAFF /* ScoreView.swift */; };
 		F753195D0FE588BFD780C29E /* RacketSkinView.swift in Sources */ = {isa = PBXBuildFile; fileRef = 490440BE4772F79F23F88592 /* RacketSkinView.swift */; };
 		F8F9E722AB61743137226BAD /* InsightsModelTests.swift in Sources */ = {isa = PBXBuildFile; fileRef = D301DF1565F9F1034A3E3B45 /* InsightsModelTests.swift */; };
+		F965474F079B3E4B289B0894 /* PracticePlan.swift in Sources */ = {isa = PBXBuildFile; fileRef = 0F79F1A7E3D3108B8075408F /* PracticePlan.swift */; };
 /* End PBXBuildFile section */
 
 /* Begin PBXContainerItemProxy section */
@@ -150,6 +160,7 @@
 		032EE97EB7178A0FC98058FD /* FirmwareUpdateView.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = FirmwareUpdateView.swift; sourceTree = "<group>"; };
 		037371CBA2AEE6E7B73842E5 /* GlassesController.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = GlassesController.swift; sourceTree = "<group>"; };
 		0A9946B6CF4A383F80879D30 /* GlassesView.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = GlassesView.swift; sourceTree = "<group>"; };
+		0F79F1A7E3D3108B8075408F /* PracticePlan.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = PracticePlan.swift; sourceTree = "<group>"; };
 		19D6AA8108FC3EEE695C9792 /* MuseScreen.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = MuseScreen.swift; sourceTree = "<group>"; };
 		1EE34726185AA44404C5C313 /* CoachMemory.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = CoachMemory.swift; sourceTree = "<group>"; };
 		1F855F6F1292B3220B90A8FB /* TennisBuddyWatch.app */ = {isa = PBXFileReference; explicitFileType = wrapper.application; includeInIndex = 0; path = TennisBuddyWatch.app; sourceTree = BUILT_PRODUCTS_DIR; };
@@ -161,6 +172,7 @@
 		2FB650E789B25A3DC1BC3772 /* AppleSignInChallenge.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = AppleSignInChallenge.swift; sourceTree = "<group>"; };
 		31B4851C1B388FB90B5E9AEC /* Info.sync-conflict-20261027-204109-GC6FYOE.plist */ = {isa = PBXFileReference; lastKnownFileType = text.plist; path = "Info.sync-conflict-20261027-204109-GC6FYOE.plist"; sourceTree = "<group>"; };
 		343375742A01D39CB5E6D41F /* TennisRacket.glb */ = {isa = PBXFileReference; path = TennisRacket.glb; sourceTree = "<group>"; };
+		34F57F5BC7609CBED7537EA2 /* ReviewQueueView.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = ReviewQueueView.swift; sourceTree = "<group>"; };
 		396D35018B2F6B1101D869F2 /* Assets.xcassets */ = {isa = PBXFileReference; lastKnownFileType = folder.assetcatalog; path = Assets.xcassets; sourceTree = "<group>"; };
 		39F2F74C107A7D5F69D1DAFF /* ScoreView.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = ScoreView.swift; sourceTree = "<group>"; };
 		39FA88E51FD976A8351A6535 /* TapCalibrationView.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = TapCalibrationView.swift; sourceTree = "<group>"; };
@@ -170,9 +182,11 @@
 		490440BE4772F79F23F88592 /* RacketSkinView.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = RacketSkinView.swift; sourceTree = "<group>"; };
 		4FF8FDF2FFBFD51C15660DFC /* ConsumerFeatureTests.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = ConsumerFeatureTests.swift; sourceTree = "<group>"; };
 		54A828E7A08D24E4BBBC9A6A /* WhatIf.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = WhatIf.swift; sourceTree = "<group>"; };
+		5576D30CEF659DF3D0CDB461 /* ScoutView.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = ScoutView.swift; sourceTree = "<group>"; };
 		5A34DFC69F764025C289A856 /* HistoryView.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = HistoryView.swift; sourceTree = "<group>"; };
 		5CE7A86CCDEFE9D1F8502AC1 /* RacketSceneView.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = RacketSceneView.swift; sourceTree = "<group>"; };
 		631AE84D17CB5BF53BA7E88F /* WhatIfView.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = WhatIfView.swift; sourceTree = "<group>"; };
+		6BB608FCCB4AED0D0C4F9553 /* PracticePlanView.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = PracticePlanView.swift; sourceTree = "<group>"; };
 		718D6AFC3060101468F35101 /* SharedSessionView.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = SharedSessionView.swift; sourceTree = "<group>"; };
 		73962EB83B7E2333DD635F04 /* CoachTests.xctest */ = {isa = PBXFileReference; explicitFileType = wrapper.cfbundle; includeInIndex = 0; path = CoachTests.xctest; sourceTree = BUILT_PRODUCTS_DIR; };
 		750EC5969F8A326324C4F2FF /* AccountView.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = AccountView.swift; sourceTree = "<group>"; };
@@ -188,6 +202,7 @@
 		8F73C9942056B6F82D381273 /* RacketView.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = RacketView.swift; sourceTree = "<group>"; };
 		93FF9841989C788B5B2C46D4 /* AppModel.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = AppModel.swift; sourceTree = "<group>"; };
 		99B37449F16667305BA65652 /* CoachModel.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = CoachModel.swift; sourceTree = "<group>"; };
+		A33029151A3D4E690D31DECA /* CoachPlanTests.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = CoachPlanTests.swift; sourceTree = "<group>"; };
 		A47CDCF90CDD3213B7A94C42 /* CalibrationView.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = CalibrationView.swift; sourceTree = "<group>"; };
 		A95212CDD7E03E99DE2060E5 /* MuseCoach.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = MuseCoach.swift; sourceTree = "<group>"; };
 		A9C75A9CE4F4D5E84133CF54 /* ScoreAnnouncer.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = ScoreAnnouncer.swift; sourceTree = "<group>"; };
@@ -303,10 +318,13 @@
 				F7FE1568EBF1F305C6ADF3C4 /* LiveView.swift */,
 				8C2996C9D860A31050356262 /* MemoryView.swift */,
 				19D6AA8108FC3EEE695C9792 /* MuseScreen.swift */,
+				6BB608FCCB4AED0D0C4F9553 /* PracticePlanView.swift */,
 				5CE7A86CCDEFE9D1F8502AC1 /* RacketSceneView.swift */,
 				490440BE4772F79F23F88592 /* RacketSkinView.swift */,
 				8F73C9942056B6F82D381273 /* RacketView.swift */,
+				34F57F5BC7609CBED7537EA2 /* ReviewQueueView.swift */,
 				39F2F74C107A7D5F69D1DAFF /* ScoreView.swift */,
+				5576D30CEF659DF3D0CDB461 /* ScoutView.swift */,
 				87E34991DFA0617BF8C41329 /* SwingAnimationView.swift */,
 				39FA88E51FD976A8351A6535 /* TapCalibrationView.swift */,
 				631AE84D17CB5BF53BA7E88F /* WhatIfView.swift */,
@@ -348,6 +366,7 @@
 				47587C1A3ADFF8D79D0B943F /* CoachTools.swift */,
 				7E13B818CB23D8733395B203 /* MuseClient.swift */,
 				A95212CDD7E03E99DE2060E5 /* MuseCoach.swift */,
+				0F79F1A7E3D3108B8075408F /* PracticePlan.swift */,
 				DC3B382A5B3D765E48B4CB77 /* SwingFilm.swift */,
 				54A828E7A08D24E4BBBC9A6A /* WhatIf.swift */,
 			);
@@ -388,6 +407,7 @@
 		C788AA57103021AF3F5EEF29 /* Tests */ = {
 			isa = PBXGroup;
 			children = (
+				A33029151A3D4E690D31DECA /* CoachPlanTests.swift */,
 				E971EC74EF10F92834614F3D /* CoachTests.swift */,
 				4FF8FDF2FFBFD51C15660DFC /* ConsumerFeatureTests.swift */,
 				D301DF1565F9F1034A3E3B45 /* InsightsModelTests.swift */,
@@ -624,12 +644,16 @@
 				A29365338828346B2B9B6AD3 /* MuseClient.swift in Sources */,
 				65BA365DA7CAFE80010E4CBC /* MuseCoach.swift in Sources */,
 				12E9272F24196C1CEF07A0B4 /* MuseScreen.swift in Sources */,
+				73CA4B1944AB4883D0F9A303 /* PracticePlan.swift in Sources */,
+				809EEA561D2EB51752E49F6F /* PracticePlanView.swift in Sources */,
 				044D7A721F0CE85DB86A97DA /* RacketSceneView.swift in Sources */,
 				F753195D0FE588BFD780C29E /* RacketSkinView.swift in Sources */,
 				1D917C4ECF632F4D057F0CBA /* RacketView.swift in Sources */,
 				20C7D56510BA2336399B0466 /* Records.swift in Sources */,
+				36E935B1DFB21C4438B22EDE /* ReviewQueueView.swift in Sources */,
 				8A96015274E29EFE642A942E /* ScoreAnnouncer.swift in Sources */,
 				42CE072E77A2A7DDB612E52F /* ScoreView.swift in Sources */,
+				6102C0DCE6E2CEF7AAD5B91A /* ScoutView.swift in Sources */,
 				9C9B32A4B14014387AAF2B3E /* SharedSessionView.swift in Sources */,
 				24A10F85D9E15C0C2E6EB092 /* SocialModels.swift in Sources */,
 				EDD754BC72D3120FBCC7883F /* SwingAnimationView.swift in Sources */,
@@ -650,6 +674,7 @@
 				37FECF58E2C1D7FB1CE48CAA /* AppleSignInChallenge.swift in Sources */,
 				00668D7CC80080DFA354520B /* CoachMemory.swift in Sources */,
 				0F8AFFC0DB5B3EBEA6B6F094 /* CoachModel.swift in Sources */,
+				750B55EA01F2715778C233A5 /* CoachPlanTests.swift in Sources */,
 				8C2766DA9FE6AE1A97F2A1A0 /* CoachTests.swift in Sources */,
 				89E375132CC6F3B9CDE4BDF0 /* CoachTools.swift in Sources */,
 				37629004E033DFB7367AD5D0 /* ConsumerFeatureTests.swift in Sources */,
@@ -657,6 +682,7 @@
 				F8F9E722AB61743137226BAD /* InsightsModelTests.swift in Sources */,
 				65A2D66B16AE3280C48695FD /* MuseClient.swift in Sources */,
 				2FFE390154509ACA2C095B92 /* MuseCoach.swift in Sources */,
+				F965474F079B3E4B289B0894 /* PracticePlan.swift in Sources */,
 				117FB391373D2548F66FB7C9 /* Records.swift in Sources */,
 				E087C594C150518A07848381 /* ScoreAnnouncer.swift in Sources */,
 				0CB6145C1331DF98B4CBEF8A /* SocialModels.swift in Sources */,
@@ -692,12 +718,16 @@
 				E076ADEAA3E3106B85BC6181 /* MuseClient.swift in Sources */,
 				C57AA38341143B9C02A8AAD6 /* MuseCoach.swift in Sources */,
 				9ABDC6E52CFC9BE74BAAA8CF /* MuseScreen.swift in Sources */,
+				192CE25F0B9E6A8C346DB8CF /* PracticePlan.swift in Sources */,
+				CC1ED852598700B179A8D13E /* PracticePlanView.swift in Sources */,
 				65D4F29ECD63B318321BBF4F /* RacketSceneView.swift in Sources */,
 				9D99BFE7952F59F2664D23A6 /* RacketSkinView.swift in Sources */,
 				886B779B6E84BAB7928FFEBD /* RacketView.swift in Sources */,
 				D06127062F0CC45A1C3F14B3 /* Records.swift in Sources */,
+				40625B3CAC15D1B540325DDA /* ReviewQueueView.swift in Sources */,
 				DDE9324A8ADD56E702D6D57D /* ScoreAnnouncer.swift in Sources */,
 				F4D3258438561EE80DBF3D90 /* ScoreView.swift in Sources */,
+				72D8D4C4943D1689DA2D099C /* ScoutView.swift in Sources */,
 				E656B9C4C14FCBF2B563203F /* SharedSessionView.swift in Sources */,
 				2FDD375CDBD93DA6E5D24A38 /* SocialModels.swift in Sources */,
 				EBAA1118DC5363A274E67F41 /* SwingAnimationView.swift in Sources */,
