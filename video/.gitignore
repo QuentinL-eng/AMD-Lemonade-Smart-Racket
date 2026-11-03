@@ -11,3 +11,6 @@ public/footage/*
 
 # Voiceover recordings: large, regenerate or share like footage
 public/audio/vo/
+
+# Regenerated from git and hackathon.json by npm run assets
+src/config/generated/facts.json
