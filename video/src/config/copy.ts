@@ -159,9 +159,9 @@ export const copy = {
     deviceBadge: 'Meta Wearables Device Access Toolkit',
     filmBadge: 'Real Muse Spark script, on a demo forehand session',
     museCallouts: ['You ask in your own words', 'Muse calls simulate_change', 'An estimate, on your own shots', 'Then it plans a drill'],
-    // Fill in each player's name and level.
-    testimonial1: { name: 'Name', detail: 'Club player, level' },
-    testimonial2: { name: 'Name', detail: 'Club player, level' },
+    // Each player's name and what they do. An empty detail shows the name alone.
+    testimonial1: { name: 'Kellam Adams', detail: 'Teaches tennis part time' },
+    testimonial2: { name: 'Josh Do', detail: '' },
   },
 
   devices: {

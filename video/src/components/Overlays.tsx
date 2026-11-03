@@ -78,7 +78,7 @@ const LowerThird: React.FC<{ name: string; detail: string; frames: number }> = (
     <AbsoluteFill style={{ justifyContent: 'flex-end', padding: '0 0 170px 90px', opacity: useOut(frames) }}>
       <div style={{ ...enter(frame, 0, 10), width: 'fit-content', fontFamily: fonts.sans, background: 'rgba(11,12,9,0.82)', borderLeft: `6px solid ${colors.accent}`, padding: '14px 30px', borderRadius: '0 14px 14px 0' }}>
         <div style={{ fontSize: 40, fontWeight: 700, color: colors.text }}>{name}</div>
-        <div style={{ fontSize: 28, color: colors.muted }}>{detail}</div>
+        {detail && <div style={{ fontSize: 28, color: colors.muted }}>{detail}</div>}
       </div>
     </AbsoluteFill>
   );

@@ -46,7 +46,7 @@ LOUDNESS_LUFS = -16.0
 
 # Applied after isolation: rumble out, body back, the tinny 2-3 kHz band down, pops above the voice out, level evened.
 LEVEL = "lowpass=f=9500,acompressor=threshold=-24dB:ratio=3:attack=8:release=120:makeup=2"
-TONE = ",".join(["highpass=f=70:poles=2", "equalizer=f=130:t=q:w=1:g=7", "equalizer=f=260:t=q:w=1:g=7", "equalizer=f=2400:t=q:w=1.4:g=-8", LEVEL])
+TONE = ",".join(["highpass=f=80:poles=2", "equalizer=f=130:t=q:w=1:g=2", "equalizer=f=260:t=q:w=1:g=4", "equalizer=f=2400:t=q:w=1.4:g=-7", LEVEL])
 FILTER_TONE = ",".join(["highpass=f=70:poles=2", "equalizer=f=170:t=q:w=1:g=3", "equalizer=f=260:t=q:w=0.7:g=4", "equalizer=f=2500:t=q:w=1.4:g=-6", LEVEL])
 
 
