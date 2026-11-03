@@ -4,7 +4,7 @@
   "private": true,
   "description": "Reveal + demo video for Tennis Buddee (Remotion). Edit src/config/* to change copy, timing and footage.",
   "scripts": {
-    "assets": "node scripts/sync-assets.mjs",
+    "assets": "node scripts/sync-assets.mjs && node scripts/sync-facts.mjs",
     "studio": "npm run assets && remotion studio",
     "still": "remotion still",
     "render:reveal": "npm run assets && remotion render Reveal out/reveal.mp4",
@@ -12,6 +12,9 @@
     "frames": "node scripts/review-frames.mjs",
     "typecheck": "tsc --noEmit",
     "timeline": "node scripts/print-timeline.mjs",
+    "check": "npm run assets && node scripts/check-video.mjs",
+    "clips": "npm run assets && node scripts/render-clips.mjs",
+    "sam": "node scripts/sam-clip.mjs",
     "render:song": "npm run assets && remotion render RevealSong out/reveal-song.mp4",
     "render:hype": "npm run assets && remotion render Hype out/hype.mp4",
     "footage": "node scripts/cut-footage.mjs",

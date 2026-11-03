@@ -4,7 +4,8 @@ import React from 'react';
 import { Composition, Folder } from 'remotion';
 import { SceneWithSound, Timeline, cutFrames } from './components/Timeline';
 import { video } from './config/brand';
-import { cuts, reveal, type Cut } from './config/timeline';
+import { OverlayLayer } from './components/Overlays';
+import { cuts, demo, reveal, type Cut } from './config/timeline';
 import { scenes, type SceneId } from './scenes';
 import { RacketSheet, VIEWS } from './scenes/dev/RacketSheet';
 import { Hype, hypeFrames } from './hype/Hype';
@@ -43,8 +44,15 @@ export const RemotionRoot: React.FC = () => (
     {/* Each scene on its own, for quick iteration in the studio. */}
     <Folder name="Scenes">
       {(Object.keys(scenes) as SceneId[]).map((id) => {
-        const seconds = reveal.find((e) => 'scene' in e && e.scene === id)?.seconds ?? 6;
+        const seconds = [...demo, ...reveal].find((e) => 'scene' in e && e.scene === id)?.seconds ?? 6;
         return <Composition key={id} id={`scene-${id}`} component={SceneWithSound} defaultProps={{ id }} durationInFrames={Math.round(seconds * video.fps)} {...video} />;
+      })}
+    </Folder>
+    {/* Each entry's overlays on transparent, for an outside editor: scripts/render-clips.mjs */}
+    <Folder name="Overlays">
+      {demo.filter((e) => e.overlays).map((e) => {
+        const id = 'scene' in e ? e.scene : e.footage;
+        return <Composition key={id} id={`overlay-${id}`} component={OverlayLayer} defaultProps={{ overlays: e.overlays! }} durationInFrames={Math.round(e.seconds * video.fps)} {...video} />;
       })}
     </Folder>
     <Folder name="Dev">

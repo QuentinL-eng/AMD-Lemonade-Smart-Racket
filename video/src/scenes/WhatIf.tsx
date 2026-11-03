@@ -67,6 +67,7 @@ export const WhatIf: React.FC = () => {
         <Card style={{ ...enter(frame, T.result) }}>
           {features.showBallFlight && <Flight t={grow} />}
           {c.results.map((r) => <Bar key={r.label} {...r} t={grow} />)}
+          <div style={{ fontSize: 22, color: colors.muted }}>{c.note}</div>
         </Card>
         <div style={{ display: 'flex', gap: 22, alignItems: 'stretch' }}>
           <div style={{ ...enter(frame, T.note + 20), transform: `scale(${press})`, background: colors.card, border: `2px solid ${colors.accent}`, color: colors.accent, fontSize: 30, fontWeight: 700, borderRadius: 18, padding: '20px 28px', alignSelf: 'flex-start' }}>

@@ -2,26 +2,45 @@
 //
 // An entry is either:
 //   { scene: '<id>', seconds }                  CGI scene from src/scenes
-//   { footage: '<id>', seconds, file?, ... }    real footage slot
+//   { footage: '<id>', seconds, ... }           real footage slot
 //
-// Footage: drop the clip in public/footage/ and set `file`. Until then a
-// placeholder card shows the shot notes, so the cut is watchable today.
+// Footage: save the clip as public/footage/<id>.mp4 and it is used automatically. Until then the slot plays, in
+// order: `clips` (short cuts already in public/footage), `fallback` (a CGI scene), or a placeholder with the shot notes.
 // `from` trims the start of the clip (seconds). `caption` is burned in at the bottom.
-// Scenes take `skip` (frames) to start a scene part-way in, e.g. so its key moment
-// lands on a beat.
+// Scenes take `skip` (frames) to start a scene part-way in, e.g. so its key moment lands on a beat.
+// Any entry takes `overlays`: text and cards over the picture, drawn by src/components/Overlays.tsx.
 
 import type { SceneId } from '../scenes';
-import { music, type Music } from './sound.ts'; // .ts so scripts/print-timeline.mjs can import it with plain node
+import { music, type Music } from './sound.ts'; // .ts so scripts can import it with plain node
+import { voiceover, type VoLine } from './voiceover.ts';
 
-export type SceneEntry = { scene: SceneId; seconds: number; skip?: number };
+/** `at` and `seconds` are relative to the entry. `text` is a key of copy.overlays. */
+export type Overlay =
+  | { type: 'headline'; text: 'hook'; at: number; seconds: number }
+  | { type: 'shotCard'; at: number; seconds: number }
+  | { type: 'badge'; text: 'deviceBadge' | 'filmBadge'; at: number; seconds: number; x?: number; y?: number }
+  | { type: 'callouts'; text: 'museCallouts'; at: number; every: number }
+  | { type: 'lowerThird'; text: 'testimonial1' | 'testimonial2' | 'testimonial3'; at: number; seconds: number };
+
+export type SceneEntry = { scene: SceneId; seconds: number; skip?: number; overlays?: Overlay[] };
 export type FootageEntry = {
   footage: string;
   seconds: number;
-  file?: string;
+  file?: string; // only to use a name other than <footage>.mp4
   from?: number;
   muted?: boolean;
   caption?: string;
   shot: string; // what to film, shown on the placeholder
+  /** Plays until the real clip exists: [clip name, seconds, optional playback rate]. */
+  clips?: [string, number, number?][];
+  /** The clips above are a stand-in, not the final shot: tags the frame and `npm run check` lists it. */
+  standIn?: boolean;
+  /** CGI scene to show until the real clip exists. */
+  fallback?: SceneId;
+  /** 'phone': a portrait screen recording in an iPhone frame, ungraded. Default: full frame, graded. */
+  layout?: 'full' | 'phone';
+  playbackRate?: number;
+  overlays?: Overlay[];
 };
 export type Entry = SceneEntry | FootageEntry;
 
@@ -45,41 +64,48 @@ export const reveal: Entry[] = [
   { scene: 'endcard', seconds: 5 },
 ];
 
-// The 3:00 hackathon submission. CGI beats intercut with real footage.
+// The 3:00 hackathon submission (script: video/DEMO_SCRIPT.md). Spoken lines live in voiceover.ts and follow their
+// entry, so you can reorder this list freely. `npm run timeline` prints the cut; `npm run check` tells you what's left.
+export const demoTransition = 0.25;
+// The song fades out at about 2:05. Jump back from bar 49 to bar 9, where it's just as full, on a bar line.
+const songBar = (n: number) => 0.386 + ((n - 1) * 4 * 60) / 95;
+const demoMusic: Music = { ...music, jump: { at: songBar(49), to: songBar(9) } };
 export const demo: Entry[] = [
-  { footage: 'club-rally', seconds: 5, caption: 'Tuesday night at the club.',
-    shot: 'Wide, low angle behind the baseline. A fast rally, golden light if possible. No talking.' },
-  { scene: 'hook', seconds: 3.5 },
-  { scene: 'racketReveal', seconds: 5.5 },
-  { footage: 'intro-to-camera', seconds: 12, muted: false,
-    caption: 'I built a smart racket and the app around it during the hackathon.',
-    shot: 'You to camera on court, racket in hand. One sentence on the problem, one on what you built this week.' },
+  { footage: 'cold-open', seconds: 8, standIn: true, clips: [['ev-toss', 3.2, 0.5], ['ev-serve', 4.8, 0.3]],
+    overlays: [{ type: 'headline', text: 'hook', at: 0.4, seconds: 3.6 }, { type: 'shotCard', at: 4.6, seconds: 3.4 }],
+    shot: 'Your serve at the court: toss, then contact. Film 240 fps slow-mo from the side. Phone on the Live tab so the card numbers are real.' },
+  { scene: 'racketReveal', seconds: 6 },
+  { footage: 'talk-intro', seconds: 9, muted: false,
+    caption: 'I built a smart racket: a sensor in the handle, and Muse Spark predicting what a change will do.',
+    shot: 'Bedroom, landscape, racket in hand. One line on the problem, one on what you built. Say what the caption says, in your own words, and change the caption to match.' },
   { scene: 'insideHandle', seconds: 9 },
-  { footage: 'build-montage', seconds: 8, caption: 'Custom board, printed insert, firmware.',
-    shot: 'Macro cuts, 1 s each: soldering, insert in hand, closing the handle, flashing firmware, Onshape CAD.' },
-  { scene: 'robotLab', seconds: 7 },
-  { footage: 'robot-arm', seconds: 7, caption: 'Robot arm test rig for labelled swings.',
-    shot: 'The Epson C8 swinging the racket. If it is not running yet, record the Epson simulator and the TennisRobot sim run.' },
-  { scene: 'impact', seconds: 6 },
-  { footage: 'live-session', seconds: 12, caption: 'Every shot lands on your phone, watch and glasses.',
-    shot: 'Split: player hitting forehands / phone Live screen updating. Real shots, real numbers.' },
-  { scene: 'devices', seconds: 6 },
-  { footage: 'glasses-pov', seconds: 7, caption: 'Meta Ray-Ban Display: stats and score in view.',
-    shot: 'Through-the-lens POV or over-shoulder of the HUD while rallying.' },
-  { scene: 'score', seconds: 5 },
-  { footage: 'match-scoring', seconds: 9, caption: 'Two taps on the handle: point to you.',
-    shot: 'Close-up of thumb tapping the handle between points, cut to the score updating on the watch.' },
+  { footage: 'build-montage', seconds: 6, clips: [['bt-smoke', 1.2], ['bt-solder', 1], ['bt-pcb', 1], ['bt-pod', 0.7], ['bt-code', 1.1], ['bt-wired', 0.6], ['bt-cad', 0.4]],
+    shot: 'Already cut from the build footage. Replace only if you have something better.' },
+  { scene: 'clubFinding', seconds: 10 },
+  { footage: 'robot-arm', seconds: 5, clips: [['rh-reveal', 3], ['rh-past', 1.2], ['rh-arm', 0.8]],
+    shot: 'Already cut from the Oct 29 arm session.' },
+  { scene: 'robotLab', seconds: 5 },
+  { scene: 'evidence', seconds: 9 },
+  { scene: 'devices', seconds: 6, overlays: [{ type: 'badge', text: 'deviceBadge', at: 1.6, seconds: 4.2, x: 1560, y: 300 }] },
+  { footage: 'glasses-pov', seconds: 7, fallback: 'glassesPov',
+    shot: 'Optional: through the lens of the real Ray-Ban Display. Until then, the simulated-view CGI plays, and says so.' },
+  { scene: 'museAgent', seconds: 12 },
   { scene: 'whatIf', seconds: 10 },
-  { footage: 'muse-screen-recording', seconds: 20, caption: 'Muse Spark runs the what-if on your own shots, then plans a drill.',
-    shot: 'Screen recording (iPhone): ask a what-if, the simulate_change result, then "Plan my next drill".' },
-  { footage: 'drill-on-court', seconds: 9, caption: 'The drill runs on the watch and counts itself.',
-    shot: 'Player doing the drill, watch close-up counting down "to go", ending on "Drill complete!".' },
-  { scene: 'together', seconds: 5 },
-  { footage: 'testimonials', seconds: 25, muted: false, caption: 'First test at the club.',
-    shot: '4-5 players, ~5 s each, best line only. Ask "What did it tell you that you did not know?"' },
-  { footage: 'built-this-week', seconds: 9, caption: 'Built during the hackathon: insert, firmware, app, Muse tools, robot rig.',
-    shot: 'Screen capture: git log / repo tree scrolling, highlighted new folders. Required by the rules.' },
-  { scene: 'endcard', seconds: 5 },
+  { footage: 'muse-screen-recording', seconds: 28, layout: 'phone',
+    overlays: [{ type: 'callouts', text: 'museCallouts', at: 1, every: 6 }],
+    shot: 'iPhone screen recording, about a minute, slowly: Muse tab, What if, ask it, wait for the numbers. Then Next drill, then Start on Watch. Set playbackRate to speed it up and move the callouts to match.' },
+  { footage: 'drill-on-watch', seconds: 6,
+    shot: 'Close on the Watch: the to-go count drops as you hit. Finish on the phone Live tab saying Drill complete!' },
+  { scene: 'samTrack', seconds: 8 },
+  { scene: 'swingFilm', seconds: 8, overlays: [{ type: 'badge', text: 'filmBadge', at: 0.3, seconds: 7.5, x: 960, y: 40 }] },
+  { footage: 'testimonial-1', seconds: 5, muted: false, overlays: [{ type: 'lowerThird', text: 'testimonial1', at: 0.4, seconds: 4 }],
+    shot: 'A player who used it: one line, on camera, with their OK to use it. Delete this entry if you do not have one.' },
+  { footage: 'testimonial-2', seconds: 5, muted: false, overlays: [{ type: 'lowerThird', text: 'testimonial2', at: 0.4, seconds: 4 }],
+    shot: 'A second player: one line, on camera, with their OK to use it. Delete this entry if you do not have one.' },
+  { footage: 'testimonial-3', seconds: 5, muted: false, overlays: [{ type: 'lowerThird', text: 'testimonial3', at: 0.4, seconds: 4 }],
+    shot: 'A third player: one line, on camera, with their OK to use it. Delete this entry if you do not have one.' },
+  { scene: 'builtProof', seconds: 8 },
+  { scene: 'endcard', seconds: 6 },
 ];
 
 // ---------------------------------------------------------------------------
@@ -103,9 +129,9 @@ export const revealSong: Entry[] = [
 ];
 
 /** Every cut: its entries, crossfade length and music. Root.tsx makes one composition each. */
-export const cuts = {
+export type Cut = { entries: Entry[]; transition: number; music: Music; voiceover?: VoLine[] };
+export const cuts: Record<'Reveal' | 'RevealSong' | 'Demo', Cut> = {
   Reveal: { entries: reveal, transition: transitionSeconds, music },
   RevealSong: { entries: revealSong, transition: 0, music: song },
-  Demo: { entries: demo, transition: transitionSeconds, music },
+  Demo: { entries: demo, transition: demoTransition, music: demoMusic, voiceover },
 };
-export type Cut = (typeof cuts)[keyof typeof cuts];

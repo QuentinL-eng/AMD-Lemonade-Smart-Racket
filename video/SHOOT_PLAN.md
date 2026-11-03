@@ -1,5 +1,8 @@
 # Shoot plan: real footage for the 3:00 demo
 
+> **Superseded for the cut itself.** The current order, timing and shot list are in [`DEMO_SCRIPT.md`](DEMO_SCRIPT.md). The
+> gear, testimonial questions and "say this, not that" below still apply.
+
 The CGI shows *how it works*. The footage has to prove *it's real*: real players,
 real shots, real numbers on real screens. Judges score Demo at 25% ("is the demo
 video genuinely cool to watch?") and Impact at 30% ("could this actually become

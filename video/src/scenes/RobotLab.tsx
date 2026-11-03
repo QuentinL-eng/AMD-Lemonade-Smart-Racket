@@ -131,13 +131,13 @@ export const RobotLab: React.FC = () => {
   const ball: [number, number, number] = frame < c
     ? [lerp(-1900, HEAD[0] - 40, inT), lerp(HEAD[1] - 300, HEAD[1], inT), lerp(HEAD[2] + 160, HEAD[2], inT)]
     : [lerp(HEAD[0] - 40, -2200, outT), lerp(HEAD[1], HEAD[1] - 900, outT), lerp(HEAD[2], HEAD[2] + 500, outT)];
-  const flash = Math.max(0, 1 - Math.abs(frame - c) / 8);
+  const flash = copy.robotLab.showBalls ? Math.max(0, 1 - Math.abs(frame - c) / 8) : 0;
 
   return (
     <Backdrop glow={0.08}>
-      <Stage3D camera={cam} target={[-0.2, 0.4, 0]} fov={36}>
-        <RobotArm angle={angle} racketGlow={flash * 0.8}>
-          {frame > c - 24 && (
+      <Stage3D camera={cam} target={[0.9, 0.4, 0]} fov={36}>
+        <RobotArm angle={angle} racketGlow={flash * 0.8} racket="blue">
+          {copy.robotLab.showBalls && frame > c - 24 && (
             <mesh position={ball}>
               <sphereGeometry args={[34, 32, 32]} />
               <meshStandardMaterial color="#D9EE3F" roughness={0.9} emissive="#D9EE3F" emissiveIntensity={0.15} />

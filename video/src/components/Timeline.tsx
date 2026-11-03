@@ -5,8 +5,11 @@ import { AbsoluteFill, Audio, Sequence, interpolate, staticFile, useVideoConfig 
 import { video } from '../config/brand';
 import { cues, effects, sound, type Cue } from '../config/sound';
 import type { Cut, Entry } from '../config/timeline';
+import { voSeconds } from '../config/voiceover';
 import { scenes, type SceneId } from '../scenes';
 import { FootageSlot } from './FootageSlot';
+import { OverlayLayer } from './Overlays';
+import { VoiceoverTrack, voFile } from './Voiceover';
 
 const fps = video.fps;
 
@@ -28,6 +31,20 @@ const overlap = (cut: Cut) => Math.round(cut.transition * fps);
 /** Total length after crossfades overlap. Root.tsx uses it for durationInFrames. */
 export const cutFrames = (cut: Cut) => lengths(cut).reduce((n, l) => n + l, 0) - overlap(cut) * (cut.entries.length - 1);
 
+/** The name a line of voiceover uses for an entry: its scene or footage id. */
+const entryId = (e: Entry) => ('scene' in e ? e.scene : e.footage);
+
+/** First frame of each entry in the finished cut. */
+const startFrames = (cut: Cut) => {
+  const len = lengths(cut);
+  const starts = new Map<string, number>();
+  cut.entries.reduce((at, e, i) => {
+    starts.set(entryId(e), at);
+    return at + len[i] - overlap(cut);
+  }, 0);
+  return starts;
+};
+
 /** One sound effect, placed so its hit point lands on `frame`. */
 export const Effect: React.FC<{ cue: Cue; frame: number }> = ({ cue, frame }) => {
   const fx = effects[cue.sfx];
@@ -46,7 +63,7 @@ export const Effect: React.FC<{ cue: Cue; frame: number }> = ({ cue, frame }) =>
 };
 
 /** A CGI scene plus its sound cues from config/sound.ts, optionally started `skip` frames in. */
-export const SceneWithSound: React.FC<{ id: SceneId; skip?: number }> = ({ id, skip = 0 }) => {
+export const SceneWithSound: React.FC<{ id: SceneId; skip?: number; children?: React.ReactNode }> = ({ id, skip = 0, children }) => {
   const Scene = scenes[id];
   const { durationInFrames } = useVideoConfig();
   return (
@@ -55,6 +72,7 @@ export const SceneWithSound: React.FC<{ id: SceneId; skip?: number }> = ({ id, s
         <Scene />
       </Sequence>
       {cues[id].map((c, i) => <Effect key={i} cue={c} frame={c.fromEnd ? durationInFrames - c.at : c.at - skip} />)}
+      {children}
     </AbsoluteFill>
   );
 };
@@ -68,18 +86,29 @@ const Music: React.FC<{ cut: Cut }> = ({ cut }) => {
     if ('footage' in e && e.muted === false) talk.push([at, at + len[i]]);
     return at + len[i] - overlap(cut);
   }, 0);
+  // Only recorded lines duck the music: a caption alone makes no sound to clear.
+  const starts = startFrames(cut);
+  const spoken = (cut.voiceover ?? []).filter((l) => voFile(l.id) && starts.has(l.at)).map((l) => {
+    const from = starts.get(l.at)! + Math.round((l.lead ?? 0.3) * fps);
+    return [from, from + Math.round(voSeconds(l) * fps)];
+  });
   const base = cut.music.volume ?? 0.5;
+  const volumeAt = (f: number) => {
+    const ducked = talk.some(([a, b]) => f >= a - 10 && f <= b + 10);
+    const underVo = spoken.some(([a, b]) => f >= a - 10 && f <= b + 10);
+    const fade = interpolate(f, [durationInFrames - sound.musicFadeOut * fps, durationInFrames], [1, 0], { extrapolateLeft: 'clamp', extrapolateRight: 'clamp' });
+    return (ducked ? sound.musicUnderTalk : underVo ? sound.musicUnderVoiceover : base) * fade;
+  };
+  const from = Math.round((cut.music.from ?? 0) * fps);
+  const src = staticFile(cut.music.src);
+  const { jump } = cut.music;
+  if (!jump) return <Audio src={src} trimBefore={from} loop volume={volumeAt} />; // loops if the cut outlasts the song
+  const first = Math.round(jump.at * fps) - from;
   return (
-    <Audio
-      src={staticFile(cut.music.src)}
-      trimBefore={Math.round((cut.music.from ?? 0) * fps)}
-      loop // cuts longer than the track (the 2:57 Demo vs a 2:08 song) start it again
-      volume={(f) => {
-        const ducked = talk.some(([a, b]) => f >= a - 10 && f <= b + 10);
-        const fade = interpolate(f, [durationInFrames - sound.musicFadeOut * fps, durationInFrames], [1, 0], { extrapolateLeft: 'clamp', extrapolateRight: 'clamp' });
-        return (ducked ? sound.musicUnderTalk : base) * fade;
-      }}
-    />
+    <>
+      <Sequence durationInFrames={first} layout="none"><Audio src={src} trimBefore={from} volume={volumeAt} /></Sequence>
+      <Sequence from={first} layout="none"><Audio src={src} trimBefore={Math.round(jump.to * fps)} volume={(f) => volumeAt(f + first)} /></Sequence>
+    </>
   );
 };
 
@@ -92,7 +121,11 @@ export const Timeline: React.FC<{ cut: Cut }> = ({ cut }) => {
         {cut.entries.flatMap((e: Entry, i) => {
           const items = [
             <TransitionSeries.Sequence key={`s${i}`} durationInFrames={len[i]}>
-              {'scene' in e ? <SceneWithSound id={e.scene} skip={e.skip} /> : <FootageSlot entry={e} />}
+              {'scene' in e ? (
+                <SceneWithSound id={e.scene} skip={e.skip}>{e.overlays && <OverlayLayer overlays={e.overlays} />}</SceneWithSound>
+              ) : (
+                <FootageSlot entry={e} />
+              )}
             </TransitionSeries.Sequence>,
           ];
           if (i < cut.entries.length - 1 && overlap(cut) > 0)
@@ -101,6 +134,7 @@ export const Timeline: React.FC<{ cut: Cut }> = ({ cut }) => {
         })}
       </TransitionSeries>
       <Music cut={cut} />
+      {cut.voiceover && <VoiceoverTrack lines={cut.voiceover} starts={startFrames(cut)} fps={fps} />}
     </AbsoluteFill>
   );
 };

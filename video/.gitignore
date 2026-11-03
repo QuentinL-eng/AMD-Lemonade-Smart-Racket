@@ -8,3 +8,6 @@ cad/robot-arm.step
 # Raw footage is large; keep it out of git (share via Drive instead)
 public/footage/*
 !public/footage/README.md
+
+# Voiceover recordings: large, regenerate or share like footage
+public/audio/vo/
