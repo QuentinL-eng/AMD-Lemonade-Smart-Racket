@@ -9,6 +9,12 @@ struct RacketView: View {
     var body: some View {
         @Bindable var model = model
         Form {
+            Section {
+                NavigationLink { SharedSessionView() } label: { Label("Play together", systemImage: "person.2") }
+            } footer: {
+                Text("Invite friends, keep score together and share racket stats.")
+            }
+
             Section("Your racket") {
                 NavigationLink { RacketSkinView() } label: { Label("Racket skins", systemImage: "paintpalette") }
                 #if os(iOS)
@@ -60,7 +66,7 @@ struct RacketView: View {
                 Toggle("Use metric units", isOn: $useMetric)
                 LabeledContent("iCloud sync", value: SyncedStore.isSyncing ? "On" : "Off")
             } header: {
-                Text("Settings")
+                Text("General")
             } footer: {
                 Text("\(useMetric ? "km/h and cm" : "mph and inches"). iCloud sync: \(SyncedStore.statusText).")
             }
@@ -145,7 +151,7 @@ struct RacketView: View {
             }
         }
         .formStyle(.grouped)
-        .navigationTitle("Racket")
+        .navigationTitle("Settings")
         .sheet(isPresented: $showCalibration) {
             CalibrationView()
                 #if os(macOS)

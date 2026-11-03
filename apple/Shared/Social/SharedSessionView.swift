@@ -165,7 +165,7 @@ struct SharedSessionView: View {
                 Button("Record my racket stats") { app.startSharedRecording(matchID: state.id, playerID: me) }
                     .disabled(app.isSessionActive || app.sourceKind != .racket)
                 Text(app.isSessionActive ? "End your current recording first." : app.sourceKind != .racket
-                     ? "Select and connect your smart racket in the Racket tab to share shots."
+                     ? "Select and connect your smart racket in Settings to share shots."
                      : "Start a recording to share your shots. Scoring works without a racket.")
                     .font(.caption).foregroundStyle(.secondary)
             }

@@ -1,6 +1,6 @@
 import SwiftUI
 
-/// Settings for the Meta Ray-Ban Display link (Racket tab → Glasses).
+/// Settings for the Meta Ray-Ban Display link (Settings tab → Glasses).
 struct GlassesView: View {
     @Environment(GlassesController.self) private var glasses
 

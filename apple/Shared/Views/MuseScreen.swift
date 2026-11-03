@@ -55,7 +55,7 @@ struct SwingSketch: View {
     }
 }
 
-/// Muse: the best change for your game, the next drill, memory, and questions, pushed from Insights.
+/// Muse: the best change for your game, the next drill, memory, and questions. Its own tab.
 struct CoachScreen: View {
     @Query(sort: \SessionRecord.startDate) private var sessions: [SessionRecord]
     @Query(sort: \CoachNote.updatedAt, order: .reverse) private var allNotes: [CoachNote]
@@ -193,7 +193,7 @@ struct CoachScreen: View {
                 Text("Muse is testing changes…").font(.subheadline).foregroundStyle(MuseStyle.text)
                 Spacer()
             } else {
-                Text(filmError.isEmpty ? (coach.museAvailable ? "Uses Muse Spark online" : "Sign in under Account to use Muse")
+                Text(filmError.isEmpty ? (coach.museAvailable ? "Uses Muse Spark online" : "Sign in under Settings → Account to use Muse")
                      : filmError)
                     .font(.caption).foregroundStyle(MuseStyle.muted).lineLimit(2)
                 Spacer()
@@ -401,7 +401,7 @@ struct CoachScreen: View {
                 .foregroundStyle(MuseStyle.text)
             Text(coach.museAvailable
                  ? "Muse sends your question and the shot data, racket readings and player notes it asks for to Meta. Health data and session notes are excluded; turn off player notes under Memory."
-                 : "Sign in under Account to use Muse online. Until then the built-in engine answers offline.")
+                 : "Sign in under Settings → Account to use Muse online. Until then the built-in engine answers offline.")
                 .font(.caption).foregroundStyle(MuseStyle.muted)
             if let reason = coach.lastFallbackReason {
                 Text("Using the built-in engine: \(reason)").font(.caption).foregroundStyle(MuseStyle.muted)

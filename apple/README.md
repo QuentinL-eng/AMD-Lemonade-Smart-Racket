@@ -17,13 +17,13 @@ The project file is generated from `project.yml`. After adding or removing files
 ## Using it without the racket
 
 The app starts on the **Simulator** data source: a virtual racket that swings and hits every few seconds, so every
-screen works without hardware. Switch to the real racket from the connection menu on the Live tab or in the Racket tab.
+screen works without hardware. Switch to the real racket from the connection menu on the Live tab or in the Settings tab.
 
 ## Muse Spark
 
 Muse runs through the `muse` Supabase edge function (`backend/supabase/functions/muse`), which holds the Meta API key
 as a server secret; the app never contains or asks for a key. Muse online needs a signed-in account
-(Racket → Account) and can be turned off with **Use Muse online** in Insights → Muse.
+(Settings → Account) and can be turned off with **Use Muse online** on the Muse tab.
 Muse sends questions and requested shot/session statistics to Meta. Health data and session notes are excluded.
 Any Muse error, or being signed out, uses the deterministic built-in engine, and the UI shows the engine that answered.
 Deploy once: `supabase secrets set META_API_KEY=... --project-ref birutnqxduzwldvymeun` then
@@ -44,12 +44,12 @@ Tools (`Shared/Coach/CoachTools.swift`): `query_shots`, `compare_sessions`, `get
 question and fetches what it needs.
 
 **Muse memory** (`CoachNote`, synced in the same SwiftData/iCloud store): per-player notes such as habits, goals or
-past injuries, edited in Insights → Muse → Memory. With **Let Muse use these notes** on (the default), Muse can read
+past injuries, edited in Muse → Memory. With **Let Muse use these notes** on (the default), Muse can read
 them and add up to two per answer (240 characters each, 200 per player, duplicates skipped). Notes it adds are tagged
 "Added by Muse" and listed under the answer. Notes, including injury notes, go to Meta when Muse reads them; turning
 the switch off keeps them on the device.
 
-**What if** (Insights → Muse → What if): sliders for swing speed, face, path and contact on the player's average
+**What if** (Muse → What if): sliders for swing speed, face, path and contact on the player's average
 stroke, with the estimate recomputed on the device by the same baseline and `ShotSimulator` as `simulate_change`
 (`Shared/Coach/WhatIf.swift`), plus buttons that ask Muse about the change or to find the best one.
 Training data for this flow: `docs/WHATIF_DATASET.md`.
@@ -86,7 +86,7 @@ The Muse tests mock HTTP and model responses; an end-to-end API check requires y
 
 ## Consumer features
 
-- **Racket → Racket skins:** main and secondary colour pickers, four presets, original textured racket,
+- **Settings → Racket skins:** main and secondary colour pickers, four presets, original textured racket,
   persistent colours, and a preview that updates the Live 3D racket too. Strings retain their own material.
 - **Session names:** edit during a recording on Live, or use Rename session in a History session.
   Empty recordings are retained so tennis workouts and score-only sessions are not discarded.
