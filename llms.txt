@@ -11,7 +11,7 @@ Key facts:
 
 - Meta Muse Spark: 10 native function-calling tools (query_shots, compare_sessions, get_session_digest,
   get_live_state, simulate_change, list_shots, read_live_sensors, get_racket_status, recall_notes, remember_note),
-  called through a Supabase edge function that holds the API key. Bounded loop: 5 requests, 8 tool calls, 45 s.
+  called through a Supabase edge function that holds the API key. Bounded loop: 5 requests, 8 tool calls per round, 45 s.
 - Meta Wearables Device Access Toolkit (MWDATCore, MWDATDisplay): live HUD on Meta Ray-Ban Display.
 - Firmware 1.6 computes each shot on the racket (C++ port of the Swift analyzer, parity-tested), sends an 80-byte
   summary, then the raw 448 ms window with acks, resends and a flash backlog.

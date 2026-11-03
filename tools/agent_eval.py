@@ -36,7 +36,7 @@ PRESETS = {
     "baseten": {"key": "BASETEN_API_KEY", "base": "https://inference.baseten.co/v1",
                 "model": "meta-models/muse-spark-open-1026", "effort": None},
 }
-MAX_REQUESTS, MAX_TOOLS = 5, 8  # the app's agent limits
+MAX_REQUESTS, MAX_TOOLS = 5, 8  # the app's agent limits: 5 rounds, 8 calls per round
 
 
 def secret(name):
@@ -99,7 +99,7 @@ def load_data():
 def call(base, key, model, effort, messages, tools):
     body = {"model": model, "messages": messages, "tools": tools or None,
             "tool_choice": "auto" if tools else None,
-            "max_completion_tokens": 1024}
+            "max_completion_tokens": 4096}  # MuseClient.swift
     body = {k: v for k, v in body.items() if v is not None}
     if effort:
         body["reasoning_effort"] = effort
@@ -110,16 +110,23 @@ def call(base, key, model, effort, messages, tools):
         return json.load(r)
 
 
+FINAL_NUDGE = "Give your final answer now using the tool results already available."  # MuseCoach.generate
+
+
 def run_case(ref, sessions, players, base, key, model, effort):
+    """MuseCoach.generate's loop: 5 rounds, last round nudged without tools. Empty finals and
+    tool calls on the last round raise, mirroring the app's invalidResponse/roundLimit fallback."""
     meta = ref["metadata"]
     session = sessions[meta["session_id"]]
     catalog = players[meta["player_id"]]
     units = cs.Units(metric=meta["units"] == "km/h")
     messages = [m for m in ref["messages"][:2]]
     tools, seq, pool, usage = ref["tools"], [], [], {"prompt": 0, "completion": 0}
-    nto = 0
-    for _ in range(MAX_REQUESTS):
-        resp = call(base, key, model, effort, messages, tools if nto < MAX_TOOLS else None)
+    for round in range(MAX_REQUESTS):
+        last = round == MAX_REQUESTS - 1
+        if last:
+            messages.append({"role": "user", "content": FINAL_NUDGE})
+        resp = call(base, key, model, effort, messages, None if last else tools)
         u = resp.get("usage", {})
         usage["prompt"] += u.get("prompt_tokens", 0)
         usage["completion"] += u.get("completion_tokens", 0)
@@ -127,9 +134,20 @@ def run_case(ref, sessions, players, base, key, model, effort):
         messages.append({k: v for k, v in msg.items() if k in ("role", "content", "tool_calls")})
         tcs = msg.get("tool_calls") or []
         if not tcs:
+            if not (msg.get("content") or "").strip():
+                e = RuntimeError("empty final answer (app falls back to built-in engine)")
+                e.usage = usage
+                raise e
             break
-        for tc in tcs[:MAX_TOOLS - nto]:
-            nto += 1
+        if last:
+            e = RuntimeError("tool calls on final round (app reports round limit)")
+            e.usage = usage
+            raise e
+        if len(tcs) > MAX_TOOLS:
+            e = RuntimeError(f"{len(tcs)} parallel tool calls (app allows 8)")
+            e.usage = usage
+            raise e
+        for tc in tcs:
             name = tc["function"]["name"]
             try:
                 args = json.loads(tc["function"]["arguments"] or "{}")
@@ -151,16 +169,6 @@ def run_case(ref, sessions, players, base, key, model, effort):
             pool += numbers(out)
             messages.append({"role": "tool", "tool_call_id": tc["id"],
                              "content": cs.tool_json(out)})
-        if nto >= MAX_TOOLS:
-            break
-    # Final answer pass without tools if we ended on tool calls.
-    if messages[-1].get("role") != "assistant" or messages[-1].get("tool_calls"):
-        resp = call(base, key, model, effort, messages, None)
-        u = resp.get("usage", {})
-        usage["prompt"] += u.get("prompt_tokens", 0)
-        usage["completion"] += u.get("completion_tokens", 0)
-        messages.append({"role": "assistant",
-                         "content": resp["choices"][0]["message"].get("content")})
     return messages, seq, pool, usage
 
 
@@ -168,12 +176,25 @@ def score(ref, messages, seq, pool):
     meta = ref["metadata"]
     answer = next((m.get("content") or "" for m in reversed(messages)
                    if m.get("role") == "assistant" and m.get("content")), "")
+    question = next((m.get("content") or "" for m in messages if m.get("role") == "user"), "")
+    pool = pool + answer_numbers(question)  # repeating the request's numbers is legitimate
     bad = grounded(answer, pool)
+    simulated = False
+    for m in messages:
+        if m.get("role") == "tool":
+            try:
+                c = json.loads(m["content"])
+            except (json.JSONDecodeError, KeyError, TypeError):
+                continue
+            simulated = simulated or (isinstance(c, dict) and "before" in c and "after" in c)
+    has_estimate = "estimat" in answer.lower()
     out = {"digest_first": bool(seq) and seq[0] == "get_session_digest",
            "tool_calls": len(seq), "unknown_tools": [t for t in seq if t not in
                         ("get_session_digest", "simulate_change")],
-           "ungrounded_numbers": bad, "has_estimate": "estimat" in answer.lower(),
-           "words": len(answer.split()), "target": None, "exact_pick": None}
+           "ungrounded_numbers": bad, "has_estimate": has_estimate,
+           "simulated": simulated, "estimate_ok": has_estimate or not simulated,
+           "words": len(answer.split()), "target": None, "exact_pick": None,
+           "answer": answer}
     if meta["kind"] in ("objective", "player_whatif", "player_whatif_extreme") and meta.get("chosen"):
         sims = [m for m in messages if m.get("role") == "tool"]
         last = {}
@@ -235,11 +256,14 @@ def main():
             s.update(kind=m["kind"], objective=m.get("objective"), flaw_found=m.get("flaw_found"),
                      session=m["session_id"][:8], error=None)
         except Exception as e:  # noqa: BLE001 - one bad case must not kill the run
+            u = getattr(e, "usage", None) or {}
+            usage["prompt"] += u.get("prompt", 0)
+            usage["completion"] += u.get("completion", 0)
             s = {"kind": m["kind"], "error": f"{type(e).__name__}: {str(e)[:160]}"}
             answer = ""
         rows.append(s)
         flag = "ERR" if s.get("error") else (
-            "ok" if s["digest_first"] and not s["ungrounded_numbers"] and s["has_estimate"] else "CHECK")
+            "ok" if s["digest_first"] and not s["ungrounded_numbers"] and s["estimate_ok"] else "CHECK")
         print(f"[{i + 1}/{len(sample)}] {s['kind']:16s} {flag:5s} tools={s.get('tool_calls', '-')}"
               f" ungrounded={s.get('ungrounded_numbers', '-')}"
               f" target={s.get('target')} err={s.get('error')}", flush=True)
@@ -247,7 +271,8 @@ def main():
     agg = {"preset": a.preset, "model": model, "cases": len(rows), "errors": len(rows) - len(ok),
            "digest_first": sum(r["digest_first"] for r in ok),
            "grounded": sum(not r["ungrounded_numbers"] for r in ok),
-           "estimate_label": sum(r["has_estimate"] for r in ok),
+           "estimate_label": sum(r["estimate_ok"] for r in ok),
+           "simulated_cases": sum(r["simulated"] for r in ok),
            "target": [r["target"] for r in ok if r["target"] is not None],
            "usage": usage, "rows": rows}
     out = os.path.join(ROOT, "data/whatif", f"eval_{a.preset}_s{a.sample}.json")

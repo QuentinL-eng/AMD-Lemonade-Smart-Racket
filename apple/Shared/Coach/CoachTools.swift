@@ -255,6 +255,9 @@ final class CoachTools {
                     "spin_type": r.spin.rawValue, "applied_parameters": try JSONSerialization.jsonObject(with: JSONEncoder().encode(r.parameters))]
         }
         return ["estimated": true, "sample_count": baseline.sampleCount, "applied_deltas": applied,
+                "limits": ["swing_percent": WhatIf.Deltas.swingLimit, "face_deg": WhatIf.Deltas.angleLimit,
+                           "path_deg": WhatIf.Deltas.angleLimit, "contact_x_cm": WhatIf.Deltas.contactLimit,
+                           "contact_y_cm": WhatIf.Deltas.contactLimit],
                 "before": try output(base), "after": try output(changed),
                 "limitations": "Sensitivity estimate on an average shot, not a prediction. Incoming speed is assumed (serve 0, volley 54, groundstroke 43.2 km/h); incoming direction, side spin, contact height, launch angle and flight are unmodeled. Do not claim landing depth or net clearance."]
     }

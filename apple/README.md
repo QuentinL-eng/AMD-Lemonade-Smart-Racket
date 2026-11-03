@@ -34,7 +34,7 @@ The function calls `POST https://api.meta.ai/v1/chat/completions`, Bearer authen
 Native function calling is confirmed in [Meta's tool calling docs](https://dev.meta.ai/docs/tool-calling).
 [Published limits](https://dev.meta.ai/docs/pricing-rate-limits) are 3,000 RPM / 4,000,000 TPM for this model as of October 27, 2026;
 HTTP 429 immediately falls back, without automatic retries. Each request times out after 45 seconds.
-The agent makes at most five requests and runs at most eight tool calls per response. The final request omits tools.
+The agent makes at most five requests and runs at most eight tool calls per round. The final request omits tools.
 
 Tools (`Shared/Coach/CoachTools.swift`): `query_shots`, `compare_sessions`, `get_session_digest`, `get_live_state`,
 `simulate_change`, and the racket as an agent can ask it: `list_shots` (individual stored shots), `read_live_sensors`

@@ -75,7 +75,7 @@ state, and a robot-arm rig for repeatable ground truth ([`TennisRobot/`](TennisR
    and to Ray-Ban Display.
 5. **Grounded numbers.** The prompt allows only numbers that came from tools. The dataset tests check that every
    number in an answer appears in a tool result.
-6. **Production limits.** At most 5 requests and 8 tool calls per answer. 45 s timeout. HTTP 429 falls back at once
+6. **Production limits.** At most 5 requests and 8 tool calls per round. 45 s timeout. HTTP 429 falls back at once
    to a built-in engine, and the UI names the engine that answered.
 
 The 10 tools: `query_shots`, `compare_sessions`, `get_session_digest`, `get_live_state`, `simulate_change`,

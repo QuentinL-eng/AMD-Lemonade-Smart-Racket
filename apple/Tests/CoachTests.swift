@@ -52,6 +52,9 @@ final class CoachToolsTests: XCTestCase {
         XCTAssertTrue(hit["avgBallSpeed"] is NSNull)
         XCTAssertTrue(hit["avgContactTowardTip"] is NSNull)
     }
+    func testSystemPromptRequiresEstimatedOnSimulationNumbers() {
+        XCTAssertTrue(MuseCoach.systemPrompt.contains("Every sentence stating a simulation number must contain the word estimated."))
+    }
     func testValidationErrorsStayInToolResults() throws {
         let (_, _, tools) = fixture()
         for (name, args) in [("unknown", "{}"), ("query_shots", "[]"), ("query_shots", "{bad"),
@@ -71,6 +74,12 @@ final class CoachToolsTests: XCTestCase {
         let parameters = after["applied_parameters"] as! [String: Any]
         XCTAssertEqual(parameters["swingSpeedKmh"] as? Double, 130)
         XCTAssertEqual(parameters["faceAngleDeg"] as? Double, 15)
+        let limits = result["limits"] as! [String: Any]
+        XCTAssertEqual(limits["swing_percent"] as? Double, 30)
+        XCTAssertEqual(limits["face_deg"] as? Double, 15)
+        XCTAssertEqual(limits["path_deg"] as? Double, 15)
+        XCTAssertEqual(limits["contact_x_cm"] as? Double, 5)
+        XCTAssertEqual(limits["contact_y_cm"] as? Double, 5)
         XCTAssertNotNil(try object(tools, "simulate_change", "{\"type\":\"hit\"}")["error"])
     }
     func testListShotsFiltersOrdersAndLimits() throws {

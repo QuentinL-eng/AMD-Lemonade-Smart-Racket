@@ -67,6 +67,8 @@ class Physics(unittest.TestCase):
         self.assertEqual(r["applied_deltas"]["face_deg"], 15)
         self.assertAlmostEqual(r["after"]["applied_parameters"]["swingSpeedKmh"], 110 * 1.3)
         self.assertTrue(r["estimated"])
+        self.assertEqual(r["limits"], {"swing_percent": 30, "face_deg": 15, "path_deg": 15,
+                                       "contact_x_cm": 5, "contact_y_cm": 5})
 
     def test_mic_only_and_saturated_shots_give_no_baseline(self):
         session = Session("S", "2026-10-28T19:00:00Z", 600, [Shot.from_mic(True, 0), shot(saturated=True)])
