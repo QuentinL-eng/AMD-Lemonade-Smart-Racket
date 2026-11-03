@@ -47,6 +47,19 @@ frames across runs. A full 2-hour match at 30 fps is ~216k frames (~$43) — alw
 around contacts instead. Delete source video after tracking unless you are entitled to keep
 it; F3Set access follows that dataset's own terms.
 
+## Illustrative figures (web emulator only)
+
+[`website/emulator.html`](../website/emulator.html) mirrors the app's Live tab
+(`apple/Shared/Views/LiveView.swift`, `Components.swift`: string-bed geometry ported 1:1),
+so it needs speeds the footage cannot supply. These are computed deterministically from
+intensity `i` (0-1) and shot index, and every surface labels them illustrative:
+
+- swing = 60 + 90·i km/h; ball = swing·1.35 + 8 (+ small deterministic jitter)
+- spin = 800 + 2200·i rpm (topspin; slice below i = 0.25 on every third shot)
+- face = ±8·i° (sign alternates); path = 10 + 20·i° up (slice: 8-18° down)
+- contact (cm): deterministic scatter, spread 7·(1.15 − 0.6·i), clamped to the head;
+  sweet iff within 4 cm. Sweet-spot verdicts and the green/red flash follow from this.
+
 ## Schema (`emulator_session.json`)
 
 Written by [`tools/sam_track_to_session.py`](../tools/sam_track_to_session.py), tested by

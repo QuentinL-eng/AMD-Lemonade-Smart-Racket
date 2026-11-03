@@ -4,156 +4,299 @@
 <meta charset="utf-8">
 <meta name="viewport" content="width=device-width, initial-scale=1">
 <title>Tennis Buddee — Pro-match emulator</title>
-<meta name="description" content="Replay a SAM 3.1-tracked pro match through the Tennis Buddee session view. Derived timing and intensity only; contact dots are illustrative.">
-<link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Bricolage+Grotesque:opsz,wght@12..96,600..800&family=DM+Sans:wght@400;500;600&display=swap">
+<meta name="description" content="The Tennis Buddee Live tab in your browser, replaying a SAM 3.1-tracked pro match. Derived timing and intensity only; speeds and contacts are illustrative.">
 <style>
-:root { --felt:#DDE85B; --ink:#1D2614; --paper:#FBFAF3; --muted:#5B6450; --card:#232D1A; --line:#E2E0D2; }
-* { box-sizing:border-box; }
-body { margin:0; background:var(--paper); color:var(--ink); font:400 16px/1.5 "DM Sans",Arial,sans-serif; }
-.wrap { max-width:1060px; margin:0 auto; padding:20px 24px 48px; }
-.top { display:flex; justify-content:space-between; align-items:center; gap:12px; flex-wrap:wrap; }
-.brand { font:800 20px/1 "Bricolage Grotesque",Arial,sans-serif; text-decoration:none; }
-h1 { font:800 clamp(34px,5vw,54px)/1 "Bricolage Grotesque",Arial,sans-serif; letter-spacing:-0.03em; margin:18px 0 6px; }
-.sub { color:var(--muted); max-width:62ch; margin:0 0 14px; }
-.prov { background:var(--ink); color:var(--paper); border-radius:14px; padding:14px 18px; font-size:14px; }
-.prov b { color:var(--felt); }
-.grid { display:grid; grid-template-columns:minmax(0,1.1fr) minmax(0,1fr); gap:18px; margin-top:18px; }
-@media (max-width:820px){ .grid{ grid-template-columns:1fr; } }
-.panel { background:#fff; border:1px solid var(--line); border-radius:14px; padding:16px 18px; }
-.panel h2 { font:700 15px/1.2 "Bricolage Grotesque",Arial,sans-serif; margin:0 0 10px; letter-spacing:0.02em; }
-#bed { width:100%; height:auto; display:block; background:var(--card); border-radius:10px; }
-.tag { display:inline-block; font-size:12px; font-weight:600; background:var(--felt); border-radius:999px; padding:2px 10px; margin-left:8px; }
-.shot { border-top:1px solid var(--line); padding:9px 0; display:flex; justify-content:space-between; gap:10px; font-size:14px; }
-.shot:first-of-type { border-top:0; }
-.bar { height:8px; border-radius:99px; background:var(--line); margin-top:5px; overflow:hidden; }
-.bar i { display:block; height:100%; background:var(--ink); border-radius:99px; }
-.controls { display:flex; gap:10px; align-items:center; flex-wrap:wrap; margin-top:14px; }
-button { font:600 15px "DM Sans",Arial,sans-serif; background:var(--ink); color:var(--felt); border:0; border-radius:999px; padding:10px 20px; cursor:pointer; }
-button.ghost { background:transparent; color:var(--ink); border:2px solid var(--ink); }
-label.chk { font-size:14px; display:flex; gap:8px; align-items:center; }
-.totals { display:flex; gap:22px; font-size:14px; color:var(--muted); margin-top:6px; flex-wrap:wrap; }
-.totals b { color:var(--ink); font-size:20px; display:block; }
-.foot { color:var(--muted); font-size:13px; margin-top:22px; }
+:root{
+  --accent:#B0DA1C; --accent-dark:#7A9A10;
+  --page:#F2F2F7; --card:#FFFFFF; --tile:#ECECF1;
+  --ink:#1C1C1E; --secondary:#6B6B70; --separator:#E5E5EA;
+  --green:#34C759; --red:#FF3B30;
+  --rounded:ui-rounded,"SF Pro Rounded",-apple-system,"Helvetica Neue",Arial,sans-serif;
+  --sys:-apple-system,BlinkMacSystemFont,"SF Pro Text","Helvetica Neue",Arial,sans-serif;
+}
+*{box-sizing:border-box}
+body{margin:0;background:var(--page);color:var(--ink);font:400 16px/1.45 var(--sys);-webkit-font-smoothing:antialiased}
+.chrome{max-width:480px;margin:0 auto;padding:14px 16px 4px}
+.brandrow{display:flex;justify-content:space-between;align-items:center;font-size:14px;margin-bottom:8px}
+.brandrow a{color:var(--ink);text-decoration:none;font-weight:700}
+.brandrow a.sub{color:var(--secondary);font-weight:400}
+.prov{background:var(--ink);color:#F2F2F7;border-radius:14px;padding:11px 14px;font-size:12.5px;line-height:1.5}
+.prov b{color:var(--accent)}
+.phone{max-width:430px;margin:10px auto 0;background:var(--page);border-radius:28px;padding:0 0 8px}
+.statusbar{display:flex;justify-content:space-between;align-items:center;padding:12px 26px 2px;font-size:14px;font-weight:600}
+.statusbar svg{display:block}
+.navbar{padding:6px 16px 8px;border-bottom:0.5px solid var(--separator)}
+.navrow{display:flex;justify-content:space-between;align-items:center}
+.navtitle{font-size:32px;font-weight:700;letter-spacing:-0.02em;margin:0}
+.pill{display:flex;align-items:center;gap:6px;font-size:12.5px;font-weight:500;color:var(--secondary);background:var(--tile);border-radius:999px;padding:6px 11px}
+.dot{width:8px;height:8px;border-radius:50%;background:var(--green);flex:none}
+.recenter{border:0;background:none;color:var(--accent-dark);font:600 13px var(--sys);cursor:pointer;padding:6px 4px}
+.screen{padding:12px 16px 4px;display:flex;flex-direction:column;gap:14px}
+.card{background:var(--card);border-radius:18px;padding:16px;position:relative}
+#swingCanvas{width:100%;height:auto;display:block;border-radius:12px;background:linear-gradient(180deg,rgba(176,218,28,0.14),rgba(176,218,28,0.02))}
+.livestats{display:flex;gap:16px;font-size:12px;color:var(--secondary);padding:10px 4px 0;font-variant-numeric:tabular-nums}
+.sessionbtn{border:0;border-radius:14px;padding:14px;font:700 17px var(--sys);cursor:pointer;background:var(--accent);color:#000;width:100%}
+.sessionbtn.live{background:var(--red);color:#fff}
+.sessrow{display:flex;gap:10px;align-items:center}
+.seg{display:flex;background:var(--tile);border-radius:10px;padding:2px;font-size:13px;font-weight:600}
+.seg button{border:0;background:none;padding:6px 10px;border-radius:8px;cursor:pointer;color:var(--secondary);font:inherit}
+.seg button.on{background:#fff;color:var(--ink);box-shadow:0 1px 2px rgba(0,0,0,.12)}
+.tiles{display:grid;grid-template-columns:1fr 1fr 1fr 1fr;gap:8px}
+.tile{background:var(--tile);border-radius:12px;padding:10px 8px}
+.tile .l{font-size:11px;color:var(--secondary)}
+.tile .v{font:600 20px/1.2 var(--sys);font-variant-numeric:tabular-nums}
+.tile .u{font-size:11px;color:var(--secondary)}
+.cardhead{display:flex;justify-content:space-between;align-items:center;margin-bottom:10px}
+.shotname{font-size:17px;font-weight:700}
+.badge{font-size:12px;font-weight:600;padding:4px 9px;border-radius:999px}
+.badge.sweet{background:rgba(52,199,89,.18);color:#1F8A3D}
+.badge.off{background:rgba(255,59,48,.16);color:#C42B23}
+.bignum{font:700 48px/1 var(--rounded);font-variant-numeric:tabular-nums;letter-spacing:-0.01em}
+.bigunit{font-size:12px;color:var(--secondary);margin-top:2px}
+.metrics{display:grid;grid-template-columns:1fr 1fr;gap:8px 14px;margin-top:12px}
+.metric .l{font-size:11px;color:var(--secondary)}
+.metric .v{font-size:15px;font-weight:500;font-variant-numeric:tabular-nums}
+.shotgrid{display:flex;gap:12px;align-items:flex-start}
+.shotgrid .left{flex:1;min-width:0}
+#miniBed{width:96px;height:auto;flex:none}
+#shotCard{transition:box-shadow 1.2s ease-out,border-color 1.2s ease-out;border:2px solid transparent}
+#shotCard.flash-sweet{box-shadow:0 0 26px rgba(52,199,89,.65);border-color:var(--green)}
+#shotCard.flash-off{box-shadow:0 0 26px rgba(255,59,48,.6);border-color:var(--red)}
+.secttl{font-size:17px;font-weight:700;margin:0 0 8px}
+#bedCanvas{width:100%;height:auto;display:block}
+.illtag{display:inline-block;font-size:11px;font-weight:600;background:var(--tile);color:var(--secondary);border-radius:999px;padding:2px 9px;margin-left:8px;vertical-align:2px}
+.rrow{display:flex;align-items:center;gap:10px;font-size:15px;padding:8px 0;border-top:0.5px solid var(--separator)}
+.rrow .sp{margin-left:auto;font-variant-numeric:tabular-nums;color:var(--secondary)}
+.empty{text-align:center;color:var(--secondary);padding:34px 10px;font-size:15px}
+.empty .big{font-size:44px;display:block;margin-bottom:8px}
+.tabbar{display:flex;background:rgba(255,255,255,.92);border-top:0.5px solid var(--separator);border-radius:0 0 28px 28px;padding:8px 4px 20px;margin-top:6px}
+.tab{flex:1;border:0;background:none;display:flex;flex-direction:column;align-items:center;gap:3px;font-size:10.5px;color:#8E8E93;cursor:pointer;font-family:var(--sys)}
+.tab.on{color:var(--accent-dark)}
+.tab svg{width:24px;height:24px}
+.foot{max-width:480px;margin:0 auto;padding:10px 16px 34px;font-size:12.5px;color:var(--secondary)}
+@media (prefers-reduced-motion:reduce){#shotCard{transition:none}}
 </style>
 </head>
 <body>
-<div class="wrap">
-  <div class="top">
-    <a class="brand" href="index.html">Tennis Buddee</a>
-    <a href="https://github.com/QuentinL-eng/Tennis-Buddy-Smart-Racket/blob/main/docs/EMULATOR_DATA.md">How this data was made</a>
-  </div>
-  <h1>Pro-match emulator</h1>
-  <p class="sub">A SAM 3.1-tracked pro match replayed through the session view: real rally cadence,
-  stroke mix, and swing intensity drive the same screens the racket feeds.</p>
+<div class="chrome">
+  <div class="brandrow"><a href="index.html">Tennis Buddee</a>
+    <a class="sub" href="https://github.com/QuentinL-eng/Tennis-Buddy-Smart-Racket/blob/main/docs/EMULATOR_DATA.md">How this data was made</a></div>
   <div class="prov" id="provenance">Loading session…</div>
+</div>
 
-  <div class="grid">
-    <div class="panel">
-      <h2>String bed <span class="tag">contacts illustrative — not measured</span></h2>
-      <canvas id="bed" width="420" height="520"></canvas>
-      <label class="chk"><input type="checkbox" id="showContacts" checked> Show illustrative contact dots</label>
+<div class="phone">
+  <div class="statusbar"><span id="clock">9:41</span>
+    <svg width="54" height="12" viewBox="0 0 54 12" aria-hidden="true"><rect x="0" y="7" width="3" height="5" rx="1" fill="#1C1C1E"/><rect x="5" y="5" width="3" height="7" rx="1" fill="#1C1C1E"/><rect x="10" y="3" width="3" height="9" rx="1" fill="#1C1C1E"/><rect x="15" y="1" width="3" height="11" rx="1" fill="#1C1C1E"/><rect x="24" y="2" width="22" height="10" rx="3" fill="none" stroke="#1C1C1E" opacity=".5"/><rect x="26" y="4" width="14" height="6" rx="1.5" fill="#1C1C1E"/><rect x="47" y="5" width="2.5" height="4" rx="1" fill="#1C1C1E" opacity=".5"/></svg>
+  </div>
+  <div class="navbar"><div class="navrow">
+    <h1 class="navtitle" id="navTitle">Live</h1>
+    <span style="display:flex;gap:8px;align-items:center"><span class="pill"><span class="dot"></span><span id="connLabel">Pro replay</span></span><button class="recenter" id="recenterBtn">Recenter</button></span>
+  </div></div>
+
+  <div class="screen" id="liveScreen">
+    <div class="card" style="padding:12px">
+      <canvas id="swingCanvas" width="380" height="190"></canvas>
+      <div class="livestats"><span id="statClock">0:00</span><span id="statCount">0 shots</span><span id="statCover">track cover –</span></div>
     </div>
-    <div class="panel">
-      <h2>Shot feed</h2>
-      <div id="feed"></div>
-      <div class="totals" id="totals"></div>
-      <div class="controls">
-        <button id="playBtn">Play</button>
-        <button id="restartBtn" class="ghost">Restart</button>
-        <button id="speedBtn" class="ghost">1×</button>
-      </div>
+    <div class="sessrow">
+      <button class="sessionbtn" id="sessionBtn" style="flex:1">Start Session</button>
+      <div class="seg" id="speedSeg"><button data-s="1" class="on">1×</button><button data-s="2">2×</button><button data-s="4">4×</button></div>
+      <div class="seg" id="unitSeg"><button data-u="kmh" class="on">km/h</button><button data-u="mph">mph</button></div>
+    </div>
+    <div class="tiles" id="statTiles"></div>
+    <div id="shotCardWrap"></div>
+    <div class="card">
+      <h2 class="secttl">This session</h2>
+      <canvas id="bedCanvas" width="380" height="380"></canvas>
+      <div id="recentList"></div>
     </div>
   </div>
-  <p class="foot">Derived from video: shot times, stroke side/kind, unitless intensity. Not observable from
-  video and never shown as measured: ball speed, spin, face angle, contact point. Method and limits:
-  <a href="https://github.com/QuentinL-eng/Tennis-Buddy-Smart-Racket/blob/main/docs/EMULATOR_DATA.md">docs/EMULATOR_DATA.md</a>.</p>
+  <div class="screen" id="altScreen" style="display:none"><div class="card"><div class="empty" id="altEmpty"></div></div></div>
+
+  <div class="tabbar" id="tabBar">
+    <button class="tab on" data-t="Live"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8"><ellipse cx="9" cy="8" rx="6" ry="6.5" transform="rotate(-20 9 8)"/><line x1="13" y1="13" x2="20" y2="20"/></svg>Live</button>
+    <button class="tab" data-t="Score"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8"><path d="M7 4h10v5a5 5 0 0 1-10 0V4z"/><path d="M7 5H4v2a3 3 0 0 0 3 3M17 5h3v2a3 3 0 0 1-3 3M12 14v4M8 20h8"/></svg>Score</button>
+    <button class="tab" data-t="Together"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8"><circle cx="9" cy="8" r="3.2"/><path d="M3.5 19c.6-3 2.8-4.5 5.5-4.5s4.9 1.5 5.5 4.5"/><circle cx="17" cy="9" r="2.4"/><path d="M16 14.6c2.3.2 3.9 1.6 4.4 4"/></svg>Together</button>
+    <button class="tab" data-t="Insights"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8"><path d="M12 3l1.9 5.6L19.5 10l-5.6 1.9L12 17.5l-1.9-5.6L4.5 10l5.6-1.4L12 3z"/><path d="M19 15l.8 2.2L22 18l-2.2.8L19 21l-.8-2.2L16 18l2.2-.8L19 15z"/></svg>Insights</button>
+    <button class="tab" data-t="Racket"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8"><circle cx="12" cy="12" r="2"/><path d="M8.5 15.5a5 5 0 0 1 0-7M15.5 8.5a5 5 0 0 1 0 7M6 18a9 9 0 0 1 0-12M18 6a9 9 0 0 1 0 12"/></svg>Racket</button>
+  </div>
 </div>
+<p class="foot">Derived from video: shot times, stroke side/kind, unitless intensity. Speeds, spin, angles and
+contacts are illustrative figures computed from intensity — never measured. Method and limits:
+<a href="https://github.com/QuentinL-eng/Tennis-Buddy-Smart-Racket/blob/main/docs/EMULATOR_DATA.md">docs/EMULATOR_DATA.md</a>.</p>
+
 <script>
 "use strict";
-/* Session shape: tools/sam_track_to_session.py output. Illustrative contact dots are
-   deterministic per shot (mulberry32) and always labeled illustrative on this page. */
+/* Mirrors apple/Shared/Views/LiveView.swift + Components.swift (StringBedView geometry ported
+   1:1: 24.8 x 32.4 cm head, 16x19 strings, 4 cm sweet spot). Illustrative figures below are
+   deterministic per shot and documented in docs/EMULATOR_DATA.md. */
 function mulberry32(a){return function(){a|=0;a=a+0x6D2B79F5|0;var t=Math.imul(a^a>>>15,1|a);t=t+Math.imul(t^t>>>7,61|t)^t;return((t^t>>>14)>>>0)/4294967296;};}
-function dotFor(shot){
-  var r=mulberry32(shot.index*2654435761+7);
-  var spread=shot.intensity>0.66?150:(shot.intensity>0.33?105:70);
-  return {x:210+(r()-0.5)*2*spread, y:250+(r()-0.5)*2*spread*1.15};
+function illust(shot){
+  var r=mulberry32(shot.index*2654435761+7), i=shot.intensity;
+  var swing=60+90*i, ball=swing*1.35+8+r()*6;
+  var slice=i<0.25&&(shot.index%3===0);
+  var spread=7.0*(1.15-0.6*i);
+  var cx=Math.max(-11,Math.min(11,(r()-0.5)*2*spread*0.8));
+  var cy=Math.max(-14,Math.min(14,(r()-0.5)*2*spread));
+  return {swing:swing, ball:ball, spin:Math.round(800+2200*i), slice:slice,
+    face:Math.round(i*8*(shot.index%2?1:-1)),
+    path:slice?-Math.round(8+10*r()):Math.round(10+20*i),
+    cx:cx, cy:cy, sweet:Math.hypot(cx,cy)<=4.0};
 }
-function drawBed(ctx, shots, upto, showContacts){
-  var W=420,H=520;
+function drawBed(ctx,W,H,shots,hlIdx){
+  var hw=12.4,hl=16.2,sc=Math.min(W/(2*hw+3),H/(2*hl+3)),cx=W/2,cy=H/2;
+  function P(x,y){return [cx+x*sc,cy-y*sc];}
   ctx.clearRect(0,0,W,H);
-  ctx.strokeStyle="#DDE85B"; ctx.lineWidth=10;
-  ctx.beginPath(); ctx.roundRect(60,20,300,480,150); ctx.stroke();
-  ctx.strokeStyle="rgba(221,232,91,0.35)"; ctx.lineWidth=2;
-  for(var x=90;x<=330;x+=24){ctx.beginPath();ctx.moveTo(x,40);ctx.lineTo(x,480);ctx.stroke();}
-  for(var y=70;y<=450;y+=24){ctx.beginPath();ctx.moveTo(80,y);ctx.lineTo(340,y);ctx.stroke();}
-  ctx.strokeStyle="#DDE85B"; ctx.lineWidth=3;
-  ctx.strokeRect(170,210,80,80);
-  ctx.fillStyle="#DDE85B"; ctx.font="600 13px 'DM Sans',Arial,sans-serif";
-  ctx.fillText(showContacts?"illustrative contacts":"contacts hidden",118,505);
-  if(!showContacts) return;
-  for(var i=0;i<upto && i<shots.length;i++){
-    var p=dotFor(shots[i]);
-    var age=(upto-i)/Math.max(upto,1);
-    ctx.globalAlpha=Math.max(0.15,1-age*1.4);
-    ctx.fillStyle=shots[i].side==="forehand"?"#DDE85B":"#FBFAF3";
-    ctx.beginPath(); ctx.arc(p.x,p.y,shots[i].kind==="serve"?9:7,0,7); ctx.fill();
+  var head={x:cx-hw*sc,y:cy-hl*sc,w:2*hw*sc,h:2*hl*sc};
+  ctx.beginPath();ctx.ellipse(cx,cy,hw*sc,hl*sc,0,0,7);
+  ctx.fillStyle="rgba(28,28,30,0.04)";ctx.fill();
+  ctx.save();ctx.beginPath();ctx.ellipse(cx,cy,hw*sc,hl*sc,0,0,7);ctx.clip();
+  ctx.strokeStyle="rgba(28,28,30,0.12)";ctx.lineWidth=0.6;ctx.beginPath();
+  for(var a=-7;a<=8;a++){var x=cx+(a-0.5)*1.5*sc;ctx.moveTo(x,head.y);ctx.lineTo(x,head.y+head.h);}
+  for(var b=-9;b<=9;b++){var y=cy+b*1.6*sc;ctx.moveTo(head.x,y);ctx.lineTo(head.x+head.w,y);}
+  ctx.stroke();ctx.restore();
+  ctx.beginPath();ctx.ellipse(cx,cy,hw*sc,hl*sc,0,0,7);
+  ctx.strokeStyle="rgba(28,28,30,0.7)";ctx.lineWidth=Math.max(3,sc*0.9);ctx.stroke();
+  var rr=4.0*sc;
+  ctx.beginPath();ctx.ellipse(cx,cy,rr,rr,0,0,7);
+  ctx.fillStyle="rgba(52,199,89,0.10)";ctx.fill();
+  ctx.setLineDash([4,3]);ctx.strokeStyle="rgba(52,199,89,0.6)";ctx.lineWidth=1.2;ctx.stroke();ctx.setLineDash([]);
+  for(var i=0;i<shots.length;i++){
+    var f=illust(shots[i]),p=P(f.cx,f.cy),d=Math.max(3,0.75*sc),hl=(i===hlIdx);
+    ctx.beginPath();ctx.ellipse(p[0],p[1],d,d,0,0,7);
+    ctx.fillStyle=f.sweet?"rgba(52,199,89,"+(hl?1:0.55)+")":"rgba(255,59,48,"+(hl?1:0.55)+")";ctx.fill();
+    if(hl){ctx.strokeStyle="#1C1C1E";ctx.lineWidth=2;ctx.stroke();}
   }
-  ctx.globalAlpha=1;
 }
-function shotRow(s){
-  var d=document.createElement("div"); d.className="shot";
-  var pct=Math.round(s.intensity*100);
-  d.innerHTML="<span><b>#"+(s.index+1)+"</b> "+s.side+" "+s.kind+" · "+s.t_s.toFixed(1)+"s</span><span style='min-width:110px'>intensity "+pct+"<span class='bar'><i style='width:"+pct+"%'></i></span></span>";
-  return d;
-}
-function initEmulator(doc, session){
+function angleTxt(d,pos,neg){d=Math.round(d);return d===0?"0°":Math.abs(d)+"° "+(d>0?pos:neg);}
+function el(doc,tag,cls,html){var e=doc.createElement(tag);if(cls)e.className=cls;if(html!=null)e.innerHTML=html;return e;}
+function initEmulator(doc,session){
   var shots=session.shots||[];
-  var feed=doc.getElementById("feed"), totals=doc.getElementById("totals");
-  var bed=doc.getElementById("bed"), ctx=bed.getContext("2d");
-  var playBtn=doc.getElementById("playBtn"), restartBtn=doc.getElementById("restartBtn");
-  var speedBtn=doc.getElementById("speedBtn"), showBox=doc.getElementById("showContacts");
-  var prov=doc.getElementById("provenance");
-  var speeds=[1,2,4], state={shown:0,playing:false,speed:1,t:0,last:0};
-  prov.innerHTML="<b>Data:</b> "+session.provenance.source+" · tracker: "+session.provenance.tracker+
-    " · <b>derived:</b> timing, side/kind, intensity · <b>illustrative:</b> contact dots · <b>never shown:</b> "+session.omitted.join(", ");
-  function paintTotals(){
-    var fh=shots.filter(function(s){return s.side==="forehand";}).length;
-    totals.innerHTML="<span><b>"+shots.length+"</b>shots</span><span><b>"+fh+"</b>forehands</span><span><b>"+(shots.length-fh)+"</b>backhands/other</span>";
+  var prov=doc.getElementById("provenance"),tiles=doc.getElementById("statTiles");
+  var cardWrap=doc.getElementById("shotCardWrap"),recent=doc.getElementById("recentList");
+  var bed=doc.getElementById("bedCanvas").getContext("2d");
+  var swing=doc.getElementById("swingCanvas"),sctx=swing.getContext("2d");
+  var sBtn=doc.getElementById("sessionBtn"),clockEl=doc.getElementById("statClock");
+  var countEl=doc.getElementById("statCount"),coverEl=doc.getElementById("statCover");
+  var state={shown:0,playing:false,speed:1,t:0,last:0,metric:true,swingV:0,swingA:0};
+  prov.innerHTML="<b>Data:</b> "+session.provenance.source+" · <b>derived:</b> timing, side/kind, intensity · "+
+    "<b>illustrative:</b> speeds, spin, angles, contacts";
+  function spd(kmh){return state.metric?kmh.toFixed(0):(kmh*0.621371).toFixed(0);}
+  function spdUnit(){return state.metric?"km/h":"mph";}
+  function clockStr(s){s=Math.floor(s);return Math.floor(s/60)+":"+(s%60<10?"0":"")+(s%60);}
+  function paintTiles(){
+    var n=state.shown,sw=shots.slice(0,n).map(illust),sweet=sw.filter(function(f){return f.sweet;}).length;
+    var balls=sw.map(function(f){return f.ball;});
+    var avg=balls.length?balls.reduce(function(a,b){return a+b;},0)/balls.length:0;
+    var mx=balls.length?Math.max.apply(null,balls):0;
+    var defs=[["Shots",""+n,""],["Sweet spot",n?Math.round(100*sweet/n)+"":"–","%"],
+      ["Avg ball",n?spd(avg):"–",spdUnit()+"*"],["Best",n?spd(mx):"–",spdUnit()+"*"]];
+    tiles.innerHTML="";
+    defs.forEach(function(d){tiles.appendChild(el(doc,"div","tile",
+      "<div class='l'>"+d[0]+"</div><div class='v'>"+d[1]+" <span class='u'>"+d[2]+"</span></div>"));});
   }
-  function paint(){ drawBed(ctx,shots,state.shown,showBox.checked); paintTotals(); }
-  function step(now){
-    if(!state.playing) return;
-    var dt=(now-state.last)/1000*state.speed; state.last=now; state.t+=dt;
-    var endT=shots.length?shots[shots.length-1].t_s+2:0;
-    while(state.shown<shots.length && shots[state.shown].t_s<=state.t){
-      feed.insertBefore(shotRow(shots[state.shown]),feed.firstChild);
-      while(feed.children.length>8) feed.removeChild(feed.lastChild);
-      state.shown++;
+  function paintCard(){
+    cardWrap.innerHTML="";
+    if(!state.shown){
+      var e=el(doc,"div","card","<div class='empty'><svg width='44' height='44' viewBox='0 0 24 24' fill='none' stroke='#8E8E93' stroke-width='1.6'><ellipse cx='9' cy='8' rx='6' ry='6.5' transform='rotate(-20 9 8)'/><line x1='13' y1='13' x2='20' y2='20'/></svg><br>Start the session.<br>Every hit shows up here.</div>");
+      e.id="shotCard";cardWrap.appendChild(e);return;
     }
-    paint();
-    if(state.t>=endT){state.playing=false;playBtn.textContent="Play";return;}
+    var s=shots[state.shown-1],f=illust(s);
+    var c=el(doc,"div","card");c.id="shotCard";
+    var name=s.kind==="serve"?"Serve":(s.side==="forehand"?"Forehand":s.side==="backhand"?"Backhand":"Hit");
+    c.appendChild(el(doc,"div","cardhead","<span class='shotname'>"+name+"</span>"+
+      "<span class='badge "+(f.sweet?"sweet":"off")+"'>"+(f.sweet?"Sweet spot":"Off center")+"</span>"));
+    var g=el(doc,"div","shotgrid");
+    var left=el(doc,"div","left","<div class='bignum'>"+spd(f.ball)+"</div><div class='bigunit'>"+spdUnit()+" ball speed (illustrative)</div>");
+    var m=el(doc,"div","metrics");
+    m.appendChild(el(doc,"div","metric","<div class='l'>Swing</div><div class='v'>"+spd(f.swing)+" "+spdUnit()+"</div>"));
+    m.appendChild(el(doc,"div","metric","<div class='l'>Spin</div><div class='v'>"+f.spin+" rpm "+(f.slice?"slice":"topspin")+"</div>"));
+    m.appendChild(el(doc,"div","metric","<div class='l'>Face</div><div class='v'>"+angleTxt(f.face,"open","closed")+"</div>"));
+    m.appendChild(el(doc,"div","metric","<div class='l'>Path</div><div class='v'>"+angleTxt(f.path,"up","down")+"</div>"));
+    left.appendChild(m);g.appendChild(left);
+    var mini=doc.createElement("canvas");mini.id="miniBed";mini.width=180;mini.height=220;
+    g.appendChild(mini);c.appendChild(g);cardWrap.appendChild(c);
+    drawBed(mini.getContext("2d"),180,220,[s],0);
+    c.classList.add(f.sweet?"flash-sweet":"flash-off");
+    setTimeout(function(){c.classList.remove("flash-sweet","flash-off");},1300);
+  }
+  function paintRecent(){
+    recent.innerHTML="";
+    var last=shots.slice(0,state.shown).slice(-6).reverse();
+    last.forEach(function(s){
+      var f=illust(s);
+      var r=el(doc,"div","rrow","<span>"+(s.kind==="serve"?"Serve":s.side)+"</span><span class='sp'>"+spd(f.ball)+" "+spdUnit()+"</span><span class='dot' style='background:"+(f.sweet?"var(--green)":"var(--red)")+"'></span>");
+      recent.appendChild(r);
+    });
+  }
+  function drawSwing(){
+    var W=380,H=190;var x=sctx;
+    x.clearRect(0,0,W,H);
+    x.save();x.translate(190,150);x.rotate(state.swingA);
+    x.strokeStyle="#1C1C1E";x.lineWidth=7;
+    x.beginPath();x.ellipse(0,-72,44,54,0,0,7);x.stroke();
+    x.strokeStyle="rgba(28,28,30,0.25)";x.lineWidth=1.5;x.beginPath();
+    for(var i=-3;i<=3;i++){x.moveTo(i*11,-118);x.lineTo(i*11,-26);}
+    for(var j=-4;j<=4;j++){x.moveTo(-40,-72+j*11);x.lineTo(40,-72+j*11);}
+    x.stroke();
+    x.strokeStyle="#1C1C1E";x.lineWidth=9;x.beginPath();x.moveTo(0,-18);x.lineTo(0,34);x.stroke();
+    x.restore();
+  }
+  function paint(){paintTiles();paintRecent();drawBed(bed,380,380,shots.slice(0,state.shown),state.shown-1);drawSwing();}
+  function step(now){
+    if(!state.playing)return;
+    var dt=(now-state.last)/1000*state.speed;state.last=now;state.t+=dt;
+    state.swingV+=(-state.swingA*90-state.swingV*8)*dt;state.swingA+=state.swingV*dt;
+    var endT=shots.length?shots[shots.length-1].t_s+2:0;
+    var added=false;
+    while(state.shown<shots.length&&shots[state.shown].t_s<=state.t){
+      state.shown++;state.swingV+=2.2+3*shots[state.shown-1].intensity;added=true;
+    }
+    if(added)paintCard();
+    clockEl.textContent=clockStr(state.t);
+    countEl.textContent=state.shown+" shots";
+    coverEl.textContent=state.shown?("track cover "+Math.round(100*shots[state.shown-1].track_cover)+"%"):"track cover –";
+    paintTiles();paintRecent();drawBed(bed,380,380,shots.slice(0,state.shown),state.shown-1);drawSwing();
+    if(state.t>=endT){setPlaying(false);return;}
     requestAnimationFrame(step);
   }
-  playBtn.addEventListener("click",function(){
-    state.playing=!state.playing; playBtn.textContent=state.playing?"Pause":"Play";
-    if(state.playing){state.last=performance.now();requestAnimationFrame(step);}
+  function setPlaying(p){
+    state.playing=p;sBtn.textContent=p?"End Session":"Start Session";
+    sBtn.classList.toggle("live",p);
+    if(p){state.last=performance.now();requestAnimationFrame(step);}
+  }
+  sBtn.addEventListener("click",function(){
+    if(!state.playing&&state.shown>=shots.length){state.shown=0;state.t=0;paintCard();}
+    setPlaying(!state.playing);
   });
-  restartBtn.addEventListener("click",function(){state.shown=0;state.t=0;feed.innerHTML="";paint();});
-  speedBtn.addEventListener("click",function(){
-    state.speed=speeds[(speeds.indexOf(state.speed)+1)%speeds.length];
-    speedBtn.textContent=state.speed+"×";
-  });
-  showBox.addEventListener("change",paint);
-  paint();
+  doc.getElementById("recenterBtn").addEventListener("click",function(){state.swingA=0;state.swingV=0;drawSwing();});
+  function seg(id,fn){
+    var node=doc.getElementById(id);
+    var btns=node.children||[];
+    for(var i=0;i<btns.length;i++)(function(b){b.addEventListener("click",function(){
+      for(var j=0;j<btns.length;j++)btns[j].classList.remove("on");
+      b.classList.add("on");fn(b);});})(btns[i]);
+  }
+  seg("speedSeg",function(b){state.speed=+b.getAttribute("data-s");});
+  seg("unitSeg",function(b){state.metric=b.getAttribute("data-u")==="kmh";paintTiles();paintCard();paintRecent();});
+  var tabs=doc.getElementById("tabBar").children;
+  for(var ti=0;ti<tabs.length;ti++)(function(b){b.addEventListener("click",function(){
+    for(var j=0;j<tabs.length;j++)tabs[j].classList.remove("on");
+    b.classList.add("on");
+    var t=b.getAttribute("data-t");
+    doc.getElementById("navTitle").textContent=t;
+    var live=t==="Live";
+    doc.getElementById("liveScreen").style.display=live?"flex":"none";
+    doc.getElementById("altScreen").style.display=live?"none":"flex";
+    if(!live)doc.getElementById("altEmpty").innerHTML="<b>"+t+"</b> isn't part of this emulator.<br>It replays the Live tab only.";
+  });})(tabs[ti]);
+  if(doc.getElementById("clock"))doc.getElementById("clock").textContent="9:41";
+  paintCard();paint();
   return state;
 }
-if(typeof window!=="undefined" && window.document){
-  fetch("emulator_session.json").then(function(r){return r.json();}).then(function(s){
-    initEmulator(document,s);
-  }).catch(function(){
-    document.getElementById("provenance").textContent=
-      "Could not load emulator_session.json — serve this folder over HTTP (e.g. python3 -m http.server) or deploy both files together.";
-  });
+if(typeof window!=="undefined"&&window.document){
+  fetch("emulator_session.json").then(function(r){return r.json();}).then(function(s){initEmulator(document,s);})
+  .catch(function(){document.getElementById("provenance").textContent="Could not load emulator_session.json — serve this folder over HTTP or deploy both files together.";});
 }
 </script>
 </body>
