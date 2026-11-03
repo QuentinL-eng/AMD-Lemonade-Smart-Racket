@@ -160,7 +160,8 @@ export const copy = {
     filmBadge: 'Real Muse Spark script, on a demo forehand session',
     museCallouts: ['You ask in your own words', 'Muse calls simulate_change', 'An estimate, on your own shots', 'Then it plans a drill'],
     // Each player's name and what they do. An empty detail shows the name alone.
-    testimonial1: { name: 'Kellam Adams', detail: 'Teaches tennis part time' },
+    // Kellam's job title is about the person, not the product, so it's the one allowed use of the word.
+    testimonial1: { name: 'Kellam Adams', detail: 'Part-time tennis coach' },
     testimonial2: { name: 'Josh Do', detail: '' },
   },
 
