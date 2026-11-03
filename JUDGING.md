@@ -32,7 +32,7 @@ chatbot: every number Muse reports must come from a tool result.
 | Meta Wearables Device Access Toolkit (`MWDATCore`, `MWDATDisplay`), Ray-Ban Display HUD | [`apple/iOS/Glasses/GlassesController.swift`](apple/iOS/Glasses/GlassesController.swift) |
 | 2,263-conversation tool-use dataset (tool results match the app exactly) | [`ml/whatif_synth.py`](ml/whatif_synth.py), [`docs/WHATIF_DATASET.md`](docs/WHATIF_DATASET.md) |
 | Head-to-head agent eval vs the Meta API and open Muse Spark | [`tools/agent_eval.py`](tools/agent_eval.py) (`--preset meta` / `--preset baseten`) |
-| Meta SAM 3.1 video + image APIs | Racket tracks + contact pre-fill behind the reviewed contacts; tracks convert to emulator sessions | [`tools/sam_f3set_video.py`](tools/sam_f3set_video.py), [`tools/sam_track_to_session.py`](tools/sam_track_to_session.py) |
+| Meta SAM 3.1 video + image APIs | Racket tracks + contact pre-fill behind the reviewed contacts; tracks convert to emulator sessions (9 matches, 2,265 hits; stroke types are F3Tennis dataset labels for the Ostrava final and F3Tennis model predictions, flagged as predicted, for the other 8) | [`tools/sam_f3set_video.py`](tools/sam_f3set_video.py), [`tools/sam_track_to_session.py`](tools/sam_track_to_session.py) |
 
 Quick automated checks: `muse-spark-1.3` in `apple/Shared/Coach/MuseClient.swift:27` and
 `backend/supabase/functions/muse/index.ts` (which calls `POST https://api.meta.ai/v1/chat/completions`);

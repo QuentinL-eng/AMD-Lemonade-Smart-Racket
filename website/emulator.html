@@ -245,7 +245,7 @@ svg.i .f{fill:currentColor;stroke:none}
   <div class="tabs" id="tabs"></div>
   <div class="toast" id="toast" hidden></div>
  </div>
- <p class="foot">This is a browser emulator of the iPhone app, not a recording of a real match. In the labelled Ostrava match, stroke types and outcomes are the F3Tennis dataset's labels and the swing timing follows the SAM-tracked racket (a 2D box, so a rough guide). In the other matches the video gives only shot times and a unitless swing intensity, with no stroke labels. Speeds, spin, face and path angles, contact points, the 3D swing and the gyro/g readouts are estimates from the app's own physics model and swing template, ported to JavaScript.
+ <p class="foot">This is a browser emulator of the iPhone app, not a recording of a real match. In the labelled Ostrava match, stroke types and outcomes are the F3Tennis dataset's labels and the swing timing follows the SAM-tracked racket (a 2D box, so a rough guide). In the other eight matches the stroke types, hitters and hit times are predictions of the F3Tennis model (97% on held-out Ostrava hits, not measured on these broadcasts), and the swing timing follows the SAM-tracked racket. Speeds, spin, face and path angles, contact points, the 3D swing and the gyro/g readouts are estimates from the app's own physics model and swing template, ported to JavaScript.
  Method and limits: <a href="https://github.com/QuentinL-eng/Tennis-Buddy-Smart-Racket/blob/main/docs/EMULATOR_DATA.md">docs/EMULATOR_DATA.md</a>.</p>
 </div>
 
@@ -319,7 +319,7 @@ function params(s){
 }
 const LABEL={forehand:"Forehand",backhand:"Backhand",serve:"Serve",volley:"Volley",hit:"Hit"};
 const enrich=s=>{const p=params(s),r=simulate(p),type=s.stroke||"hit";
-  return {s,p,r,type,name:LABEL[type],t:s.t_s,i:s.intensity,sweet:r.dist<=SWEET,id:s.index,outcome:s.outcome||null,prog:s.prog||null};};
+  return {s,p,r,type,name:LABEL[type],t:s.t_s,i:s.intensity,sweet:r.dist<=SWEET,id:s.index,outcome:s.outcome||null,prog:s.prog||null,predicted:!!s.predicted,conf:s.conf==null?null:s.conf};};
 const baselineOf=rows=>rows.length?{swing:mean(rows.map(x=>x.p.swing)),face:mean(rows.map(x=>x.p.face)),path:mean(rows.map(x=>x.p.path)),cx:mean(rows.map(x=>x.p.cx)),cy:mean(rows.map(x=>x.p.cy)),inc:mean(rows.map(x=>x.p.inc))}:null;
 const STROKES=["forehand","backhand","serve","volley","hit"];
 const strokesIn=rs=>STROKES.filter(t=>rs.some(x=>x.type===t));
@@ -514,7 +514,7 @@ function shotCardHTML(r,anim=true){
      <div class="mt"><div class="l">Spin</div><div class="v">${Math.round(m.rpm)} rpm ${m.spin}</div></div>
      <div class="mt"><div class="l">Face</div><div class="v">${ang(p.face,"open","closed")}</div></div>
      <div class="mt"><div class="l">Path</div><div class="v">${ang(p.path,"up","down")}</div></div></div></div>
-    ${bedSVG([r],0,90)}</div></div>`;
+    ${bedSVG([r],0,90)}</div>${r.predicted?`<div class="cap" style="margin-top:10px">Stroke type predicted by the F3Tennis model${r.conf!=null?` · ${Math.round(100*r.conf)}% sure`:""}</div>`:""}</div>`;
 }
 function paintShot(){
   const r=S.lastRow;
@@ -709,6 +709,9 @@ function answer(q){
     return {tools:["list_shots"],a:`Your last ${off.length} off-center hits:\n`+off.map(x=>`• ${clockStr(x.t)} — ${U.lt(x.r.dist)} from center, ${U.sv(x.r.ball)} ${U.su()}`).join("\n")+`\nOverall ${rs.filter(x=>!x.sweet).length} of ${n} hits missed the sweet spot.`};}
   if(/weak|stroke|worst|best/.test(low)){
     const sw=rs.filter(x=>x.sweet).length,grp=strokesIn(rs),lab=rs.some(x=>x.outcome);
+    if(grp.length>1&&!lab){
+      const st=grp.map(g=>{const q=strokeRows(rs,g);return `• ${LABEL[g]}: ${q.length} hits, average ball ${U.sv(mean(q.map(x=>x.r.ball)))} ${U.su()}`;});
+      return {tools:grp.map(()=>"query_shots"),a:`I can't say which stroke loses you points: this replay has no outcome labels (winner or error), and the sweet-spot rates are an assumption. What it does show, with stroke types predicted by the F3Tennis model:\n`+st.join("\n")};}
     if(grp.length<2||!lab)return {tools:["get_session_digest"],a:`Every hit in this replay is logged as a plain "Hit", because this match's clips carry no stroke labels, so there is no stroke to compare. What the data does show: ${Math.round(100*sw/n)}% of ${n} hits found the sweet spot, and the average ball was ${U.sv(mean(rs.map(x=>x.r.ball)))} ${U.su()}.`};
     // the dataset labels each hit's outcome, so this one is real data, not the contact prior
     const st=grp.map(g=>{const q=strokeRows(rs,g),e=q.filter(x=>/err/.test(x.outcome||"")).length;return {g,n:q.length,e,rate:e/q.length,ball:mean(q.map(x=>x.r.ball))};}).filter(x=>x.n>=3).sort((a,z)=>z.rate-a.rate);
@@ -951,8 +954,8 @@ $("speed").addEventListener("click",e=>{const b=e.target.closest("button");if(!b
 function setPlayer(i){
   S.pi=i;S.active=false;S.shown=0;S.clock=-LEAD;S.lastRow=null;S.d=Z();S.film=null;S.chat=[];S.drill=null;S.drillRun=false;
   const P=PLAYERS[i],ses=P.session;rows=(ses.shots||[]).map(enrich);
-  const lab=ses.provenance.labels;
-  $("prov").innerHTML=lab?`<b>From the dataset (real):</b> each hit's stroke, forehand/backhand, technique and outcome — ${ses.provenance.labels}. <b>From video:</b> when each hit happened and how the hitter's racket moved, tracked with SAM 3.1 (box centre, 25 fps). <b>Estimated:</b> speeds, spin, angles, contact points, and the 3D swing built from that motion.<br><a href="${P.video_url}">F3Tennis dataset</a>`:
+  const lab=ses.provenance.labels,pred=ses.provenance.predicted;
+  $("prov").innerHTML=pred?`<b>Predicted by a model:</b> each hit's stroke type, which player hit it and when — the F3Tennis tsm_e2espot model (97% stroke-type accuracy on held-out Ostrava hits; not measured on this broadcast). <b>From video:</b> how the hitter's racket moved, tracked with SAM 3.1 (box centre, 25 fps, windows spread through the match). <b>Estimated:</b> speeds, spin, angles, contact points, and the 3D swing built from that motion.<br><a href="${P.video_url}">Source video</a>`:lab?`<b>From the dataset (real):</b> each hit's stroke, forehand/backhand, technique and outcome — ${ses.provenance.labels}. <b>From video:</b> when each hit happened and how the hitter's racket moved, tracked with SAM 3.1 (box centre, 25 fps). <b>Estimated:</b> speeds, spin, angles, contact points, and the 3D swing built from that motion.<br><a href="${P.video_url}">F3Tennis dataset</a>`:
    `<b>From video:</b> ${ses.provenance.source} — shot times and swing intensity, tracked with SAM 3.1 in short windows around contacts (not the full match). Stroke types aren't labelled for this match, so every hit shows as "Hit" with a generic swing. <b>Estimated:</b> speeds, spin, angles, contact points, and the racket's 3D motion.${P.video_url?`<br><a href="${P.video_url}">Source video</a>`:""}`;
   [...$("players").children].forEach((b,k)=>b.classList.toggle("on",k===i));
   paintSess();paintShot();paintRecent();renderNav();refreshOther();

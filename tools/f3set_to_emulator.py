@@ -26,7 +26,7 @@ import sys
 
 FPS = 25.0            # F3Set videos are 25 fps (data/external/f3set/repo/README.md)
 HALF = 12             # frames either side of contact kept per shot
-PATH_MIN, PATH_MAX = -20.0, 35.0   # a 2D box centre over-weights vertical motion: halve the angle, keep it plausible
+PATH_SCALE, PATH_MIN, PATH_MAX = 0.3, -15.0, 30.0   # a 2D box centre over-weights vertical motion (camera looks down): scale the angle, keep it plausible
 GAP_S = 3.0           # between clips, as in tools/sam_players_to_emulator.py
 NAME = "Ostrava 2022 final (labelled)"
 SOURCE = "WTA Ostrava 2022 final, Swiatek v Krejcikova, F3Tennis dataset labels + SAM 3.1 racket tracks"
@@ -128,7 +128,7 @@ def profile(sm):
     i0, i1 = HALF - 2, HALF + 2
     vx = (sm[i1][0] - sm[i0][0]) / scale
     vy = (sm[i1][1] - sm[i0][1]) / scale
-    path = max(PATH_MIN, min(PATH_MAX, 0.5 * math.degrees(math.atan2(-vy, abs(vx) + 1e-9))))
+    path = max(PATH_MIN, min(PATH_MAX, PATH_SCALE * math.degrees(math.atan2(-vy, abs(vx) + 1e-9))))
     peak = max(math.hypot(b[0] - a[0], b[1] - a[1]) / scale * FPS for a, b in zip(sm, sm[1:]))
     return prog, path, peak, scale
 

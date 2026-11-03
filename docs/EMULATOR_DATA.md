@@ -17,10 +17,18 @@ app's session format, and a static web page plays the sessions back. Live page:
 3. No real player's name is attached to measured data. Style presets are illustrative and
    say so. Never commit source footage; derived tracks + this provenance note are the artifact.
 4. The committed `emulator_sessions.json` carries one entry per player, each with its own
-   provenance block (video title, uploader, URL). Current file: the labelled Ostrava 2022
-   final (60 hits, real stroke labels, both players, from F3Tennis clips) plus 8 pro players,
-   291 hits from SAM 3.1-tracked broadcast windows (29,296 billed frames, $5.86) with no
-   stroke labels, source videos deleted after tracking.
+   provenance block (video title, uploader, URL). Current file (9 players, 2,265 hits): the
+   labelled Ostrava 2022 final (60 hits, real F3Tennis stroke labels and outcomes, both
+   players) plus 8 broadcast matches (2,205 hits) whose stroke type, hitter and hit time are
+   **predictions of the F3Tennis tsm_e2espot model** (flagged `predicted`, with its confidence),
+   with SAM 3.1 racket tracks for the swing timing (611 windows, 79,945 billed frames, $15.99;
+   an earlier 291-hit audio-window pass cost $5.86 and was replaced). Source videos are
+   deleted after tracking. Sessions are named by match, not by one player, because both
+   players' hits are in them.
+5. Stroke types for those 8 matches are model predictions, never presented as labels: the shot card, the
+   info panel and the footer say so. The model scored 97% (58/60) on stroke type on 60 hits of the Ostrava test
+   split; accuracy on these broadcasts was not measured, and Ostrava shares its match and camera with the
+   training clips, so that number is optimistic.
 
 ## Why this is a fair analogy for racket data
 
@@ -48,7 +56,13 @@ python3 tools/sam_players_to_emulator.py work/alcaraz work/sinner \
 #     labels + the hitter's racket timing per hit. Replaces the 'Ostrava' entry, keeps the rest.
 python3 tools/f3set_to_emulator.py data/external/f3set/sam_video --merge website/emulator_sessions.json
 
-# 3. Deploy: copy both files into .website-dist/ next to index.html, then publish.
+# 2c. Model-predicted matches (separate CUDA environment: tools/f3tennis_model/README.md):
+python3 tools/f3tennis_model/detect_pros.py        # whole video at 25 fps -> <video>.ev25.json (hits, type, hitter, conf)
+python3 tools/sam_model_windows.py video.mp4 video.ev25.json --player nadal --out work/nadal \
+    --frames 13500 --budget 2.75 --ledger work/ledger_nadal.json --plan   # prints the cost; add --yes to spend
+python3 tools/model_events_to_emulator.py work --merge website/emulator_sessions.json
+
+# 3. Deploy: copy index.html, emulator.html, both session files and emulator/ into .website-dist/, then publish.
 ```
 
 Cost control: `--budget` caps every SAM run; ledgers (`sam_video_ledger.json`) count billed
@@ -107,6 +121,10 @@ The labelled entry ([`tools/f3set_to_emulator.py`](../tools/f3set_to_emulator.py
 `tools/test_f3set_emulator.py`) adds per hit: `stroke` (forehand/backhand/serve/volley, as the app's `ShotType`),
 `technique`, `hitter` (near/far), `court`, `dir`, `outcome` (in/winner/forced-err/unforced-err), and, when the
 hitter's racket was tracked, `prog` (25 values from -1 to +1: how far through the stroke the racket is each frame
-from -12 to +12 around contact, by path length) and `path_deg` (direction of the racket centre at contact, halved
-and clamped to -20..35). 50 of the 60 hits have a usable track; the other 10 still carry their real stroke type and
+from -12 to +12 around contact, by path length) and `path_deg` (direction of the racket centre at contact, scaled by 0.3 and clamped to -15..30 because the camera looks down and inflates upward motion). 50 of the 60 hits have a usable track; the other 10 still carry their real stroke type and
 use the template's timing. F3Set video is 25 fps. `data/external/` is not committed; only this derived entry is.
+
+The model-predicted entries (`tools/model_events_to_emulator.py`, tested by `tools/test_model_events.py`) have the same
+fields with `predicted: true`, `side_source: "model_prediction"`, `conf` (the model's stroke-type confidence), and
+`technique`/`outcome` null. 66% of their hits have a usable hitter's-racket track (`prog`); the rest keep the predicted
+stroke type and use the template's timing.
