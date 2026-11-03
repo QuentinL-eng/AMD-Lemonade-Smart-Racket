@@ -20,7 +20,7 @@ export type Overlay =
   | { type: 'shotCard'; at: number; seconds: number }
   | { type: 'badge'; text: 'deviceBadge' | 'filmBadge'; at: number; seconds: number; x?: number; y?: number }
   | { type: 'callouts'; text: 'museCallouts'; at: number; every: number }
-  | { type: 'lowerThird'; text: 'testimonial1' | 'testimonial2' | 'testimonial3'; at: number; seconds: number };
+  | { type: 'lowerThird'; text: 'testimonial1' | 'testimonial2'; at: number; seconds: number };
 
 export type SceneEntry = { scene: SceneId; seconds: number; skip?: number; overlays?: Overlay[] };
 export type FootageEntry = {
@@ -98,12 +98,11 @@ export const demo: Entry[] = [
     shot: 'Close on the Watch: the to-go count drops as you hit. Finish on the phone Live tab saying Drill complete!' },
   { scene: 'samTrack', seconds: 8 },
   { scene: 'swingFilm', seconds: 8, overlays: [{ type: 'badge', text: 'filmBadge', at: 0.3, seconds: 7.5, x: 960, y: 40 }] },
-  { footage: 'testimonial-1', seconds: 5, muted: false, overlays: [{ type: 'lowerThird', text: 'testimonial1', at: 0.4, seconds: 4 }],
-    shot: 'A player who used it: one line, on camera, with their OK to use it. Delete this entry if you do not have one.' },
-  { footage: 'testimonial-2', seconds: 5, muted: false, overlays: [{ type: 'lowerThird', text: 'testimonial2', at: 0.4, seconds: 4 }],
-    shot: 'A second player: one line, on camera, with their OK to use it. Delete this entry if you do not have one.' },
-  { footage: 'testimonial-3', seconds: 5, muted: false, overlays: [{ type: 'lowerThird', text: 'testimonial3', at: 0.4, seconds: 4 }],
-    shot: 'A third player: one line, on camera, with their OK to use it. Delete this entry if you do not have one.' },
+  // Made by scripts/testimonials.py, which cleans the audio. The files are full length: pick each line with `from` and `seconds`.
+  { footage: 'testimonial-1', seconds: 8, from: 16.5, muted: false, overlays: [{ type: 'lowerThird', text: 'testimonial1', at: 0.4, seconds: 4 }],
+    shot: 'npm run testimonials' },
+  { footage: 'testimonial-2', seconds: 8, from: 1.5, muted: false, overlays: [{ type: 'lowerThird', text: 'testimonial2', at: 0.4, seconds: 4 }],
+    shot: 'npm run testimonials' },
   { scene: 'builtProof', seconds: 8 },
   { scene: 'endcard', seconds: 6 },
 ];

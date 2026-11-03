@@ -15,6 +15,7 @@
     "check": "npm run assets && node scripts/check-video.mjs",
     "clips": "npm run assets && node scripts/render-clips.mjs",
     "sam": "node scripts/sam-clip.mjs",
+    "testimonials": "python scripts/testimonials.py",
     "render:song": "npm run assets && remotion render RevealSong out/reveal-song.mp4",
     "render:hype": "npm run assets && remotion render Hype out/hype.mp4",
     "footage": "node scripts/cut-footage.mjs",

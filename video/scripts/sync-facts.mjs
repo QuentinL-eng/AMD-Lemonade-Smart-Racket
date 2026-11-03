@@ -1,20 +1,28 @@
 // Writes src/config/generated/facts.json: the proof numbers on screen, read from git and hackathon.json so they
 // can't drift from the repo. Runs before studio and every render (npm run assets).
 import { execFileSync } from 'node:child_process';
-import { mkdirSync, readFileSync, writeFileSync } from 'node:fs';
+import { existsSync, mkdirSync, readFileSync, writeFileSync } from 'node:fs';
 import { dirname, join, resolve } from 'node:path';
 import { fileURLToPath } from 'node:url';
 
 const here = dirname(fileURLToPath(import.meta.url));
 const root = resolve(here, '..', '..');
 const hackathon = JSON.parse(readFileSync(join(root, 'hackathon.json'), 'utf8'));
+const output = join(here, '..', 'src/config/generated/facts.json');
 
 const git = (...args) => execFileSync('git', args, { cwd: root, encoding: 'utf8' }).trim().split('\n').filter(Boolean);
-// `date|subject`, oldest first
-const log = git('log', '--reverse', '--date=short', '--format=%ad|%s').map((l) => {
-  const at = l.indexOf('|');
-  return { date: l.slice(0, at), subject: l.slice(at + 1) };
-});
+// `date|subject`, oldest first. A broken local history shouldn't stop a render: keep the last facts and say so.
+let log;
+try {
+  log = git('log', '--reverse', '--date=short', '--format=%ad|%s').map((l) => {
+    const at = l.indexOf('|');
+    return { date: l.slice(0, at), subject: l.slice(at + 1) };
+  });
+} catch (err) {
+  if (!existsSync(output)) throw err;
+  console.warn('facts: git log failed, keeping the last facts.json. The on-screen commit count may be stale.');
+  process.exit(0);
+}
 
 // Every calendar day from first to last commit, so quiet days show as gaps.
 const counts = new Map();
@@ -45,5 +53,5 @@ const facts = {
   links: hackathon.links,
 };
 mkdirSync(join(here, '..', 'src/config/generated'), { recursive: true });
-writeFileSync(join(here, '..', 'src/config/generated/facts.json'), `${JSON.stringify(facts, null, 2)}\n`);
+writeFileSync(output, `${JSON.stringify(facts, null, 2)}\n`);
 console.log(`facts: ${log.length} commits, ${first} to ${last}, ${hackathon.agent_tools.length} Muse tools`);

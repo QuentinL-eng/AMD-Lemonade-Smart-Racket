@@ -28,7 +28,7 @@ judges watch muted. Every number on screen comes from the repo.
 | 2:07 | Watch counts down, phone says "Drill complete!" | **Film** | Impact |
 | 2:12 | SAM 3.1: the real cached boxes on your real 240 fps forehand | CGI over real, new | Meta |
 | 2:20 | Swing film from Muse's real script, on a demo session | CGI | Meta |
-| 2:28 | Three players, one line each | **Film** (or delete and give the time to the hero) | Impact |
+| 2:28 | Two players, one line each | Filmed, audio cleaned; pick the lines | Impact |
 | 2:42 | Proof: commits by day and the test counts, read from the repo | CGI, new | Trust |
 | 2:50 | Endcard: tennisbuddy.net, TestFlight, no hardware needed | CGI, done | Impact |
 
@@ -50,9 +50,6 @@ it as `public/audio/vo/<id>.wav`. It starts playing and the music ducks, with no
    Muse, Insights, Settings). Muse tab → What if → ask → wait for the numbers, then Next drill → Start on Watch.
 3. `drill-on-watch.mp4`: close on the Watch as the to-go count drops, ending on the phone's Live tab: "Drill complete!".
 4. The voiceover, one line at a time, with a duvet around you for a quiet room.
-
-**If anyone is around:** `testimonial-1.mp4` and so on, with their OK to use it on camera. If not, delete those entries. The
-`muse-screen-recording` slot can take the 15 s.
 
 Save each clip under that name in `public/footage/`. It replaces the stand-in on its own.
 
