@@ -463,7 +463,7 @@ let PLAYERS=[],rows=[];
 const S={tab:"live",stack:{live:[],score:[],muse:[],insights:[],settings:[]},pi:0,active:false,shown:0,clock:-1.4,speed:1,last:0,
   title:"Tennis session",lastRow:null,flashKey:0,
   stroke:null,metric:"ballSpeed",period:"Month",
-  d:Z(),lever:"Speed",film:null,chat:[],drill:null,drillRun:false,question:"",museSeen:false,
+  d:Z(),lever:"Speed",film:null,trials:[],chat:[],drill:null,drillRun:false,question:"",museSeen:false,
   plan:null,planRun:-1,scout:"",reviews:[],match:null,rules:{simple:false,setsToWin:2,noAd:false,matchTB:false},recenter:0,skin:false};
 const $=id=>document.getElementById(id);
 const shownRows=()=>rows.slice(0,S.shown);
@@ -691,10 +691,19 @@ const CANDS=[
  {k:"path",d:{...Z(),path:6},title:"Brush up the back",cue:"Swing low to high through the ball",why:"A steeper brush adds spin without needing more speed."},
  {k:"face",d:{...Z(),face:-4},title:"Close the face a touch",cue:"Feel the strings point slightly down at contact",why:"A slightly closed face turns more of your swing into spin."},
  {k:"contact",d:null,title:"Meet it in the middle",cue:"Aim for the center of the strings",why:"Centered contact keeps the speed you already make."}];
+/* The worth-it bar, same numbers as WhatIf.Deltas in the app and the simulate_change gain verdict. */
+const GAIN={spinRatio:1.3,spinRPM:400,spinFloor:1200,paceRatio:1.05,centered:2};
+const gainOf=(A,B)=>({spin:B.rpm>=Math.max(A.rpm*GAIN.spinRatio,A.rpm+GAIN.spinRPM,GAIN.spinFloor)?"decisive":"small",
+  pace:B.ball>=A.ball*GAIN.paceRatio?"decisive":"small",contact:Math.hypot(B.p.cx,B.p.cy)<=GAIN.centered?"centered":"off_center"});
+const isDecisive=(A,B)=>{const g=gainOf(A,B);return g.spin==="decisive"||g.pace==="decisive"||(g.contact==="centered"&&Math.hypot(A.p.cx,A.p.cy)>GAIN.centered);};
+const scaled=(d,k)=>({swing:clamp(d.swing*k,-30,30),face:clamp(d.face*k,-15,15),path:clamp(d.path*k,-15,15),cx:d.cx,cy:d.cy});
 function evalCands(b){
   const A=simulate(b);
-  return CANDS.map(c=>{const d=c.d||{...Z(),cx:clamp(-b.cx,-3,3),cy:clamp(-b.cy,-3,3)},B=simulate(apply(b,d));
-    return {...c,d,gain:B.ball/A.ball-1,rpm:B.rpm,rpm0:A.rpm,ball:B.ball,score:(B.ball/A.ball-1)+.5*(B.rpm/Math.max(A.rpm,1)-1)};}).sort((a,z)=>z.score-a.score);
+  return CANDS.map(c=>{const d0=c.d||{...Z(),cx:clamp(-b.cx,-3,3),cy:clamp(-b.cy,-3,3)};
+    // Test two sizes and keep the smallest with a decisive gain, as Muse does in the app.
+    const d=c.d&&!isDecisive(A,simulate(apply(b,d0)))&&isDecisive(A,simulate(apply(b,scaled(d0,2))))?scaled(d0,2):d0,B=simulate(apply(b,d));
+    return {...c,d,decisive:isDecisive(A,B),verdict:gainOf(A,B),gain:B.ball/A.ball-1,rpm:B.rpm,rpm0:A.rpm,ball:B.ball,score:(B.ball/A.ball-1)+.5*(B.rpm/Math.max(A.rpm,1)-1)};})
+    .sort((a,z)=>(z.decisive-a.decisive)||(z.score-a.score));
 }
 function museHTML(el){
   const rs=shownRows(),f=S.film,st=f?f.stroke:curStroke(rs),b=baselineOf(strokeRows(rs,st));
@@ -840,7 +849,7 @@ function wiResults(b){
     <div class="pbar"><i style="width:${100*b0/t}%;background:var(--m-ghost)"></i>${Math.abs(up)>=.5?`<i style="width:${100*a0/t}%;background:${up>0?"var(--m-lime)":"#FF998C"};opacity:.9"></i>`:""}</div>${note?`<div class="nt">${note}</div>`:""}</div>`;};
   return bar("Ball speed",U.speed(A.ball),U.speed(B.ball),U.su(),"",Math.max(U.speed(A.ball),U.speed(B.ball),1)*1.15)+
     bar("Spin",A.rpm,B.rpm,"rpm",A.spin===B.spin?"":`${cap1(A.spin)} → ${cap1(B.spin)}`,Math.max(A.rpm,B.rpm,1)*1.15)+
-    `<div class="mfoot" style="margin:0">${f?"Estimated by the racket's physics model. Picked and tested by Muse (demo engine).":"Estimated by the racket's physics model on your average swing. Ball flight isn't modeled."} Ball flight, landing and net clearance are not modeled.</div>`;
+    wiVerdict(A,B)+`<div class="mfoot" style="margin:0">${f?"Estimated by the racket's physics model. Picked and tested by Muse (demo engine).":"Estimated by the racket's physics model on your average swing. Ball flight isn't modeled."} Ball flight, landing and net clearance are not modeled.</div>`;
 }
 function wiEditor(){
   const sl=(t,key,lim,step)=>`<div class="sl"><div class="tp"><b>${t}</b><span data-cap="${key}">${CAP[key](S.d[key])}</span></div><input type="range" data-d="${key}" min="${-lim}" max="${lim}" step="${step}" value="${S.d[key]}" aria-label="${t}"></div>`;
@@ -850,6 +859,17 @@ function wiEditor(){
 function bindSlider(i){
   i.addEventListener("input",()=>{S.d[i.dataset.d]=+i.value;const cp=document.querySelector(`[data-cap="${i.dataset.d}"]`);
     if(cp)cp.textContent=CAP[i.dataset.d](S.d[i.dataset.d]);wiUpdate();});
+}
+function wiVerdict(A,B){
+  if(isZero(S.d))return "";const g=gainOf(A,B);
+  return `<div class="mfoot" style="margin:0 0 6px" id="wi-gain">Estimated gain: spin ${g.spin}, pace ${g.pace}, contact ${g.contact==="centered"?"centered":"off center"}.</div>`;
+}
+const describeD=d=>Object.keys(CAP).filter(k=>d[k]).map(k=>`${({swing:"swing",path:"path",face:"face",cy:"contact",cx:"contact"})[k]} ${CAP[k](d[k])}`).join(", ");
+function wiTrials(){
+  const w=wiBase();if(!w.b)return "";
+  const pend=S.trials.filter(t=>!t.completed);
+  return `<button class="mrow" data-act="tryit" id="wi-tryit" ${isZero(S.d)?'disabled style="opacity:.5;margin-bottom:12px"':'style="margin-bottom:12px"'}>${ic("flag")}<span><div class="a">Try it</div><div class="b">Save this change to check later</div></span></button>`+
+   (pend.length?`<div style="font-weight:700;color:var(--m-text);margin-bottom:8px">Changes you are trying</div>`+pend.map(t=>`<div class="mcard" style="margin-bottom:8px;display:flex;align-items:center;gap:10px"><div style="flex:1"><div style="font-weight:600">${cap1(t.goal)}</div><div class="mfoot" style="margin:2px 0 0">${t.text}</div></div>${strokeRows(w.rs,t.stroke).length?`<button data-act="followup" data-v="${t.id}" style="color:var(--m-lime);font-weight:600;min-height:44px">Log follow-up</button>`:""}</div>`).join(""):"");
 }
 function whatifHTML(el){
   const {rs:all,st,q:rs,b}=wiBase();
@@ -861,7 +881,8 @@ function whatifHTML(el){
    <div class="bl">Your average ${LABEL[st].toLowerCase()}: ${rs.length} swings, ${U.sv(b.swing)} ${U.su()}, path ${Math.abs(Math.round(b.path))}° ${b.path>=0?"up":"down"}, face ${Math.abs(Math.round(b.face))}° ${b.face>=0?"open":"closed"}, contact ${Math.hypot(b.cx,b.cy)<.5?"centered":U.lt(Math.hypot(b.cx,b.cy))}.</div>
    <div class="lt" id="wi-tiles">${wiTiles()}</div>
    <div class="mcard" style="margin-bottom:12px" id="wi-ed">${wiEditor()}</div>
-   <div class="mcard res" id="wi-res">${wiResults(b)}</div>`;
+   <div class="mcard res" id="wi-res">${wiResults(b)}</div>
+   <div id="wi-try" style="margin-top:12px">${wiTrials()}</div>`;
   el.innerHTML=h;
   const bb=document.createElement("div");bb.className="bbar";bb.id="bbar";
   bb.innerHTML=`<button class="p" data-act="bestchange">${ic("sparkles")} ${S.film?"Find another change":"Find the best change"}</button><button class="g" data-act="wireset">Reset</button>`;
@@ -870,7 +891,7 @@ function whatifHTML(el){
 }
 function wiUpdate(){
   const b=wiBase().b;if(!b||!$("wi-res"))return;
-  $("wi-tiles").innerHTML=wiTiles();$("wi-res").innerHTML=wiResults(b);$("wi-cue").innerHTML=wiCue();
+  $("wi-tiles").innerHTML=wiTiles();$("wi-res").innerHTML=wiResults(b);$("wi-try").innerHTML=wiTrials();$("wi-cue").innerHTML=wiCue();
   const rb=document.querySelector('.nav [data-act="wireset"]');if(rb)rb.style.opacity=isZero(S.d)?".4":"1";
 }
 function mountWI(){
@@ -1037,6 +1058,9 @@ $("phone").addEventListener("click",e=>{
    case"lever":S.lever=v;{const el=$("v-other"),b=baselineOf(shownRows());if(b&&$("wi-ed")){wiUpdate();const sl=el.querySelector("#wi-ed");sl.innerHTML=wiEditor();el.querySelectorAll("#wi-ed input[data-d]").forEach(bindSlider);}}break;
    case"wimode":S.wiMode=v;wiStart=performance.now();document.querySelectorAll("#wimodes button").forEach(b=>b.classList.toggle("on",b.dataset.v===v));break;
    case"wireset":S.d=Z();S.film=null;refreshOther();break;
+   case"tryit":{const w=wiBase();if(!w.b||isZero(S.d))break;const A=simulate(w.b),B=simulate(apply(w.b,S.d)),ups=[B.rpm>A.rpm*1.05?"more spin":null,B.ball>A.ball*1.05?"more pace":null].filter(Boolean);
+     S.trials.push({id:Date.now(),stroke:w.st,goal:ups.length?ups.join(" + "):"test a change",text:describeD(S.d),d:{...S.d},predicted:{ball0:A.ball,ball1:B.ball,rpm0:A.rpm,rpm1:B.rpm},before:{ball:mean(w.q.map(x=>x.r.ball)),rpm:mean(w.q.map(x=>x.r.rpm))},completed:false});wiUpdate();break;}
+   case"followup":{const t=S.trials.find(x=>String(x.id)===v);if(t){const q=strokeRows(wiBase().rs,t.stroke);t.after={ball:mean(q.map(x=>x.r.ball)),rpm:mean(q.map(x=>x.r.rpm))};t.completed=true;}wiUpdate();break;}
    case"bestchange":{const w=wiBase(),c=evalCands(w.b),i=S.film&&S.film.stroke===w.st?(c.findIndex(x=>x.title===S.film.title)+1)%c.length:0;S.film={...c[i],stroke:w.st};S.d={...c[i].d};refreshOther();break;}
    case"wistroke":S.wiStroke=v;S.d=Z();S.film=null;refreshOther();break;
    case"rule":{const r=S.rules;if(k==="simple")r.simple=v==="1";if(k==="sets")r.setsToWin=+v;if(k==="noad")r.noAd=!r.noAd;if(k==="mtb")r.matchTB=!r.matchTB;refreshOther();break;}
@@ -1171,7 +1195,7 @@ $("hitlist").addEventListener("click",e=>{
 });
 
 function setPlayer(i){
-  S.pi=i;S.active=false;S.shown=0;S.clock=-LEAD;S.lastRow=null;S.d=Z();S.film=null;S.chat=[];S.drill=null;S.drillRun=false;S.plan=null;S.planRun=-1;S.scout="";S.reviews=[];
+  S.pi=i;S.active=false;S.shown=0;S.clock=-LEAD;S.lastRow=null;S.d=Z();S.film=null;S.trials=[];S.chat=[];S.drill=null;S.drillRun=false;S.plan=null;S.planRun=-1;S.scout="";S.reviews=[];
   const P=PLAYERS[i],ses=P.session;rows=(ses.shots||[]).map(enrich);
   const lab=ses.provenance.labels,pred=ses.provenance.predicted;
   $("prov").innerHTML=pred?`<b>Predicted by a model:</b> each hit's stroke type, which player hit it and when — the F3Tennis tsm_e2espot model (97% stroke-type accuracy on held-out Ostrava hits; not measured on this broadcast). <b>From video:</b> how the hitter's racket moved, tracked with SAM 3.1 (box centre, 25 fps, windows spread through the match). <b>Estimated:</b> speeds, spin, angles, contact points, and the 3D swing built from that motion.<br><a href="${P.video_url}">Source video</a>`:lab?`<b>From the dataset (real):</b> each hit's stroke, forehand/backhand, technique and outcome — ${ses.provenance.labels}. <b>From video:</b> when each hit happened and how the hitter's racket moved, tracked with SAM 3.1 (box centre, 25 fps). <b>Estimated:</b> speeds, spin, angles, contact points, and the 3D swing built from that motion.<br><a href="${P.video_url}">F3Tennis dataset</a>`:
