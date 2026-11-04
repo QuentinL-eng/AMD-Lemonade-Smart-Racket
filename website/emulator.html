@@ -754,8 +754,8 @@ function museHTML(el){
   h+=`<button class="mrow" data-act="scout">${ic("bino")}<span><div class="a">Scout yourself</div><div class="b">Where an opponent would attack you</div></span><span class="ch">${ic("chev")}</span></button>`;
   h+=`<button class="mrow" data-act="review">${ic("flag")}<span><div class="a">Review queue</div><div class="b">${pend?`${pend} waiting for you`:"Flag a session for a human look"}</div></span><span class="ch">${ic("chev")}</span></button>`;
   h+=`<div><div class="eyebrow" style="color:var(--m-muted);margin:4px 0 8px">ASK</div><div class="asklist">${SUGG.map(q=>`<button data-act="ask" data-v="${q}"><span>${q}</span>${ic("chev")}</button>`).join("")}</div></div>`;
-  S.chat.forEach((c,i)=>{h+=`<div class="mcard"><div class="mq">${c.q}</div><div class="mans">${c.a}</div>${i===S.chat.length-1?`<div class="mfoot">Tools: ${c.tools.join(", ")} · demo engine, template reply over real tool results</div>`:""}</div>`;});
-  h+=`<div class="mcard" style="font-size:12px;color:var(--m-muted)">In the app, Muse Spark makes these tool calls on your sessions and writes the reply. This page can't reach Muse, so a template writes the reply from the same tool outputs, computed here on the replayed match.</div>`;
+  S.chat.forEach((c,i)=>{h+=`<div class="mcard"><div class="mq">${c.q}</div><div class="mans">${c.a}</div>${i===S.chat.length-1?`<div class="mfoot">Tools: ${c.tools.join(", ")}</div>`:""}</div>`;});
+  h+=`<div class="mcard" style="font-size:12px;color:var(--m-muted)">Ask a free-form question. Muse Spark Open, served by Baseten, answers using the current replay. Replay statistics are estimates; no physical racket is connected.</div>`;
   el.innerHTML=h;
   const bar=document.createElement("div");bar.className="askbar";bar.id="askbar";
   bar.innerHTML=`<div class="in"><input id="q" placeholder="Ask Muse anything about your game" value="${S.question.replace(/"/g,"&quot;")}"><button data-act="send" aria-label="Send">${ic("up")}</button></div>`;
@@ -794,7 +794,18 @@ function answer(q){
     return {tools:["get_racket_status"],a:"This is a video replay, so no racket hardware is connected and there is no battery or firmware to report. With a real racket, Muse reads those straight from its status packet."};
   return {tools:[],a:"In this demo I can answer the four suggested questions. Tap one above."};
 }
-function askMuse(q){q=(q||"").trim();if(!q)return;const r=answer(q);S.chat.push({q,a:r.a,tools:r.tools});S.question="";refreshOther();const sc=$("v-other");sc.scrollTop=sc.scrollHeight;}
+let musePending=false;
+const chatEscape=s=>String(s).replace(/[&<>"']/g,c=>({'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;',"'":'&#39;'}[c]));
+async function askMuse(q){
+ q=(q||"").trim();if(!q||musePending)return;
+ musePending=true;const c={q:chatEscape(q),a:"Asking Muse Spark…",tools:[]};S.chat.push(c);S.question="";refreshOther();
+ try{
+ const rs=shownRows();const context={source:"Pro-match replay; physics figures are estimates, contact points assumed",shotCount:rs.length,shots:rs.slice(-80).map(x=>({stroke:x.type,time:x.t,parameters:x.p,estimates:x.r,outcome:x.outcome})),units:"km/h, degrees, rpm, cm"};
+ const r=await fetch('/api/muse',{method:'POST',headers:{'Content-Type':'application/json'},body:JSON.stringify({question:q,context}),signal:AbortSignal.timeout(55000)});
+ const data=await r.json();if(!r.ok)throw Error(data.error||'Muse unavailable');c.a=chatEscape(data.answer);c.tools=['Muse Spark Open · Baseten'];
+ }catch(e){c.a=chatEscape(e.message||'Muse unavailable. Please try again.');}
+ finally{musePending=false;refreshOther();const sc=$("v-other");sc.scrollTop=sc.scrollHeight;}
+}
 function memoryHTML(el){el.innerHTML=`<div class="mh"><span class="t">Memory</span></div>${`<div class="mcard" style="text-align:center;padding:40px 20px"><div style="font-size:44px;color:var(--m-lime)">${ic("brain")}</div><div style="font:800 20px var(--rounded);margin:8px 0">No notes yet</div><div style="color:var(--m-muted)">Muse keeps short notes about your habits between sessions. This replay starts with none.</div></div>`}`;}
 
 /* ---------- Muse feature screens (demo engine over the replay's own numbers) ---------- */
