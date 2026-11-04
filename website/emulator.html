@@ -797,7 +797,7 @@ function answer(q){
 let musePending=false;
 const chatEscape=s=>String(s).replace(/[&<>"']/g,c=>({'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;',"'":'&#39;'}[c]));
 async function museRequest(q,task="chat"){
- const rs=shownRows();const context={source:"Session replay; physics figures are estimates, contact points assumed",shotCount:rs.length,shots:rs.map(x=>({stroke:x.type,time:x.t,parameters:x.p,estimates:x.r,outcome:x.outcome})),units:"km/h, degrees, rpm, cm"};
+ const rs=shownRows();const context={source:"Session replay; physics figures are estimates, contact points assumed",shotCount:rs.length,shots:rs.map(x=>({stroke:x.type,time:x.t,parameters:x.p,estimates:{ball:x.r.ball,rpm:x.r.rpm,dist:x.r.dist},outcome:x.outcome})),units:"km/h, degrees, rpm, cm"};
  let r;for(let attempt=0;attempt<2;attempt++){r=await fetch('/api/muse',{method:'POST',headers:{'Content-Type':'application/json'},body:JSON.stringify({question:q,task,context}),signal:AbortSignal.timeout(180000)});if(r.ok||![502,503,504].includes(r.status))break;}
  if(!r.headers.get('content-type')?.includes('application/json'))throw Error('Muse is temporarily unavailable. Please try again.');
  const data=await r.json();if(!r.ok)throw Error(data.error||'Muse is temporarily unavailable. Please try again.');return data;
