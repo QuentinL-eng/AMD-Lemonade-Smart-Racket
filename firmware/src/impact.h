@@ -38,6 +38,10 @@ void impactReset();
 // Returns IMPACT_* flags.
 int impactStep(const ImpactInput &in, uint32_t micTriggerUs, TBHit *hit, ImpactWindow *win);
 
+// Data collection (USB serial 'c'): every mic trigger yields a hit and window, even on a still racket and with a
+// small high-g jump. Off in normal use.
+void impactSetCollect(bool on);
+
 // Latest orientation, sensor axes -> world (z up): w, x, y, z.
 void impactOrientation(float q[4]);
 

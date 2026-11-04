@@ -41,12 +41,19 @@ MicLevel micLevel() {
   return l;
 }
 
+SemaphoreHandle_t tbSerialLock() {
+  static SemaphoreHandle_t lock = xSemaphoreCreateMutex();
+  return lock;
+}
+
 static void printClip(const int16_t *clip, int count, uint32_t triggerAt) {
-  Serial.printf("CLIP_META,samples=%d,trigger_age_us=%lu\n", count,
-                (unsigned long)(micros() - triggerAt));
+  xSemaphoreTake(tbSerialLock(), portMAX_DELAY);
+  Serial.printf("CLIP_META,samples=%d,trigger_age_us=%lu,trigger_us=%lu\n", count,
+                (unsigned long)(micros() - triggerAt), (unsigned long)triggerAt);
   Serial.print("CLIP,");
   for (int i = 0; i < count; i++) Serial.printf("%04x", (uint16_t)clip[i]);
   Serial.println();
+  xSemaphoreGive(tbSerialLock());
 }
 
 static void micTask(void *) {

@@ -7,7 +7,7 @@ live racket: it runs a physics simulator to **predict** what a swing change woul
 drill the Watch and glasses track. This is a hardware + software instrument, not a generic advice
 chatbot: every number Muse reports must come from a tool result.
 
-- Website: <https://tennisbuddy.net> · Try it: [TestFlight beta](https://testflight.apple.com/join/137F7kvd)
+- **Try the [live browser emulator](https://tennisbuddy.net/emulator)** · Website: <https://tennisbuddy.net> · Try it: [TestFlight beta](https://testflight.apple.com/join/137F7kvd)
   (opens on a simulated racket, no hardware needed) · Machine index: [`llms.txt`](llms.txt) ·
   Machine metadata: [`hackathon.json`](hackathon.json)
 
@@ -63,10 +63,10 @@ Quick automated checks: `meta-models/muse-spark-open-1026` in `apple/Shared/Coac
 ## 5-minute verification
 
 ```bash
-git log --format=%ad --date=short | sort | uniq -c   # all commits Oct 26 – Nov 2, 2026
+git log --format=%ad --date=short | sort | uniq -c   # project history
 python3 ml/test_parity.py                            # C++ and Python agree on 296 clips
 python3 -m unittest discover -s ml -p test_whatif_synth.py  # simulator mirror, 11 tests
-python3 -m unittest discover -s tools -p "test_*.py" # 15 tests
+python3 -m unittest discover -s tools -p "test_*.py" # 55 tests
 npm test --prefix backend/supabase                   # migration + social logic in PGlite
 grep -rn "muse-spark-open\|inference.baseten.co" apple/Shared/Coach backend/supabase/functions/muse
 grep -rln "MWDATCore\|MWDATDisplay" apple/iOS/Glasses
@@ -76,11 +76,11 @@ grep -rln "MWDATCore\|MWDATDisplay" apple/iOS/Glasses
 
 | Suite | Command | Expected |
 |---|---|---|
-| Swift (105 methods: 62 RacketKit + 43 app) | `swift test --package-path apple/RacketKit` + `xcodebuild … TennisBuddy-macOS … test` | pass (2 replay utilities skip unless `REPLAY_DIRS` is set) |
+| Swift (106 methods: 62 RacketKit + 44 app) | `swift test --package-path apple/RacketKit` + `xcodebuild … TennisBuddy-macOS … test` | pass (2 replay utilities skip unless `REPLAY_DIRS` is set) |
 | ML parity (296 clips) | `python3 ml/test_parity.py` | `PASS`, max distance error 7.22e-07 cm |
-| What-if simulator | `python3 -m unittest discover -s ml -p test_whatif_synth.py` | 11 tests, OK |
+| What-if simulator | `python3 -m unittest discover -s ml -p test_whatif_synth.py` | 14 tests, OK |
 | Full `ml` discovery | `python3 -m unittest discover -s ml` | 46 pass; 1 research-only module needs the local kymatio checkout under `firmware/.pio/` (git-ignored, not the supported path in `ml/README.md`) |
-| Tools | `python3 -m unittest discover -s tools` | 30 tests, OK |
+| Tools | `python3 -m unittest discover -s tools` | 55 tests, OK |
 | Robot rig | `.venv/bin/python -m pytest TennisRobot/tests/` | 51 cases; needs `pytest` + loopback sockets |
 | Backend | `npm test --prefix backend/supabase` | pass (embedded PGlite, no cloud needed) |
 | Firmware host test | `firmware/tools/backlog_test/` | flash backlog vs fake flash under ASan/UBSan |
@@ -88,7 +88,7 @@ grep -rln "MWDATCore\|MWDATDisplay" apple/iOS/Glasses
 
 ## Provenance
 
-- Every commit dates Oct 26 – Nov 2, 2026 (built for the Meta Global AI Developer Hackathon).
+- Started during the Meta Global AI Developer Hackathon and updated afterwards.
 - MIT licensed ([`LICENSE`](LICENSE)); forked idea from
   [AahanPrajapati/Smart-Tennis-Racket](https://github.com/AahanPrajapati/Smart-Tennis-Racket) (MIT).
 - Privacy: shots stay on-device/iCloud; only what Muse fetches goes to Baseten via our proxy
@@ -99,5 +99,4 @@ grep -rln "MWDATCore\|MWDATDisplay" apple/iOS/Glasses
 Large local-only captures and generated output a clone does not need for evaluation:
 `data/external/`, `data/Tennis Camera/`, `data/room-2026-10-29/runs*/`, `*.tbrec` raw captures,
 `TennisRobot/TennisBuddyDayOne_20261029/`, `marketing/*.mp4`, `video/out/`, `apple/.build/`,
-`firmware/.pio/`, `backend/supabase/node_modules/`. Unpublished website drafts in
-`website/option-*.html` are superseded by `website/index.html`.
+`firmware/.pio/`, `backend/supabase/node_modules/`.

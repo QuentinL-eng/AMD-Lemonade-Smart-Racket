@@ -29,7 +29,8 @@ Key facts:
 - [Machine-readable metadata](hackathon.json): Meta tech, stats, commands, repo map
 - [README](README.md): what it is, how Meta AI is used, architecture, evidence, how to run
 - Try it: [TestFlight beta](https://testflight.apple.com/join/137F7kvd) (simulated racket included, no hardware needed)
-- Website: [tennisbuddy.net](https://tennisbuddy.net) (source: [website/index.html](website/index.html))
+- Try the [live browser emulator](https://tennisbuddy.net/emulator).
+- Website: [tennisbuddy.net](https://tennisbuddy.net)
 
 ## Muse Spark agent and Meta glasses
 
@@ -54,7 +55,7 @@ Key facts:
 - [Model run summary, Oct 28](ml/runs/SUMMARY-20261028.md)
 - [Club session findings](docs/CLUB_2026-10-28.md)
 - [Data collection](docs/DATA_COLLECTION.md)
-- [Web emulator + pro-match data spec](docs/EMULATOR_DATA.md) ([live page](website/emulator.html))
+- [Web emulator + pro-match data spec](docs/EMULATOR_DATA.md) ([live page](https://tennisbuddy.net/emulator))
 
 ## Repo map
 
@@ -69,7 +70,7 @@ Key facts:
 
 Skip (large local-only or generated output): `data/external/`, `data/Tennis Camera/`, `*.tbrec`,
 `marketing/*.mp4`, `video/out/`, `apple/.build/`, `firmware/.pio/`, `backend/supabase/node_modules/`.
-`website/option-*.html` are superseded drafts; the live page is `website/index.html`.
+
 
 ## Optional
 

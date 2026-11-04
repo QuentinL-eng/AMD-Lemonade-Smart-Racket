@@ -8,10 +8,11 @@ and sends it to an iPhone, Mac, Apple Watch and **Meta Ray-Ban Display** glasses
 agent over the player's own shots and the live racket: it runs a physics simulator to predict what a swing change
 would do, then plans a drill that the Watch and glasses track.
 
+- **Try the live app in your browser:** [Open the Tennis Buddee emulator](https://tennisbuddy.net/emulator) — no hardware or installation needed.
 - **Website:** [tennisbuddy.net](https://tennisbuddy.net)
 - **Try the app:** [TestFlight public beta](https://testflight.apple.com/join/137F7kvd) (iPhone + Apple Watch). It
   starts on a built-in simulated racket, so every screen works without the hardware.
-- **Built for:** the Meta Global AI Developer Hackathon. Every commit in this repo dates from Oct 26 to Nov 2, 2026.
+- **Built for:** the Meta Global AI Developer Hackathon. Started during the hackathon and updated afterwards.
 
 | Rubric | Where to look |
 |---|---|
@@ -83,7 +84,7 @@ state, and a robot-arm rig for repeatable ground truth ([`TennisRobot/`](TennisR
    to a built-in engine, and the UI names the engine that answered.
 7. **Meta models label the training data.** SAM 3.1 tracks rackets through video and pre-fills contact
    labels (a human confirms every one); the cached observations feed the stroke-system baseline
-   ([`ml/stroke_system/`](ml/stroke_system/)) and the web emulator ([`website/emulator.html`](website/emulator.html)).
+   ([`ml/stroke_system/`](ml/stroke_system/)) and the web emulator ([live emulator](https://tennisbuddy.net/emulator)).
 
 The 10 tools: `query_shots`, `compare_sessions`, `get_session_digest`, `get_live_state`, `simulate_change`,
 `list_shots`, `read_live_sensors`, `get_racket_status`, `recall_notes`, `remember_note`.
@@ -145,7 +146,8 @@ We report weak results too. The sweet-spot model only modestly beats the baselin
 
 ## Demo
 
-- **Demo video:** 3 minutes, real club footage plus CGI built in Remotion ([`video/`](video/)).
+- **Demo video:** 3 minutes, real club footage plus CGI built in Remotion ([source](video/)); video link to follow.
+- **Try in your browser:** [Open the live emulator](https://tennisbuddy.net/emulator).
 - **Try it in two minutes:** install the [TestFlight beta](https://testflight.apple.com/join/137F7kvd). The app opens
   on a simulated racket that swings and hits every few seconds. Open the Muse tab → What if, and ask Muse.
 - **Holds up live:**
@@ -183,7 +185,6 @@ Details: [`apple/README.md`](apple/README.md), [`firmware/README.md`](firmware/R
 | [`data/`](data/) | Small calibration and tap recordings (large raw sessions stay local) |
 | [`TennisRobot/`](TennisRobot/), [`robot/`](robot/) | Camera + Epson C8 arm rig to swing the racket repeatably for ground truth (framework, simulated) |
 | [`video/`](video/) | Remotion source for the 3-minute demo video |
-| [`website/`](website/) | [tennisbuddy.net](https://tennisbuddy.net) (`index.html` is live; `option-*.html` are superseded drafts) |
 | [`baseten/`](baseten/) | Truss config to self-host Meta's open Muse Glimmer 30B (experiment) |
 | [`docs/`](docs/) | Wiring, data collection, club session report, privacy, TestFlight, original build plan |
 | [`JUDGING.md`](JUDGING.md), [`llms.txt`](llms.txt), [`hackathon.json`](hackathon.json) | Judging evidence map, LLM index, machine-readable metadata |

@@ -3,7 +3,7 @@
 Judges can't swing the physical racket, so the emulator replays a real professional match
 through the app's data path: SAM 3.1 tracks the racket on video, the tracks convert to the
 app's session format, and a static web page plays the sessions back. Live page:
-[`website/emulator.html`](../website/emulator.html) (needs `emulator_sessions.json` beside it).
+[live emulator](https://tennisbuddy.net/emulator) (website source is maintained separately).
 
 ## Honesty rules (non-negotiable)
 
@@ -62,7 +62,7 @@ python3 tools/sam_model_windows.py video.mp4 video.ev25.json --player nadal --ou
     --frames 13500 --budget 2.75 --ledger work/ledger_nadal.json --plan   # prints the cost; add --yes to spend
 python3 tools/model_events_to_emulator.py work --merge website/emulator_sessions.json
 
-# 3. Deploy: copy index.html, emulator.html, both session files and emulator/ into .website-dist/, then publish.
+# Website deployment is maintained separately from this repository.
 ```
 
 Cost control: `--budget` caps every SAM run; ledgers (`sam_video_ledger.json`) count billed
@@ -72,7 +72,7 @@ it; F3Set access follows that dataset's own terms.
 
 ## What the emulator is (web page)
 
-[`website/emulator.html`](../website/emulator.html) is a browser copy of the iPhone app's five tabs, built to
+[live emulator](https://tennisbuddy.net/emulator) is a browser copy of the iPhone app's five tabs, built to
 look and behave like `apple/Shared/Views`:
 
 - **Live** — the app's real textured Yonex racket (`TennisRacket.glb`, shrunk by

@@ -25,3 +25,8 @@ struct MicLevel {
   int floor, peak, trigger;
 };
 MicLevel micLevel();
+
+// Serial lines longer than one printf (clip and IMU-window dumps) take this lock so two tasks never interleave them.
+#include <freertos/FreeRTOS.h>
+#include <freertos/semphr.h>
+SemaphoreHandle_t tbSerialLock();

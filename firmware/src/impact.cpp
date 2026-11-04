@@ -14,6 +14,7 @@ static const float MIC_SWING_RADS = 2.0f;   // some racket movement in the last 
 static const int MIC_SWING_LOOKBACK = 300;  // tap on the handle of a still racket isn't counted
 static const int MIC_LOOKBACK = 40;
 static const uint32_t MIC_MAX_AGE_US = 50000;
+static bool collectMode = false;   // USB data collection: every mic trigger makes a window, still racket or not
 static const int REFRACTORY = 400;          // samples between hits
 static const int REFINE = 6;                // the impact is placed on the largest jump within ±REFINE
 
@@ -177,13 +178,13 @@ int impactStep(const ImpactInput &in, uint32_t micTriggerUs, TBHit *hit, ImpactW
     cand = i;
     source = TB_HIT_MOTION;
   } else if (micNew && (int32_t)(in.t_us - micTriggerUs) < (int32_t)MIC_MAX_AGE_US &&
-             swingBefore(i, MIC_SWING_LOOKBACK) > MIC_SWING_RADS) {
+             (collectMode || swingBefore(i, MIC_SWING_LOOKBACK) > MIC_SWING_RADS)) {
     float best = 0;
     for (uint32_t k = i - MIC_LOOKBACK; k <= i; k++) {
       float j = jumpAt(k);
       if (j > best) { best = j; cand = k; }
     }
-    if (best > MIC_JUMP_G) source = TB_HIT_MIC;
+    if (best > MIC_JUMP_G || collectMode) source = TB_HIT_MIC;
   }
   if (!source) return result;
 
@@ -203,6 +204,7 @@ int impactStep(const ImpactInput &in, uint32_t micTriggerUs, TBHit *hit, ImpactW
   return result | IMPACT_HIT;
 }
 
+void impactSetCollect(bool on) { collectMode = on; }
 void impactOrientation(float out[4]) { memcpy(out, q, sizeof(q)); }
 uint32_t impactHits() { return hits; }
 uint32_t impactWindowsDropped() { return windowsDropped; }

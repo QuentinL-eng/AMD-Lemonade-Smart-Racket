@@ -73,3 +73,8 @@ data/room-2026-10-29/*.tbrec
 data/room-2026-10-29/runs/
 data/room-2026-10-29/runs_gyrofix/
 TennisRobot/TennisBuddyDayOne_20261029/
+
+# Website and marketing production files remain local.
+/website/
+/marketing/*
+!/marketing/tennis-buddee-logo/

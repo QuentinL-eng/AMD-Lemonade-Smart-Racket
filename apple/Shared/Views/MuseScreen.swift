@@ -55,7 +55,7 @@ struct SwingSketch: View {
     }
 }
 
-/// Muse: the best change for your game, the next drill, memory, and questions. Its own tab.
+/// Muse: the best change for your game, the next drill, memory, and questions, pushed from Insights.
 struct CoachScreen: View {
     @Query(sort: \SessionRecord.startDate) private var sessions: [SessionRecord]
     @Query(sort: \CoachNote.updatedAt, order: .reverse) private var allNotes: [CoachNote]
@@ -70,36 +70,16 @@ struct CoachScreen: View {
     @State private var openWhatIf = false
     private var units: UnitSystem { UnitSystem(metric: useMetric) }
 
-    private var latest: SessionRecord? { sessions.last { $0.hasPlayableShots } }
+    private var latest: SessionRecord? { sessions.last { $0.summary.count > 0 } }
     /// The newest session with motion shots, and its first stroke the swing film can draw.
-    private var filmSource: (SessionRecord, ShotType)? { baselines.filmSource }
+    private var filmSource: (SessionRecord, ShotType)? {
+        guard let s = sessions.last(where: { WhatIf.baseline($0.shots) != nil }),
+              let t = SwingFilm.strokes.first(where: { WhatIf.baseline(s.shots, type: $0) != nil }) else { return nil }
+        return (s, t)
+    }
     /// The player's average for a stroke from the newest session that has it, as the What-if screen uses.
-    private func baseline(_ stroke: ShotType) -> WhatIf.Baseline? { baselines.byStroke[stroke] }
-
-    /// Baselines decode every shot, so they are worked out once per data change, not on every redraw
-    /// (a redraw happens each time Muse starts or finishes an answer).
-    @State private var baselines = BaselineCache()
-    private struct BaselineCache {
-        var filmSource: (SessionRecord, ShotType)?
-        var byStroke: [ShotType: WhatIf.Baseline] = [:]
-    }
-    private var baselineKey: String {
-        "\(sessions.count)-\(sessions.last?.id.uuidString ?? "")-\(sessions.last?.shotRecords?.count ?? 0)"
-    }
-    private func computeBaselines() {
-        var cache = BaselineCache()
-        for session in sessions.reversed() {
-            let shots = session.shots
-            if cache.filmSource == nil, WhatIf.baseline(shots) != nil,
-               let t = SwingFilm.strokes.first(where: { WhatIf.baseline(shots, type: $0) != nil }) {
-                cache.filmSource = (session, t)
-            }
-            for stroke in SwingFilm.strokes where cache.byStroke[stroke] == nil {
-                if let b = WhatIf.baseline(shots, type: stroke) { cache.byStroke[stroke] = b }
-            }
-            if cache.filmSource != nil, cache.byStroke.count == SwingFilm.strokes.count { break }
-        }
-        baselines = cache
+    private func baseline(_ stroke: ShotType) -> WhatIf.Baseline? {
+        sessions.last { WhatIf.baseline($0.shots, type: stroke) != nil }.flatMap { WhatIf.baseline($0.shots, type: stroke) }
     }
     private var noteCount: Int { allNotes.filter { $0.playerID == model.activePlayerID }.count }
     private var pendingReviews: Int { pending.count }
@@ -121,7 +101,7 @@ struct CoachScreen: View {
                     PracticePlanView()
                 }
                 featureRow(symbol: "binoculars", title: "Scout yourself",
-                           detail: "Where an opponent would attack you") { ScoutView() }
+                           detail: "Muse predicts where an opponent would attack") { ScoutView() }
                 featureRow(symbol: "flag", title: "Review queue",
                            detail: pendingReviews == 0 ? "Flag a session for a human look" : "\(pendingReviews) waiting for you") {
                     ReviewQueueView()
@@ -136,7 +116,6 @@ struct CoachScreen: View {
         .safeAreaInset(edge: .bottom) { askBar }
         .navigationTitle("")
         .navigationDestination(isPresented: $openWhatIf) { WhatIfView() }
-        .task(id: baselineKey) { computeBaselines() }
         .museScreen()
     }
 
@@ -193,7 +172,7 @@ struct CoachScreen: View {
                 Text("Muse is testing changes…").font(.subheadline).foregroundStyle(MuseStyle.text)
                 Spacer()
             } else {
-                Text(filmError.isEmpty ? (coach.museAvailable ? "Uses Muse Spark online" : "Sign in under Settings → Account to use Muse")
+                Text(filmError.isEmpty ? (coach.museAvailable ? "Uses Muse Spark online" : "Sign in under Account to use Muse")
                      : filmError)
                     .font(.caption).foregroundStyle(MuseStyle.muted).lineLimit(2)
                 Spacer()
@@ -401,7 +380,7 @@ struct CoachScreen: View {
                 .foregroundStyle(MuseStyle.text)
             Text(coach.museAvailable
                  ? "Muse sends your question and the shot data, racket readings and player notes it asks for to Baseten, which hosts Meta's open Muse Spark. Health data and session notes are excluded; turn off player notes under Memory."
-                 : "Sign in under Settings → Account to use Muse online. Until then the built-in engine answers offline.")
+                 : "Sign in under Account to use Muse online. Until then the built-in engine answers offline.")
                 .font(.caption).foregroundStyle(MuseStyle.muted)
             if let reason = coach.lastFallbackReason {
                 Text("Using the built-in engine: \(reason)").font(.caption).foregroundStyle(MuseStyle.muted)

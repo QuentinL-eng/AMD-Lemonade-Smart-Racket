@@ -98,6 +98,7 @@ static NimBLECharacteristic *hitChar, *windowChar, *poseChar, *summaryChar;
 // Impact mode: hits go out at once through hitQueue. The sampler captures each hit's window into a backlog slot
 // (backlog.cpp), the shot task computes its summary (shot.cpp), and the loop sends the summary, then the window.
 static QueueHandle_t hitQueue;
+static QueueHandle_t dumpQueue;   // backlog slots whose IMU window goes out over USB serial (collect mode, no phone)
 static volatile uint32_t impactStepMaxUs = 0, shotMaxUs = 0;
 static TaskHandle_t shotTaskHandle;
 // TB_STREAM_IMPACTS_ACKED: the app's calibration and profile, and its acks and resend requests (queued to the loop,
@@ -299,7 +300,8 @@ static void samplerTask(void *) {
       const bool impactMode = streamMode != TB_STREAM_RAW && connected;
       static int fillSlot = -1;
       // Raw mode with a phone connected (calibration, raw recordings) doesn't capture: those aren't play.
-      const bool capture = impactMode || (backlogEnabled && !connected);
+      const bool dumpToSerial = micCollecting();   // USB data collection (tools/collect_session.py): windows go to the PC, not the phone
+      const bool capture = impactMode || (backlogEnabled && !connected) || dumpToSerial;
       if (capture && fillSlot < 0) fillSlot = backlogReserve();
       if (!capture && fillSlot >= 0) {
         backlogRelease(fillSlot);
@@ -315,7 +317,11 @@ static void samplerTask(void *) {
         lastActiveMs = millis();
         lastHitTapMs = t / 1000;
       }
-      if (r & IMPACT_WINDOW) {
+      if (r & IMPACT_WINDOW && dumpToSerial) {
+        // Collect mode over USB: the loop prints the window and frees the slot; it never enters the BLE backlog.
+        if (xQueueSend(dumpQueue, &fillSlot, 0) != pdTRUE) backlogRelease(fillSlot);
+        fillSlot = -1;
+      } else if (r & IMPACT_WINDOW) {
         int64_t unix0 = unixAtBootMs;
         uint32_t nowMs = millis();
         backlogCaptured(fillSlot, nowMs, unix0 ? (uint64_t)(unix0 + nowMs) : 0,
@@ -586,6 +592,7 @@ void setup() {
   Serial.printf("INMP441 mic + ridge distance model (156 features): %s\n", micOk ? "OK" : "FAILED to start I2S");
   tapQueue = xQueueCreate(8, sizeof(TapEvent));
   hitQueue = xQueueCreate(8, sizeof(TBHit));
+  dumpQueue = xQueueCreate(BL_SLOTS, sizeof(int));
   backlogCmdQueue = xQueueCreate(16, sizeof(BacklogCmd));
   impactReset();
   setupBacklog();
@@ -599,11 +606,40 @@ void setup() {
   xTaskCreate(samplerTask, "sampler", 4096, nullptr, configMAX_PRIORITIES - 2, nullptr);
 }
 
+// Prints one hit's whole IMU window as two lines, for tools/collect_session.py. The header carries everything needed
+// to decode and align it, so later analysis never depends on firmware defaults:
+//   IMUWIN,seq=..,impact=<index of the impact sample>,n=<samples>,sample_bytes=<bytes per sample>,fs_hz=1000,
+//          t0_us=<micros() of sample 0>,t_impact_us=..,mic_trigger_us=..,q0=w:x:y:z (x16384, sensor->world),
+//          acc_lsb_per_g=2048,gyro_lsb_per_dps=8.2,hg_range=<H3LIS range code>,fw=1.9,bat_mv=..,chunk_t0_us=a:b:..
+//   IMU,<hex of the raw little-endian TBSample array: ax ay az gx gy gz hx hy hz, int16 each, 1 ms apart>
+static void dumpWindow(const ImpactWindow &w) {
+  xSemaphoreTake(tbSerialLock(), portMAX_DELAY);
+  Serial.printf("IMUWIN,seq=%u,impact=%u,n=%u,sample_bytes=%u,fs_hz=1000,t0_us=%lu,t_impact_us=%lu,mic_trigger_us=%lu,"
+                "q0=%d:%d:%d:%d,acc_lsb_per_g=2048,gyro_lsb_per_dps=8.2,hg_range=%u,fw=%d.%d,bat_mv=%u,chunk_t0_us=",
+                w.seq, w.impact, (unsigned)TB_WINDOW_SAMPLES, (unsigned)sizeof(TBSample), (unsigned long)w.chunkT0[0],
+                (unsigned long)(w.chunkT0[0] + 1000UL * w.impact), (unsigned long)micLastTriggerUs(), w.q0[0], w.q0[1],
+                w.q0[2], w.q0[3], (unsigned)h3Range, TB_FW_MAJOR, TB_FW_MINOR, makeStatus().battery_mv);
+  for (int i = 0; i < TB_WINDOW_CHUNKS; i++) Serial.printf(i ? ":%lu" : "%lu", (unsigned long)w.chunkT0[i]);
+  Serial.println();
+  Serial.print("IMU,");
+  static char line[512];
+  const uint8_t *p = (const uint8_t *)w.s;
+  const size_t total = sizeof(w.s);
+  for (size_t off = 0; off < total; off += 128) {
+    size_t n = total - off < 128 ? total - off : 128;
+    for (size_t i = 0; i < n; i++) sprintf(line + 2 * i, "%02x", p[off + i]);
+    Serial.write((const uint8_t *)line, 2 * n);
+  }
+  Serial.println();
+  xSemaphoreGive(tbSerialLock());
+}
+
 void loop() {
   // Serial 'c' toggles clip dumping for data collection.
   while (Serial.available()) {
     if (Serial.read() == 'c') {
       micSetCollect(!micCollecting());
+      impactSetCollect(micCollecting());
       Serial.printf("collect mode %s\n", micCollecting() ? "ON" : "OFF");
     }
   }
@@ -631,6 +667,12 @@ void loop() {
     }
     Serial.printf("HIT #%u %s jump %u g swing %u dps\n", hit.seq, hit.source == TB_HIT_MIC ? "mic" : "motion",
                   hit.jump_g, hit.swing_dps);
+  }
+  // USB collect mode: print each completed IMU window (see dumpWindow).
+  int dumpSlot;
+  while (xQueueReceive(dumpQueue, &dumpSlot, 0) == pdTRUE) {
+    dumpWindow(backlogSlot(dumpSlot).win);
+    backlogRelease(dumpSlot);
   }
   // Sweet-spot verdicts from the on-device model.
   TBShot shot;

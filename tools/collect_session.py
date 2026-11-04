@@ -34,7 +34,7 @@ def serial_reader(ser, q, stop):
             continue  # a long audio line can span several serial timeouts
         line = pending.decode(errors="ignore").strip()
         pending = b""
-        if line.startswith(("SHOT", "CLIP,", "CLIP_META,")):
+        if line.startswith(("SHOT", "CLIP,", "CLIP_META,", "IMUWIN,", "IMU,")):
             q.put((time.perf_counter(), line))
 
 
@@ -52,6 +52,7 @@ def main():
     stamp = time.strftime("%Y%m%d-%H%M%S") + (f"-{a.name}" if a.name else "")
     out = os.path.join(ROOT, stamp)
     os.makedirs(os.path.join(out, "clips"))
+    os.makedirs(os.path.join(out, "imu"))
 
     cap = cv2.VideoCapture(find_camera() if a.camera is None else a.camera,cv2.CAP_DSHOW if os.name == "nt" else cv2.CAP_ANY)
     cap.set(cv2.CAP_PROP_FOURCC, cv2.VideoWriter_fourcc(*"MJPG"))
@@ -77,9 +78,13 @@ def main():
     frames_f.write("frame,t_s\n")
     clips_f = open(os.path.join(out, "clips.csv"), "w")
     clips_f.write("n,file,t_s,verdict,clipped,impact_t_s,samples\n")
+    imu_cols = ["n", "file", "t_s", "seq", "impact", "n_samples", "sample_bytes", "fs_hz", "t0_us", "t_impact_us", "mic_trigger_us", "q0", "acc_lsb_per_g", "gyro_lsb_per_dps", "hg_range", "fw", "bat_mv", "chunk_t0_us"]
+    imu_f = open(os.path.join(out, "imu.csv"), "w")
+    imu_f.write(",".join(imu_cols) + "\n")
+    n_imu, imu_meta = 0, None
     t0 = time.perf_counter()
     n_frame, n_clip, n_sat, verdict, flash_until = 0, 0, 0, "", 0.0
-    impact_t = None
+    impact_t, trigger_us = None, ""
     print("Recording. Throw balls. Press q in the video window to stop.")
     while True:
         ok, frame = cap.read()
@@ -98,6 +103,28 @@ def main():
             if line.startswith("CLIP_META,"):
                 meta = dict(part.split("=", 1) for part in line.split(",")[1:])
                 impact_t = tr - t0 - int(meta["trigger_age_us"]) / 1e6
+                trigger_us = meta.get("trigger_us", "")
+                continue
+            if line.startswith("IMUWIN,"):
+                imu_meta = dict(part.split("=", 1) for part in line.split(",")[1:])
+                imu_meta["t_s"] = f"{tr - t0:.4f}"
+                continue
+            if line.startswith("IMU,"):
+                try:
+                    raw = bytes.fromhex(line[4:])
+                    if imu_meta is None or len(raw) != int(imu_meta["n"]) * int(imu_meta["sample_bytes"]):
+                        raise ValueError("window length does not match its header")
+                except (ValueError, KeyError) as e:
+                    print("skipped a damaged IMU window:", e)
+                    imu_meta = None
+                    continue
+                n_imu += 1
+                name = f"imu/imu-{n_imu:04d}.bin"          # raw int16 little-endian, n x 9: ax ay az gx gy gz hx hy hz
+                open(os.path.join(out, name), "wb").write(raw)
+                m = {**imu_meta, "n": n_imu, "file": name, "n_samples": imu_meta["n"]}
+                imu_f.write(",".join(str(m.get(c, "")).replace(",", ";") for c in imu_cols) + "\n")
+                imu_f.flush()
+                imu_meta = None
                 continue
             n_clip += 1
             name = f"clips/clip-{n_clip:04d}.i16"
@@ -123,10 +150,11 @@ def main():
     writer.release()
     cap.release()
     cv2.destroyAllWindows()
-    frames_f.close(); clips_f.close()
+    frames_f.close(); clips_f.close(); imu_f.close()
     real_fps = n_frame / max(t, 1e-6)
     if n_sat:
         print(f"WARNING: {n_sat}/{n_clip} clips hit the mic's full scale; those sounds are distorted. Reduce the mic's exposure and retest.")
+    print(f"{n_imu} IMU windows saved in imu/ ({n_clip} audio clips).")
     print(f"{n_clip} impacts, {n_frame} frames ({real_fps:.1f} fps actual).\nNext: python3 tools/label_video.py {out}")
 
 
