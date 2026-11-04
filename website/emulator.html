@@ -743,7 +743,7 @@ function museHTML(el){
    <div class="cu2">${f?f.cue:`Muse tests changes on your average ${LABEL[st].toLowerCase()} and shows you the one that helps most.`}</div></div>
    <svg class="sk" viewBox="0 0 300 110" preserveAspectRatio="none"><path d="M18 42C75 130 190 118 246 28" fill="none" stroke="rgba(17,19,12,.35)" stroke-width="3" stroke-dasharray="6 7"/><path d="M18 52C75 140 190 118 246 20" fill="none" stroke="#11130C" stroke-width="6" stroke-linecap="round"/><circle cx="214" cy="62" r="10" fill="#FBFBF4" stroke="#11130C" stroke-width="3"/></svg>
    <div class="ft">${f?(()=>{const A=simulate(b),B=simulate(apply(b,f.d));return `<div><div class="v">${(B.ball/A.ball-1>=0?"+":"")+Math.round((B.ball/A.ball-1)*100)}%</div><div class="l">ball speed</div></div><div><div class="v">${Math.round(B.rpm)}</div><div class="l">rpm, was ${Math.round(A.rpm)}</div></div><span class="go">Watch ›</span>`;})():
-   `<span class="e">${rs.length?"Runs on this page, not Muse Spark":"Play or skip to the end of the match first"}</span><button class="go" data-act="findfilm" ${rs.length?"":"disabled"} style="min-height:44px">Find it ›</button>`}</div></div>`;
+   `<span class="e">${rs.length?"Muse tests changes on your session":"Play or skip to the end of the match first"}</span><button class="go" data-act="findfilm" ${rs.length?"":"disabled"} style="min-height:44px">Find it ›</button>`}</div></div>`;
   h+=`<div class="mtiles"><button class="mtile" data-act="drill" ${rs.length?"":"disabled"}>${ic("scope")}<span class="a">${S.drillRun?"Drill running":"Next drill"}</span><span class="b">${S.drillRun?S.drill.goal:rs.length?"Muse plans one for you":"Play a session first"}</span></button>
    <button class="mtile" data-act="memory">${ic("brain")}<span class="a">Memory</span><span class="b">0 notes Muse keeps</span></button></div>`;
   if(S.drill)h+=`<div class="mcard"><div class="eyebrow" style="color:var(--m-muted)">NEXT DRILL</div><div style="font:800 22px var(--rounded);margin:6px 0">${S.drill.title}</div><div>${S.drill.goal}</div><div class="mfoot" style="margin-top:6px">${S.drill.why}</div>
@@ -796,26 +796,38 @@ function answer(q){
 }
 let musePending=false;
 const chatEscape=s=>String(s).replace(/[&<>"']/g,c=>({'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;',"'":'&#39;'}[c]));
+async function museRequest(q,task="chat"){
+ const rs=shownRows();const context={source:"Session replay; physics figures are estimates, contact points assumed",shotCount:rs.length,shots:rs.map(x=>({stroke:x.type,time:x.t,parameters:x.p,estimates:x.r,outcome:x.outcome})),units:"km/h, degrees, rpm, cm"};
+ let r;for(let attempt=0;attempt<2;attempt++){r=await fetch('/api/muse',{method:'POST',headers:{'Content-Type':'application/json'},body:JSON.stringify({question:q,task,context}),signal:AbortSignal.timeout(180000)});if(r.ok||![502,503,504].includes(r.status))break;}
+ if(!r.headers.get('content-type')?.includes('application/json'))throw Error('Muse is temporarily unavailable. Please try again.');
+ const data=await r.json();if(!r.ok)throw Error(data.error||'Muse is temporarily unavailable. Please try again.');return data;
+}
 async function askMuse(q){
- q=(q||"").trim();if(!q||musePending)return;
- musePending=true;const c={q:chatEscape(q),a:"Asking Muse Spark…",tools:[]};S.chat.push(c);S.question="";refreshOther();
- try{
- const rs=shownRows();const context={source:"Pro-match replay; physics figures are estimates, contact points assumed",shotCount:rs.length,shots:rs.slice(-80).map(x=>({stroke:x.type,time:x.t,parameters:x.p,estimates:x.r,outcome:x.outcome})),units:"km/h, degrees, rpm, cm"};
- let r;
- for(let attempt=0;attempt<2;attempt++){
-  r=await fetch('/api/muse',{method:'POST',headers:{'Content-Type':'application/json'},body:JSON.stringify({question:q,context}),signal:AbortSignal.timeout(55000)});
-  if(r.ok||![502,503,504].includes(r.status))break;
- }
- if(!r.headers.get('content-type')?.includes('application/json'))throw Error('Muse is temporarily unavailable. Please try your question again.');
- const data=await r.json();if(!r.ok)throw Error(data.error||'Muse is temporarily unavailable. Please try again.');c.a=chatEscape(data.answer);c.tools=['Muse Spark Open · Baseten'];
- }catch(e){c.a=chatEscape(e.name==='TimeoutError'||e.name==='AbortError'?'Muse took too long to reply. Please try again.':e.message||'Muse unavailable. Please try again.');}
+ q=(q||"").trim();if(!q||musePending)return;musePending=true;const c={q:chatEscape(q),a:"Asking Muse Spark…",tools:[]};S.chat.push(c);S.question="";refreshOther();
+ try{const data=await museRequest(q);c.a=chatEscape(data.answer);c.tools=data.tools||[];}catch(e){c.a=chatEscape(e.name==='TimeoutError'?'Muse took too long to reply. Please try again.':e.message||'Muse unavailable. Please try again.');}
  finally{musePending=false;refreshOther();const sc=$("v-other");sc.scrollTop=sc.scrollHeight;}
 }
+function museJSON(text){const match=text.match(/\{[\s\S]*\}/);if(!match)throw Error('Muse returned an incomplete result. Please try again.');return JSON.parse(match[0]);}
+async function generateFeature(task){
+ if(musePending)return;musePending=true;toast('Asking Muse…');
+ try{
+ const w=wiBase();const data=await museRequest(task==='film'?`Find the best change for my ${w.st}.`:({drill:'Create my next drill.',plan:'Create my practice plan.',scout:'Scout my game.',review:'Review my session.'}[task]),task);
+ if(task==='scout')S.scout=chatEscape(data.answer);
+ else {const a=museJSON(data.answer),clean=x=>chatEscape(String(x||'').slice(0,300));
+  if(task==='drill'){if(!a.title||!a.goal||!a.why)throw Error('Muse returned an incomplete drill.');S.drill={title:clean(a.title),goal:clean(a.goal),why:clean(a.why)};S.drillRun=false;}
+  if(task==='plan'){if(!a.title||!Array.isArray(a.steps)||a.steps.length!==3||a.steps.some(x=>!x.title||!x.goal||!x.why))throw Error('Muse returned an incomplete plan.');S.plan={title:clean(a.title),when:new Date().toLocaleDateString(),steps:a.steps.map(x=>({title:clean(x.title),goal:clean(x.goal),why:clean(x.why),note:clean(x.note)}))};S.planRun=-1;}
+  if(task==='review'){if(!Array.isArray(a.flags))throw Error('Muse returned an incomplete review.');const flags=a.flags.slice(0,4).map(x=>({label:clean(x.label),detail:clean(x.detail),evidence:clean(x.evidence)}));S.reviews.unshift({label:`${new Date().toLocaleDateString()} · ${shownRows().length} shots`,flags,clear:!flags.length,status:'pending',at:null});}
+  if(task==='film'){const d={swing:+a.swing_percent||0,face:+a.face_deg||0,path:+a.path_deg||0,cx:+a.contact_x_cm||0,cy:+a.contact_y_cm||0};if(a.stroke!==w.st||!a.title||!a.cue||!a.why||Object.values(d).filter(Boolean).length<1||Object.values(d).filter(Boolean).length>2||Math.abs(d.swing)>15||Math.abs(d.face)>6||Math.abs(d.path)>10||Math.abs(d.cx)>3||Math.abs(d.cy)>3)throw Error('Muse returned an invalid swing change. Please try again.');S.film={title:clean(a.title),cue:clean(a.cue),why:clean(a.why),d,stroke:w.st};S.wiStroke=w.st;S.d={...d};}
+ }
+ refreshOther();
+ }catch(e){toast(e.message||'Muse is unavailable. Please try again.');}finally{musePending=false;}
+}
+
 function memoryHTML(el){el.innerHTML=`<div class="mh"><span class="t">Memory</span></div>${`<div class="mcard" style="text-align:center;padding:40px 20px"><div style="font-size:44px;color:var(--m-lime)">${ic("brain")}</div><div style="font:800 20px var(--rounded);margin:8px 0">No notes yet</div><div style="color:var(--m-muted)">Muse keeps short notes about your habits between sessions. This replay starts with none.</div></div>`}`;}
 
 /* ---------- Muse feature screens (demo engine over the replay's own numbers) ---------- */
 const museHead=(t,sub,right="")=>`<div class="mh"><span class="t" style="font-size:30px">${t}</span>${right}</div><div class="msub">${sub}</div>`;
-const engLabel=()=>`<div class="eng"><i></i>Demo engine · offline</div>`;
+const engLabel=()=>`<div class="eng"><i></i>Muse Spark Open · Baseten</div>`;
 function strokeStats(rs){return strokesIn(rs).map(g=>{const q=strokeRows(rs,g);return {g,n:q.length,sw:q.filter(x=>x.sweet).length/q.length,ball:mean(q.map(x=>x.r.ball)),off:q.filter(x=>!x.sweet)};}).filter(x=>x.n>=3);}
 function makePlan(rs){
   const st=strokeStats(rs).sort((a,z)=>a.sw-z.sw),w=st[0]||{g:"hit",sw:rs.filter(x=>x.sweet).length/Math.max(1,rs.length)};
@@ -828,7 +840,7 @@ function makePlan(rs){
 function planHTML(el){
   const rs=shownRows(),P=S.plan;let h=museHead("Practice plan","Three steps from your last session: the weakest link first, a progression, then a rally count.");
   if(P){
-    h+=`<div style="background:var(--m-lime);color:var(--m-ink);border-radius:22px;padding:16px"><div class="eyebrow" style="opacity:.7">PLAN · ${P.when.toUpperCase()}</div><div style="font:800 24px var(--rounded);margin:6px 0">${P.title}</div><div style="font-size:11px;opacity:.7">Demo engine · offline</div></div>`;
+    h+=`<div style="background:var(--m-lime);color:var(--m-ink);border-radius:22px;padding:16px"><div class="eyebrow" style="opacity:.7">PLAN · ${P.when.toUpperCase()}</div><div style="font:800 24px var(--rounded);margin:6px 0">${P.title}</div><div style="font-size:11px;opacity:.7">Muse Spark Open · Baseten</div></div>`;
     P.steps.forEach((x,i)=>{const run=S.planRun===i;
       h+=`<div class="mcard"><div class="eyebrow" style="color:var(--m-muted)">STEP ${i+1}</div><div style="font:800 20px var(--rounded);margin:6px 0">${x.title}</div><div style="display:flex;gap:8px;align-items:center;margin-bottom:6px">${ic("target")}<span>${x.goal}</span></div><div style="font-size:12px;color:var(--m-muted)">${x.why}</div>${x.note?`<div style="font-style:italic;opacity:.85;margin-top:6px">${x.note}</div>`:""}
        <button class="mbtn" style="margin-top:12px;${run?"opacity:.6":""}" data-act="planstep" data-v="${i}" ${run?"disabled":""}>${ic(run?"check":"play")} ${run?"Running on Watch":"Start"}</button></div>`;});
@@ -896,7 +908,7 @@ function wiResults(b){
     <div class="pbar"><i style="width:${100*b0/t}%;background:var(--m-ghost)"></i>${Math.abs(up)>=.5?`<i style="width:${100*a0/t}%;background:${up>0?"var(--m-lime)":"#FF998C"};opacity:.9"></i>`:""}</div>${note?`<div class="nt">${note}</div>`:""}</div>`;};
   return bar("Ball speed",U.speed(A.ball),U.speed(B.ball),U.su(),"",Math.max(U.speed(A.ball),U.speed(B.ball),1)*1.15)+
     bar("Spin",A.rpm,B.rpm,"rpm",A.spin===B.spin?"":`${cap1(A.spin)} → ${cap1(B.spin)}`,Math.max(A.rpm,B.rpm,1)*1.15)+
-    wiVerdict(A,B)+`<div class="mfoot" style="margin:0">${f?"Estimated by the racket's physics model. Picked and tested by Muse (demo engine).":"Estimated by the racket's physics model on your average swing. Ball flight isn't modeled."} Ball flight, landing and net clearance are not modeled.</div>`;
+    wiVerdict(A,B)+`<div class="mfoot" style="margin:0">${f?"Estimated by the racket's physics model. Picked and tested by Muse.":"Estimated by the racket's physics model on your average swing. Ball flight isn't modeled."} Ball flight, landing and net clearance are not modeled.</div>`;
 }
 function wiEditor(){
   const sl=(t,key,lim,step)=>`<div class="sl"><div class="tp"><b>${t}</b><span data-cap="${key}">${CAP[key](S.d[key])}</span></div><input type="range" data-d="${key}" min="${-lim}" max="${lim}" step="${step}" value="${S.d[key]}" aria-label="${t}"></div>`;
@@ -1090,15 +1102,14 @@ $("phone").addEventListener("click",e=>{
    case"scout":go("scout");break;
    case"review":go("review");break;
    case"together":go("together");break;
-   case"writeplan":S.plan=makePlan(shownRows());S.planRun=-1;refreshOther();break;
+   case"writeplan":generateFeature("plan");break;
    case"planstep":S.planRun=+v;refreshOther();break;
-   case"writescout":S.scout=makeScout(shownRows());refreshOther();break;
-   case"reviewnow":S.reviews.unshift(makeReview(shownRows()));refreshOther();break;
+   case"writescout":generateFeature("scout");break;
+   case"reviewnow":generateFeature("review");break;
    case"decide":{const[i,st]=v.split(":");const r=S.reviews[+i];r.status=st;r.at=new Date().toLocaleTimeString("en-US",{hour:"numeric",minute:"2-digit"});refreshOther();break;}
    case"openwi":go("whatif");break;
-   case"findfilm":{const w=wiBase();if(!w.b)break;const c=evalCands(w.b)[0];S.film={...c,stroke:w.st};S.wiStroke=w.st;S.d={...c.d};refreshOther();break;}
-   case"drill":{const rs=shownRows(),sw=rs.filter(x=>x.sweet).length/Math.max(1,rs.length),goal=Math.round(clamp(5+10*(1-sw),5,15));
-     S.drill={title:"Sweet-spot streak",goal:`Land ${goal} sweet-spot hits.`,why:`${Math.round(100*sw)}% of your hits were sweet-spot, so the target is ${goal}.`};S.drillRun=false;refreshOther();break;}
+   case"findfilm":generateFeature("film");break;
+   case"drill":generateFeature("drill");break;
    case"rundrill":S.drillRun=true;refreshOther();break;
    case"ask":askMuse(v);break;
    case"send":askMuse($("q").value);break;
@@ -1108,7 +1119,7 @@ $("phone").addEventListener("click",e=>{
    case"tryit":{const w=wiBase();if(!w.b||isZero(S.d))break;const A=simulate(w.b),B=simulate(apply(w.b,S.d)),ups=[B.rpm>A.rpm*1.05?"more spin":null,B.ball>A.ball*1.05?"more pace":null].filter(Boolean);
      S.trials.push({id:Date.now(),stroke:w.st,goal:ups.length?ups.join(" + "):"test a change",text:describeD(S.d),d:{...S.d},predicted:{ball0:A.ball,ball1:B.ball,rpm0:A.rpm,rpm1:B.rpm},before:{ball:mean(w.q.map(x=>x.r.ball)),rpm:mean(w.q.map(x=>x.r.rpm))},completed:false});wiUpdate();break;}
    case"followup":{const t=S.trials.find(x=>String(x.id)===v);if(t){const q=strokeRows(wiBase().rs,t.stroke);t.after={ball:mean(q.map(x=>x.r.ball)),rpm:mean(q.map(x=>x.r.rpm))};t.completed=true;}wiUpdate();break;}
-   case"bestchange":{const w=wiBase(),c=evalCands(w.b),i=S.film&&S.film.stroke===w.st?(c.findIndex(x=>x.title===S.film.title)+1)%c.length:0;S.film={...c[i],stroke:w.st};S.d={...c[i].d};refreshOther();break;}
+   case"bestchange":generateFeature("film");break;
    case"wistroke":S.wiStroke=v;S.d=Z();S.film=null;refreshOther();break;
    case"rule":{const r=S.rules;if(k==="simple")r.simple=v==="1";if(k==="sets")r.setsToWin=+v;if(k==="noad")r.noAd=!r.noAd;if(k==="mtb")r.matchTB=!r.matchTB;refreshOther();break;}
    case"startmatch":S.match=newMatchState(S.rules);renderNav();refreshOther();break;
