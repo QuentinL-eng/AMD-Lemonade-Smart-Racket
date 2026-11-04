@@ -10,8 +10,6 @@ would do, then plans a drill that the Watch and glasses track.
 
 - **Try the live app in your browser:** [Open the Tennis Buddee emulator](https://tennisbuddy.net/emulator) — no hardware or installation needed.
 - **Website:** [tennisbuddy.net](https://tennisbuddy.net)
-- **Try the app:** [TestFlight public beta](https://testflight.apple.com/join/137F7kvd) (iPhone + Apple Watch). It
-  starts on a built-in simulated racket, so every screen works without the hardware.
 - **Built for:** the Meta Global AI Developer Hackathon. Started during the hackathon and updated afterwards.
 
 | Rubric | Where to look |
@@ -45,7 +43,6 @@ their own strokes.
 
 **Could it become a product?** It already works like one:
 
-- a public TestFlight beta;
 - an 86-minute real club session that changed the design ([`docs/CLUB_2026-10-28.md`](docs/CLUB_2026-10-28.md));
 - accounts with Sign in with Apple and Google;
 - iCloud sync and over-the-air firmware updates.
@@ -148,8 +145,6 @@ We report weak results too. The sweet-spot model only modestly beats the baselin
 
 - **Demo video:** 3 minutes, real club footage plus CGI built in Remotion ([source](video/)); video link to follow.
 - **Try in your browser:** [Open the live emulator](https://tennisbuddy.net/emulator).
-- **Try it in two minutes:** install the [TestFlight beta](https://testflight.apple.com/join/137F7kvd). The app opens
-  on a simulated racket that swings and hits every few seconds. Open the Muse tab → What if, and ask Muse.
 - **Holds up live:**
   - The racket keeps every hit when Bluetooth drops: it acks, resends and keeps a flash backlog.
   - Any recorded session replays exactly like the live racket.

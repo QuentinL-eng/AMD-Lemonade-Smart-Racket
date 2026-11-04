@@ -7,8 +7,7 @@ live racket: it runs a physics simulator to **predict** what a swing change woul
 drill the Watch and glasses track. This is a hardware + software instrument, not a generic advice
 chatbot: every number Muse reports must come from a tool result.
 
-- **Try the [live browser emulator](https://tennisbuddy.net/emulator)** · Website: <https://tennisbuddy.net> · Try it: [TestFlight beta](https://testflight.apple.com/join/137F7kvd)
-  (opens on a simulated racket, no hardware needed) · Machine index: [`llms.txt`](llms.txt) ·
+- **Try the [live browser emulator](https://tennisbuddy.net/emulator)** · Website: <https://tennisbuddy.net> · Machine index: [`llms.txt`](llms.txt) ·
   Machine metadata: [`hackathon.json`](hackathon.json)
 
 ## Rubric evidence map
@@ -18,7 +17,7 @@ chatbot: every number Muse reports must come from a tool result.
 - Problem, users, and what changes: [`README.md`](README.md) ("Impact").
 - Real-world validation: an 86-minute club session that changed the design
   ([`docs/CLUB_2026-10-28.md`](docs/CLUB_2026-10-28.md)).
-- Product signals: public TestFlight beta, Sign in with Apple/Google, iCloud sync, over-the-air
+- Product signals: Sign in with Apple/Google, iCloud sync, over-the-air
   firmware updates, 3D-printed insert from off-the-shelf parts ([`docs/WIRING.md`](docs/WIRING.md)).
 
 ### Use of Meta AI tooling (25%)
@@ -58,7 +57,7 @@ Quick automated checks: `meta-models/muse-spark-open-1026` in `apple/Shared/Coac
   [`video/src/config/copy.ts`](video/src/config/copy.ts).
 - Live backup plan: flash backlog + replay + built-in engine fallback
   ([`README.md`](README.md) "Holds up live").
-- Two-minute try: TestFlight beta → Insights → Muse → What if (simulated racket included).
+- Two-minute try: [open the browser emulator](https://tennisbuddy.net/emulator).
 
 ## 5-minute verification
 
