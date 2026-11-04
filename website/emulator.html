@@ -801,9 +801,14 @@ async function askMuse(q){
  musePending=true;const c={q:chatEscape(q),a:"Asking Muse Spark…",tools:[]};S.chat.push(c);S.question="";refreshOther();
  try{
  const rs=shownRows();const context={source:"Pro-match replay; physics figures are estimates, contact points assumed",shotCount:rs.length,shots:rs.slice(-80).map(x=>({stroke:x.type,time:x.t,parameters:x.p,estimates:x.r,outcome:x.outcome})),units:"km/h, degrees, rpm, cm"};
- const r=await fetch('/api/muse',{method:'POST',headers:{'Content-Type':'application/json'},body:JSON.stringify({question:q,context}),signal:AbortSignal.timeout(55000)});
- const data=await r.json();if(!r.ok)throw Error(data.error||'Muse unavailable');c.a=chatEscape(data.answer);c.tools=['Muse Spark Open · Baseten'];
- }catch(e){c.a=chatEscape(e.message||'Muse unavailable. Please try again.');}
+ let r;
+ for(let attempt=0;attempt<2;attempt++){
+  r=await fetch('/api/muse',{method:'POST',headers:{'Content-Type':'application/json'},body:JSON.stringify({question:q,context}),signal:AbortSignal.timeout(55000)});
+  if(r.ok||![502,503,504].includes(r.status))break;
+ }
+ if(!r.headers.get('content-type')?.includes('application/json'))throw Error('Muse is temporarily unavailable. Please try your question again.');
+ const data=await r.json();if(!r.ok)throw Error(data.error||'Muse is temporarily unavailable. Please try again.');c.a=chatEscape(data.answer);c.tools=['Muse Spark Open · Baseten'];
+ }catch(e){c.a=chatEscape(e.name==='TimeoutError'||e.name==='AbortError'?'Muse took too long to reply. Please try again.':e.message||'Muse unavailable. Please try again.');}
  finally{musePending=false;refreshOther();const sc=$("v-other");sc.scrollTop=sc.scrollHeight;}
 }
 function memoryHTML(el){el.innerHTML=`<div class="mh"><span class="t">Memory</span></div>${`<div class="mcard" style="text-align:center;padding:40px 20px"><div style="font-size:44px;color:var(--m-lime)">${ic("brain")}</div><div style="font:800 20px var(--rounded);margin:8px 0">No notes yet</div><div style="color:var(--m-muted)">Muse keeps short notes about your habits between sessions. This replay starts with none.</div></div>`}`;}
