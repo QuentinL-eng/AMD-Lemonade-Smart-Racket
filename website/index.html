@@ -5,9 +5,9 @@
 <meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover">
 <title>Tennis Buddee</title>
 <meta name="claude:viewport-fit-sides" content="cover">
-<meta name="description" content="Tennis Buddee lives inside your racket handle. It hears every hit, measures every swing and shows you what to change between points.">
+<meta name="description" content="Meet the smart racket: live shot stats, 3D what-if predictions and play on your wrist. Try the Tennis Buddee app emulator in your browser, no hardware needed.">
 <meta property="og:title" content="Tennis Buddee">
-<meta property="og:description" content="Find the sweet spot.">
+<meta property="og:description" content="Find the sweet spot. Explore live shots, scoring and 3D what-if demos in the browser emulator.">
 <meta property="og:image" content="img/reveal_serve.jpg">
 <link rel="icon" href="img/icon.png">
 <link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Bricolage+Grotesque:opsz,wght@12..96,500..800&family=DM+Sans:wght@400;500;600&display=swap">
@@ -45,7 +45,11 @@ mark { background: var(--felt); color: var(--ink); padding: 0 0.12em; border-rad
 .hero { background: var(--felt); position: relative; overflow: hidden; }
 .hero svg.seam { position: absolute; right: -180px; top: -120px; width: 820px; height: 820px; z-index: 0; }
 .hero .wrap { position: relative; z-index: 1; padding-block: 24px 88px; display: grid; gap: 56px; }
-.top { display: flex; justify-content: space-between; align-items: center; }
+.top { display: flex; flex-wrap: wrap; gap: 20px; justify-content: space-between; align-items: center; }
+.top nav { display: flex; flex-wrap: wrap; align-items: center; gap: 16px; font-size: 15px; }
+.top nav > a:not(.btn) { text-underline-offset: 4px; }
+.hero .brand img { width: 32px; height: 32px; border: 0; border-radius: 9px; aspect-ratio: 1; }
+.hero .hero-note { font-size: 14px; margin-top: 14px; max-width: 40ch; }
 .brand { display: flex; gap: 10px; align-items: center; font: 800 20px/1 var(--display); text-decoration: none; }
 .brand img { width: 32px; height: 32px; border-radius: 9px; }
 .hero-body { display: grid; grid-template-columns: minmax(0, 1.15fr) minmax(0, 1fr); gap: 48px; align-items: center; }
@@ -72,6 +76,22 @@ mark { background: var(--felt); color: var(--ink); padding: 0 0.12em; border-rad
 .strip p { color: var(--muted); margin-top: 20px; max-width: 42ch; }
 .strip img { border-radius: 28px; aspect-ratio: 16 / 10; object-fit: cover; width: 100%; }
 @media (max-width: 820px) { .strip .wrap { grid-template-columns: 1fr; gap: 32px; } }
+
+/* ---- Browser emulator ---- */
+.demo { padding-block: 72px; border-block: 1px solid var(--rule); background: #F0F1DF; }
+.demo-head { display: grid; grid-template-columns: minmax(0, 1.2fr) minmax(0, 1fr); gap: 48px; align-items: end; }
+.demo h2 { font-size: clamp(42px, 6vw, 76px); line-height: 1; letter-spacing: -0.035em; margin-top: 16px; }
+.demo-intro { margin-top: 22px; color: var(--ink-soft); max-width: 46ch; }
+.demo-start { background: var(--ink); color: var(--paper); border-radius: 24px; padding: 30px; }
+.demo-start h3 { color: var(--felt); }
+.demo-start ol { padding-left: 22px; margin: 18px 0 24px; }
+.demo-start li + li { margin-top: 10px; }
+.demo-start .btn { background: var(--felt); color: var(--ink); }
+.demo-grid { display: grid; grid-template-columns: repeat(3, minmax(0, 1fr)); gap: 28px; margin-top: 40px; }
+.demo-grid article { border-top: 2px solid var(--ink); padding-top: 20px; }
+.demo-grid p { color: var(--muted); margin-top: 10px; font-size: 16px; }
+.demo-note { color: var(--muted); font-size: 14px; max-width: 92ch; margin-top: 32px; }
+@media (max-width: 820px) { .demo-head, .demo-grid { grid-template-columns: 1fr; gap: 28px; } .demo { padding-block: 56px; } }
 
 /* ---- Roadmap ---- */
 .road { border-top: 1px solid var(--rule); padding-block: 80px; }
@@ -101,38 +121,63 @@ footer { background: var(--ink); color: #A9B19E; font-size: 14px; padding-block:
   <div class="wrap">
     <div class="top">
       <a class="brand" href="#"><img src="img/icon.png" alt="">Tennis Buddee</a>
-      <a class="btn alt" href="#contact">Contact</a>
+      <nav aria-label="Main navigation"><a href="#features">Features</a><a href="#contact">Contact</a><a class="btn alt" href="emulator.html">Try the emulator ↗</a></nav>
     </div>
     <div class="hero-body">
       <div>
         <h1>Find the sweet spot.</h1>
-        <p>A smart module inside your racket handle that hears every hit, measures every swing and shows you what to change between points.</p>      </div>
+        <p>A smart module inside your racket handle that hears every hit, follows every swing and predicts what a change could do.</p>
+        <div class="cta"><a class="btn" href="emulator.html">Try the emulator ↗</a><a class="btn alt" href="https://testflight.apple.com/join/137F7kvd">Get the iPhone beta</a></div>
+        <p class="hero-note">Explore the app in your browser. No racket or download needed.</p>
+      </div>
       <img src="img/reveal_serve.jpg" alt="A player at full stretch on a serve under a cloudy sky">
     </div>
   </div>
 </header>
 
-<section class="court-sec"><div class="wrap">
+<main>
+<section class="court-sec" id="features"><div class="wrap">
   <span class="label">What it does</span>
   <div class="court">
-    <div><span class="n">7</span><h3>Stats on every shot</h3><p>Swing speed, ball speed, spin, face angle, swing path and shot type.</p></div>
-    <div><span class="n">1</span><h3>Sweet spot, by ear</h3><p>AI on the racket hears each hit and tells you how far off center it was.</p></div>
-    <div><span class="n">AI</span><h3>Meta Muse Spark</h3><p>Muse Spark reads your shots, predicts what a swing change will do, and plans a drill for your Watch and Ray-Ban Display.</p></div>
+    <div><span class="n">7</span><h3>Stats on every shot</h3><p>Swing speed, estimated ball speed and spin, face angle, swing path, shot type and contact point.</p></div>
+    <div><span class="n">1</span><h3>Sweet spot, by ear</h3><p>An audio model on the racket listens to each hit and estimates how far off center it was.</p></div>
+    <div><span class="n">AI</span><h3>Meta Muse Spark</h3><p>Muse Spark uses your shots to predict the effect of a swing change in 3D, build a practice plan and surface moments to review.</p></div>
   </div>
 </div></section>
 
 <section class="strip"><div class="wrap">
   <div>
     <h2>Same racket. <mark>New game.</mark></h2>
-    <p>The sensors sit inside the handle, so the racket looks and plays like yours. Your phone and Apple Watch show each shot as you play.</p>
+    <p>The sensors sit inside the handle, so the racket looks and plays like yours. Your iPhone, Mac, Apple Watch and Meta Ray-Ban Display keep your shots and score close. Double-tap the handle to score a point, then explore your session in Insights.</p>
   </div>
   <img src="img/reveal_app.jpg" alt="A player hitting a forehand beside the Tennis Buddee app showing the live shot">
+</div></section>
+
+<section class="demo" id="emulator" aria-labelledby="demo-title"><div class="wrap">
+  <div class="demo-head">
+    <div>
+      <p class="label">New · Browser emulator</p>
+      <h2 id="demo-title">Take it for<br>a <mark>test swing.</mark></h2>
+      <p class="demo-intro">Explore the app with pro-match replays. Follow the racket in 3D, keep score, dig into Insights and try a swing change — right in your browser.</p>
+    </div>
+    <aside class="demo-start" aria-label="How to try the emulator">
+      <h3>Your first session</h3>
+      <ol><li>Choose a match and tap <strong>Start Session</strong>.</li><li>Watch the shots arrive, or load the source video to follow along.</li><li>Open <strong>Muse → What if</strong> to try a change in 3D.</li></ol>
+      <a class="btn" href="emulator.html">Launch the emulator ↗</a>
+    </aside>
+  </div>
+  <div class="demo-grid">
+    <article><h3>Watch every swing</h3><p>A 3D racket, a live shot feed and optional synchronized source video. Switch matches, change replay speed or jump to a hit.</p></article>
+    <article><h3>Try a change in 3D</h3><p>Adjust speed, face angle, swing path or contact point. Compare the predicted result, save a change and log a follow-up against the replay.</p></article>
+    <article><h3>Explore all five tabs</h3><p>Live, Score, Muse, Insights and Settings. Try tennis scoring, stroke breakdowns, practice plans, Scout yourself and the review queue.</p></article>
+  </div>
+  <p class="demo-note">The emulator is a replay-based demo. Shot timing and stroke types come from dataset labels or model predictions; speeds, spin, angles, contact points and 3D swings are estimates. Its Muse features use an offline demo engine. The native app connects to Muse Spark.</p>
 </div></section>
 
 <section class="road"><div class="wrap">
   <p class="label">Where we’re headed</p>
   <div class="grid">
-    <div><span class="when">Now</span><p>Working prototype. iPhone and Mac apps live; Apple Watch and sweet-spot AI in beta. <a href="emulator.html">Try the pro-match emulator</a>.</p></div>
+    <div><span class="when">Now</span><p>Working prototype, iPhone and Apple Watch TestFlight beta, Mac app and browser emulator. Sweet-spot AI remains in beta. <a href="emulator.html">Try the pro-match emulator</a>.</p></div>
     <div><span class="when">Next</span><p>Train on real court data, validate against high-speed video, sealed custom module.</p></div>
     <div><span class="when">Later</span><p>A retail module under $100, club dashboards, pickleball and padel.</p></div>
   </div>
@@ -143,6 +188,7 @@ footer { background: var(--ink); color: #A9B19E; font-size: 14px; padding-block:
   <p style="color:#C8CFBE">Investors, clubs, academies and hardware partners.</p>
   <p class="mail">quentin.lynch@wsu.edu</p>
 </div></section>
+</main>
 <footer><div class="wrap">© 2026 Tennis Buddee · Pullman, Washington</div></footer>
 </body>
 </html>
