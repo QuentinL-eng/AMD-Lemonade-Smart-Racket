@@ -754,7 +754,7 @@ function museHTML(el){
   h+=`<button class="mrow" data-act="scout">${ic("bino")}<span><div class="a">Scout yourself</div><div class="b">Where an opponent would attack you</div></span><span class="ch">${ic("chev")}</span></button>`;
   h+=`<button class="mrow" data-act="review">${ic("flag")}<span><div class="a">Review queue</div><div class="b">${pend?`${pend} waiting for you`:"Flag a session for a human look"}</div></span><span class="ch">${ic("chev")}</span></button>`;
   h+=`<div><div class="eyebrow" style="color:var(--m-muted);margin:4px 0 8px">ASK</div><div class="asklist">${SUGG.map(q=>`<button data-act="ask" data-v="${q}"><span>${q}</span>${ic("chev")}</button>`).join("")}</div></div>`;
-  S.chat.forEach((c,i)=>{h+=`<div class="mcard"><div class="mq">${c.q}</div><div class="mans">${c.a}</div>${i===S.chat.length-1?`<div class="mfoot">Tools: ${c.tools.join(", ")}</div>`:""}</div>`;});
+  S.chat.forEach((c,i)=>{h+=`<div class="mcard"><div class="mq">${c.q}</div><div class="mans">${c.a}</div></div>`;});
   h+=`<div class="mcard" style="font-size:12px;color:var(--m-muted)">Ask a free-form question. Muse Spark Open, served by Baseten, answers using the current replay. Replay statistics are estimates; no physical racket is connected.</div>`;
   el.innerHTML=h;
   const bar=document.createElement("div");bar.className="askbar";bar.id="askbar";
@@ -798,7 +798,11 @@ let musePending=false;
 const chatEscape=s=>String(s).replace(/[&<>"']/g,c=>({'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;',"'":'&#39;'}[c]));
 async function museRequest(q,task="chat"){
  const rs=shownRows();const context={source:"Session replay; physics figures are estimates, contact points assumed",shotCount:rs.length,shots:rs.map(x=>({stroke:x.type,time:x.t,parameters:x.p,estimates:{ball:x.r.ball,rpm:x.r.rpm,dist:x.r.dist},outcome:x.outcome})),units:"km/h, degrees, rpm, cm"};
- let r;for(let attempt=0;attempt<2;attempt++){r=await fetch('/api/muse',{method:'POST',headers:{'Content-Type':'application/json'},body:JSON.stringify({question:q,task,context}),signal:AbortSignal.timeout(180000)});if(r.ok||![502,503,504].includes(r.status))break;}
+ let r,lastError;for(let attempt=0;attempt<2;attempt++){
+  try{const controller=new AbortController(),timer=setTimeout(()=>controller.abort(),180000);try{r=await fetch('/api/muse',{method:'POST',headers:{'Content-Type':'application/json'},body:JSON.stringify({question:q,task,context}),signal:controller.signal});}finally{clearTimeout(timer)}if(r.ok||![502,503,504].includes(r.status))break;}catch(e){lastError=e;}
+  if(attempt===0)await new Promise(resolve=>setTimeout(resolve,700));
+ }
+ if(!r)throw Error(lastError?.name==='AbortError'?'Muse took too long to reply. Please try again.':'Could not reach Muse. Check your connection and try again.');
  if(!r.headers.get('content-type')?.includes('application/json'))throw Error('Muse is temporarily unavailable. Please try again.');
  const data=await r.json();if(!r.ok)throw Error(data.error||'Muse is temporarily unavailable. Please try again.');return data;
 }
