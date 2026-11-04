@@ -12,13 +12,17 @@ import { InsideHandle } from './InsideHandle';
 import { MuseAgent } from './MuseAgent';
 import { RacketReveal } from './RacketReveal';
 import { RobotLab } from './RobotLab';
+import { RobotShort } from './RobotShort';
 import { SamTrack } from './SamTrack';
 import { Score } from './Score';
 import { SwingFilmScene } from './SwingFilmScene';
 import { Together } from './Together';
+import { TwoModels } from './TwoModels';
 import { WhatIf } from './WhatIf';
 
 export const scenes = {
+  robotShort: RobotShort,
+  twoModels: TwoModels,
   hook: Hook,
   racketReveal: RacketReveal,
   insideHandle: InsideHandle,

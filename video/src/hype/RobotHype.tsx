@@ -370,6 +370,30 @@ const Finale: React.FC = () => {
 
 const duck = makeDuck(robotHypeCues, f);
 
+/** Hook, digital twin and what it measures, on the song, for the Demo. Stops before "the AI learns" and "zero guesswork". */
+const INTRO_BEATS = 24;
+export const RobotHypeIntro: React.FC = () => {
+  const s = R.song;
+  const end = f(INTRO_BEATS);
+  return (
+    <AbsoluteFill style={{ background: colors.bg, color: colors.text, fontFamily: fonts.sans, overflow: 'hidden' }}>
+      {R.hook.shots.map((shot, i) => (
+        <Shot key={i} at={[R.hook.at[0] + i * 2, R.hook.at[0] + i * 2 + 2]}><HookShot shot={shot} /></Shot>
+      ))}
+      <Shot at={R.twin.at}><Twin /></Shot>
+      <Measures />
+      <Vignette />
+      <Grain />
+      <Audio
+        src={staticFile(s.src)}
+        trimBefore={Math.round(s.start * FPS)}
+        volume={(fr) => s.volume * duck(fr) * interpolate(fr, [end - 14, end - 4], [1, 0], clamp)}
+      />
+      {robotHypeCues.filter((c) => c.beat < INTRO_BEATS - 1).map((c, i) => <Effect key={i} cue={{ ...c, at: 0 }} frame={f(c.beat)} />)}
+    </AbsoluteFill>
+  );
+};
+
 export const RobotHype: React.FC = () => {
   const s = R.song;
   return (

@@ -19,7 +19,7 @@ export const Endcard: React.FC = () => {
         <div style={{ ...enter(frame, 40), fontFamily: fonts.display, fontSize: 60, fontWeight: 700, marginTop: 26 }}>{copy.endcard.site}</div>
         <div style={{ ...enter(frame, 50), fontSize: 32, color: colors.muted }}>{copy.endcard.tryIt}</div>
       </AbsoluteFill>
-      <AbsoluteFill style={{ justifyContent: 'flex-end', alignItems: 'center', paddingBottom: 40 }}>
+      <AbsoluteFill style={{ justifyContent: 'flex-end', alignItems: 'center', paddingBottom: 130 }}>
         <div style={{ ...enter(frame, 56), fontSize: 26, color: colors.muted }}>{copy.endcard.footer}</div>
       </AbsoluteFill>
     </Backdrop>

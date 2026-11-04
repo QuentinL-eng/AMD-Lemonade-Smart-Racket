@@ -87,14 +87,33 @@ export const copy = {
     ],
   },
 
-  // ml/runs/SUMMARY-20261028.md. Accuracy, baseline and the 1.83 cm come from hackathon.json via facts.json.
+  // Measured results only. ml/runs/SUMMARY-20261028.md; the 1.83 cm comes from hackathon.json via facts.json.
+  // The what-if score: README.md results table, tools/agent_eval.py --preset baseten.
+  // When the IMU + mic sessions are scored, replace `distance` with them, and say "thrown balls" and how many hits.
   evidence: {
     kicker: 'Measured',
-    title: 'We publish the weak numbers too.',
+    title: 'The numbers, measured.',
     parity: { label: 'C++ on the racket and Python agree', detail: 'Same sweet-spot call on every clip. Max distance error 7e-7 cm.' },
-    distance: { label: 'Where the ball hit, from sound', medianCm: 2.41, medianLabel: 'Always guessing the median', detail: 'Mean distance error' },
-    accuracy: { label: 'Sweet spot, yes or no', range: [59.6, 74.8], detail: 'The range still touches the baseline. Not a clear win yet.' },
-    source: '274 labelled clips · grouped 5-fold · ml/runs/SUMMARY-20261028.md',
+    distance: { label: 'Distance from the sweet spot, from sound', medianCm: 2.41, medianLabel: 'Always guessing the median', detail: 'Mean distance error' },
+    whatIf: { label: 'Muse what-if answers', percent: 87.7, detail: 'Strict all-pass on 243 cases, on open Muse Spark. 45 more lost to a proxy outage, excluded.' },
+    source: '274 labelled clips · grouped 5-fold · ml/runs/SUMMARY-20261028.md · tools/agent_eval.py',
+  },
+
+  // On the racket: firmware/src/sweetspot.cpp, a ridge model. The older int8 MLP was never promoted (ml/README.md).
+  // In the app: muse-spark-1.3 through our proxy. Open Muse Spark: meta-models/muse-spark-open-1026 in tools/agent_eval.py.
+  twoModels: {
+    kicker: 'Two models, one racket',
+    title: 'Fast on the racket. Smart in the app.',
+    racket: {
+      where: 'On the racket',
+      name: 'Our own model',
+      lines: ['Runs on the ESP32-C3', 'Ridge regression on 156 sound features', 'Trained on our own labelled hits'],
+    },
+    app: {
+      where: 'In the app',
+      name: 'Meta Muse Spark',
+      lines: ['Muse Spark 1.3 runs the agent', '10 tools, every number from a tool', 'Tested head to head on open Muse Spark'],
+    },
   },
 
   // Every tool must appear once (npm run check compares this with hackathon.json).
@@ -155,7 +174,7 @@ export const copy = {
 
   // Text for the overlays placed in src/config/timeline.ts
   overlays: {
-    hook: ['Hundreds of shots tonight.', 'Which ones were good?'],
+    hook: ['Hundreds of hits per match.', 'Which ones are good?'],
     deviceBadge: 'Meta Wearables Device Access Toolkit',
     filmBadge: 'Real Muse Spark script, on a demo forehand session',
     museCallouts: ['You ask in your own words', 'Muse calls simulate_change', 'An estimate, on your own shots', 'Then it plans a drill'],
@@ -212,8 +231,8 @@ export const copy = {
   endcard: {
     name: 'Tennis Buddee',
     tagline: 'Find the sweet spot.', // website <h1>
-    site: 'tennisbuddy.net',
-    tryIt: 'Try it on TestFlight in two minutes. It opens on a simulated racket, no hardware needed.',
+    site: 'tennisbuddy.net/emulator',
+    tryIt: 'Try our online simulator and feel like a tennis pro. No racket needed.',
     footer: 'Built with Muse Spark · Meta Global AI Developer Hackathon',
   },
 };

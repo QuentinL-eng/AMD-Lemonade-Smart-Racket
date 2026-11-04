@@ -22,7 +22,14 @@ export type Overlay =
   | { type: 'callouts'; text: 'museCallouts'; at: number; every: number }
   | { type: 'lowerThird'; text: 'testimonial1' | 'testimonial2'; at: number; seconds: number };
 
-export type SceneEntry = { scene: SceneId; seconds: number; skip?: number; overlays?: Overlay[] };
+export type SceneEntry = {
+  scene: SceneId;
+  seconds: number;
+  skip?: number;
+  overlays?: Overlay[];
+  /** The scene plays its own song: the cut's music goes silent under it. */
+  ownMusic?: boolean;
+};
 export type FootageEntry = {
   footage: string;
   seconds: number;
@@ -76,34 +83,34 @@ export const demo: Entry[] = [
     shot: 'Your serve at the court: toss, then contact. Film 240 fps slow-mo from the side. Phone on the Live tab so the card numbers are real.' },
   { scene: 'racketReveal', seconds: 6 },
   { footage: 'talk-intro', seconds: 9, muted: false,
-    caption: 'I built a smart racket: a sensor in the handle, and Muse Spark predicting what a change will do.',
+    caption: 'I built a smart racket that combines Meta AI with real data from your own swings, so you can see what a change will do before you make it.',
     shot: 'Bedroom, landscape, racket in hand. One line on the problem, one on what you built. Say what the caption says, in your own words, and change the caption to match.' },
-  { scene: 'insideHandle', seconds: 9 },
+  { scene: 'insideHandle', seconds: 8 },
   { footage: 'build-montage', seconds: 6, clips: [['bt-smoke', 1.2], ['bt-solder', 1], ['bt-pcb', 1], ['bt-pod', 0.7], ['bt-code', 1.1], ['bt-wired', 0.6], ['bt-cad', 0.4]],
     shot: 'Already cut from the build footage. Replace only if you have something better.' },
-  { scene: 'clubFinding', seconds: 10 },
-  { footage: 'robot-arm', seconds: 5, clips: [['rh-reveal', 3], ['rh-past', 1.2], ['rh-arm', 0.8]],
-    shot: 'Already cut from the Oct 29 arm session.' },
-  { scene: 'robotLab', seconds: 5 },
+  // The first 24 beats of the X clip, on its own song. It stops before the claims the Demo doesn't make.
+  { scene: 'robotShort', seconds: 11.25, ownMusic: true },
+  { scene: 'twoModels', seconds: 10 },
   { scene: 'evidence', seconds: 9 },
   { scene: 'devices', seconds: 6, overlays: [{ type: 'badge', text: 'deviceBadge', at: 1.6, seconds: 4.2, x: 1560, y: 300 }] },
   { footage: 'glasses-pov', seconds: 7, fallback: 'glassesPov',
     shot: 'Optional: through the lens of the real Ray-Ban Display. Until then, the simulated-view CGI plays, and says so.' },
   { scene: 'museAgent', seconds: 12 },
   { scene: 'whatIf', seconds: 10 },
-  { footage: 'muse-screen-recording', seconds: 28, layout: 'phone',
-    overlays: [{ type: 'callouts', text: 'museCallouts', at: 1, every: 6 }],
+  { footage: 'muse-screen-recording', seconds: 22, layout: 'phone',
+    overlays: [{ type: 'callouts', text: 'museCallouts', at: 1, every: 5 }],
     shot: 'iPhone screen recording, about a minute, slowly: Muse tab, What if, ask it, wait for the numbers. Then Next drill, then Start on Watch. Set playbackRate to speed it up and move the callouts to match.' },
   { footage: 'drill-on-watch', seconds: 6,
     shot: 'Close on the Watch: the to-go count drops as you hit. Finish on the phone Live tab saying Drill complete!' },
   { scene: 'samTrack', seconds: 8 },
-  { scene: 'swingFilm', seconds: 8, overlays: [{ type: 'badge', text: 'filmBadge', at: 0.3, seconds: 7.5, x: 960, y: 40 }] },
+  { scene: 'swingFilm', seconds: 7, overlays: [{ type: 'badge', text: 'filmBadge', at: 0.3, seconds: 6.5, x: 960, y: 40 }] },
   // Made by scripts/testimonials.py, which cleans the audio. The files are full length: pick each line with `from` and `seconds`.
-  { footage: 'testimonial-1', seconds: 8, from: 16.5, muted: false, overlays: [{ type: 'lowerThird', text: 'testimonial1', at: 0.4, seconds: 4 }],
+  { footage: 'testimonial-1', seconds: 12, from: 15, muted: false, overlays: [{ type: 'lowerThird', text: 'testimonial1', at: 0.4, seconds: 4 }],
     shot: 'npm run testimonials' },
-  { footage: 'testimonial-2', seconds: 8, from: 1.5, muted: false, overlays: [{ type: 'lowerThird', text: 'testimonial2', at: 0.4, seconds: 4 }],
+  { footage: 'testimonial-2', seconds: 12, from: 1.5, muted: false, overlays: [{ type: 'lowerThird', text: 'testimonial2', at: 0.4, seconds: 4 }],
     shot: 'npm run testimonials' },
-  { scene: 'builtProof', seconds: 8 },
+  { footage: 'simulator', seconds: 8,
+    shot: 'Screen record tennisbuddy.net/emulator in landscape: pick a match, Start Session on Live, let a few hits land, then open Muse and What if.' },
   { scene: 'endcard', seconds: 6 },
 ];
 

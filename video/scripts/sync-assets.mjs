@@ -1,6 +1,6 @@
 // Copies shared assets from the app/website into public/ so the video always
 // uses the same icon and photos as the product. Runs before studio/render.
-// (The racket itself is procedural: src/components/Racket.tsx.)
+// (Most scenes use the procedural racket in src/components/Racket.tsx. The reveal uses the app's real model.)
 import { copyFileSync, mkdirSync, existsSync, statSync } from 'node:fs';
 import { dirname, join, resolve } from 'node:path';
 import { fileURLToPath } from 'node:url';
@@ -11,6 +11,7 @@ const pub = resolve(dirname(fileURLToPath(import.meta.url)), '..', 'public');
 const assets = {
   'img/icon.png': 'website/img/icon.png',
   'img/court.jpg': 'marketing/glasses-sim/court-hires.jpg',
+  'models/TennisRacket.glb': 'website/emulator/TennisRacket.glb',
 };
 
 for (const [dest, src] of Object.entries(assets)) {

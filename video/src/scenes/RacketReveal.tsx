@@ -1,6 +1,6 @@
 import React from 'react';
 import { AbsoluteFill, Easing, interpolate, useCurrentFrame } from 'remotion';
-import { Racket } from '../components/Racket';
+import { RealRacket } from '../components/RealRacket';
 import { Stage3D } from '../components/Stage3D';
 import { Backdrop, Title } from '../components/ui';
 import { colors } from '../config/brand';
@@ -41,7 +41,7 @@ export const RacketReveal: React.FC = () => {
           <pointLight position={[-2.2, -1.2, -1.2]} intensity={18} distance={6} color={colors.accent} />
           {/* moving glint across the clearcoat during the macro */}
           <pointLight position={[sweepX, 1.6, 2.2]} intensity={25 * (1 - ramp(frame, 80, 110))} distance={8} color="#ffffff" />
-          <Racket position={[-1.1, 0, 0]} rotation={[0.1, turn, -0.16]} glow={ramp(frame, 100, 130)} />
+          <RealRacket position={[-1.1, 0, 0]} rotation={[0.1, turn, -0.16]} />
         </Stage3D>
       </AbsoluteFill>
       <AbsoluteFill style={{ justifyContent: 'center', paddingLeft: 1000, gap: 16 }}>

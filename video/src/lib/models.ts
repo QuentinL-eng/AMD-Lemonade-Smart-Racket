@@ -1,6 +1,7 @@
 import { useEffect, useMemo, useState } from 'react';
 import { cancelRender, continueRender, delayRender, staticFile } from 'remotion';
 import * as THREE from 'three';
+import { GLTFLoader } from 'three/examples/jsm/loaders/GLTFLoader.js';
 
 // Loads are cached per tab so scenes that share a model don't fetch it twice.
 const cache = new Map<string, Promise<unknown>>();
@@ -22,6 +23,10 @@ function useAsset<T>(key: string, load: () => Promise<T>): T | null {
   }, [key, handle]);
   return value;
 }
+
+/** A glTF binary from public/models, with its materials and embedded textures. */
+export const useGlb = (name: string) =>
+  useAsset(`glb:${name}`, () => new GLTFLoader().loadAsync(staticFile(`models/${name}.glb`)).then((g) => g.scene));
 
 type CadPart = { color: [number, number, number]; position: number[]; index: number[] };
 type CadFile = { bounds: { min: number[]; max: number[] }; groups: Record<string, CadPart[]> };
