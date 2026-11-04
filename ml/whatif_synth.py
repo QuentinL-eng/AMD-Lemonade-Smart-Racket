@@ -37,8 +37,10 @@ from datetime import datetime, timedelta, timezone
 import numpy as np
 
 sys.path.insert(0, os.path.dirname(__file__))
-from coach_sim import (DELTA_LIMITS, GROUND_INCOMING_KMH, INCOMING_KMH, LABELS, SYSTEM, Session, Shot,  # noqa: E402
-                       Units, digest, get_session_digest, question_prompt, simulate, simulate_change, tool_json, tool_schemas)
+from coach_sim import (CENTERED_CM, DECISIVE_PACE_RATIO, DECISIVE_SPIN_RATIO, DECISIVE_SPIN_RPM, DELTA_LIMITS,  # noqa: E402
+                       GROUND_INCOMING_KMH, INCOMING_KMH, LABELS, SLICE_TOPSPIN_RPM, SPIN_FLOOR_RPM, SYSTEM, Session,
+                       Shot, Units, digest, get_session_digest, question_prompt, simulate, simulate_change, tool_json,
+                       tool_schemas)
 
 ROOT = os.path.dirname(os.path.dirname(os.path.abspath(__file__)))
 PRIORS = os.path.join(os.path.dirname(os.path.abspath(__file__)), "whatif_priors.json")
@@ -275,13 +277,15 @@ def score(objective, before, after):
 def reaches_target(objective, before, after):
     """The goal a coach would call done: a clear, not maximal, improvement."""
     if objective == "more_spin":
-        return after["spin_rpm"] >= max(1.3 * before["spin_rpm"], before["spin_rpm"] + 400, 1200)
+        return after["spin_rpm"] >= max(DECISIVE_SPIN_RATIO * before["spin_rpm"],
+                                        before["spin_rpm"] + DECISIVE_SPIN_RPM, SPIN_FLOOR_RPM)
     if objective == "more_pace":
-        return after["ball_speed"] >= 1.05 * before["ball_speed"]
+        return after["ball_speed"] >= DECISIVE_PACE_RATIO * before["ball_speed"]
     if objective == "cleaner_contact":
-        return math.hypot(after["applied_parameters"]["contactXcm"], after["applied_parameters"]["contactYcm"]) <= 2.0
+        return math.hypot(after["applied_parameters"]["contactXcm"],
+                          after["applied_parameters"]["contactYcm"]) <= CENTERED_CM
     if objective == "fix_slice":
-        return after["spin_rpm"] >= 800
+        return after["spin_rpm"] >= SLICE_TOPSPIN_RPM
     raise ValueError(objective)
 
 
@@ -354,11 +358,15 @@ CUES = {
     # Plain words only: no digits (the answer-numbers test), no field names, each short (80-word cap).
     "face_deg-": ["keep the strings facing the net a beat longer through contact", "turn the racket face slightly down at contact",
                   "let the forearm turn over through the ball instead of holding the face open",
-                  "finish with the strings facing the court", "cover the ball a touch more at contact"],
+                  "finish with the strings facing the court", "cover the ball a touch more at contact",
+                  "swing low to high with a slightly closed face"],
     "face_deg+": ["tilt the strings slightly up at contact", "hold the face a touch more open through the ball",
                   "let the strings tilt up through the hit", "swing through with the face laid back"],
     "path_deg+": ["start the racket below the ball and finish over your shoulder", "drop the racket head earlier and brush up the back of the ball",
-                  "swing from the knees to the opposite shoulder", "trace up the back of the ball to finish high"],
+                  "swing from the knees to the opposite shoulder", "trace up the back of the ball to finish high",
+                  "compress the ball on the strings and roll through it",
+                  "meet the ball in front with the strings facing forward, not skyward",
+                  "let the racket head drop below the ball then accelerate up through it"],
     "path_deg-": ["swing more through the ball than up it", "finish out toward the target, not straight up",
                   "drive out toward the target before lifting", "hit through three balls lined up ahead"],
     "swing_percent+": ["load your legs and turn your hips earlier for the extra racket speed", "relax the grip so the racket head can accelerate",
@@ -370,7 +378,10 @@ CUES = {
     "contact_y_cm+": ["give yourself a bit more room from the ball", "take a small step back so you're not crowded at contact",
                       "extend the arm a touch more at contact"],
     "contact_x_cm": ["keep your head still and watch the ball onto the strings", "keep the head down until after the hit",
-                     "watch the seams until they blur"],
+                     "watch the seams until they blur", "rush the first move to the ball after the split step",
+                     "get the racket back before the ball bounces",
+                     "keep the arm and wrist loose so tension does not push shots off-center",
+                     "watch the ball all the way into the stringbed"],
 }
 
 

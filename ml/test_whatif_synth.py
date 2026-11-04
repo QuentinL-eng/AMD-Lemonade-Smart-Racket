@@ -10,7 +10,8 @@ import re
 import tempfile
 import unittest
 
-from coach_sim import Session, Shot, Units, digest, simulate, simulate_change, swift_round
+from coach_sim import (SYSTEM, Session, Shot, Units, digest, simulate, simulate_change, swift_round,
+                         tool_schemas)
 from whatif_synth import PRIORS, generate
 
 # swing, path, face, x, y, incoming -> ball km/h, rpm, spin (from Swift)
@@ -89,6 +90,43 @@ class Physics(unittest.TestCase):
         d = digest(session, Units(metric=False))
         self.assertEqual((d["speedUnit"], d["lengthUnit"]), ("mph", "in"))
         self.assertAlmostEqual(d["strokes"][0]["avgContactTowardTip"], 1.0)
+
+    def test_system_prompt_teaches_goal_seeking(self):
+        self.assertIn("re-simulate your final recommendation last so its numbers are verified.", SYSTEM)
+        self.assertIn("never answer a fix-it question from the digest alone.", SYSTEM)
+        self.assertIn("simulate a larger change before answering", SYSTEM)
+        self.assertIn("simulate at least two sizes of the change at once", SYSTEM)
+        self.assertIn("never do arithmetic on them", SYSTEM)
+        self.assertIn("or why shots feel wrong", SYSTEM)
+        self.assertIn("whose verdict clears the bar", SYSTEM)
+        sim = next(t for t in tool_schemas() if t["function"]["name"] == "simulate_change")
+        self.assertIn("final contact position for centering fixes", sim["function"]["description"])
+
+    def test_simulate_change_gain_verdicts(self):
+        session = Session("S", "2026-10-28T19:00:00Z", 600, [shot(x_cm=1, y_cm=2)])
+        small = simulate_change(session, Units(), type="forehand", path_deg=5)
+        self.assertEqual(small["gain"]["spin"], "small")
+        bar = max(small["before"]["spin_rpm"] * 1.3, small["before"]["spin_rpm"] + 400, 1200)
+        self.assertLess(small["after"]["spin_rpm"], bar)
+        decisive = simulate_change(session, Units(), type="forehand", path_deg=10)
+        self.assertEqual(decisive["gain"]["spin"], "decisive")
+        # Contact 2.24 cm out: no contact delta -> off_center; centering delta -> centered.
+        self.assertEqual(small["gain"]["contact"], "off_center")
+        centered = simulate_change(session, Units(), type="forehand", contact_y_cm=-2)
+        self.assertEqual(centered["gain"]["contact"], "centered")
+        # Pace: +30% swing lifts ball speed well past +5%.
+        pace = simulate_change(session, Units(), type="forehand", swing_percent=30)
+        self.assertEqual(pace["gain"]["pace"], "decisive")
+
+    def test_simulate_change_reports_deltas(self):
+        session = Session("S", "2026-10-28T19:00:00Z", 600, [shot(), shot(swing_kmh=120)])
+        r = simulate_change(session, Units(), type="forehand", path_deg=5)
+        self.assertAlmostEqual(r["delta"]["ball_speed"], r["after"]["ball_speed"] - r["before"]["ball_speed"])
+        self.assertAlmostEqual(r["delta"]["spin_rpm"], r["after"]["spin_rpm"] - r["before"]["spin_rpm"])
+        self.assertGreater(r["delta"]["spin_rpm"], 0)
+        imp = simulate_change(session, Units(metric=False), type="forehand", path_deg=5)
+        self.assertAlmostEqual(imp["delta"]["ball_speed"],
+                               imp["after"]["ball_speed"] - imp["before"]["ball_speed"])
 
 
 @unittest.skipUnless(os.path.exists(PRIORS), "run `python3 ml/whatif_synth.py priors` first")

@@ -67,7 +67,7 @@ final class CoachTools {
                  ["a": session, "b": session], ["a", "b"]),
             tool("get_session_digest", "Return the session digest and a catalog of session IDs and dates. Health data and notes are excluded.", ["session": session]),
             tool("get_live_state", "Return the current source, connection state and last shot. Motion fields are absent for mic-only hits.", [:]),
-            tool("simulate_change", "Estimate speed/spin effects on this player's mean motion-enabled shot. No flight, landing depth or net clearance is modeled. Proposed deltas and final inputs are clamped. Returns baseline and changed estimates, not measured outcomes.",
+            tool("simulate_change", "Estimate speed/spin effects on this player's mean motion-enabled shot. Also returns final contact position for centering fixes. No flight, landing depth or net clearance is modeled. Proposed deltas and final inputs are clamped. Returns baseline and changed estimates, not measured outcomes.",
                  ["session": session, "type": type, "swing_percent": number("Swing speed delta percent, clamped to -30...30"),
                   "face_deg": number("Face angle delta degrees, clamped to -15...15"),
                   "path_deg": number("Path angle delta degrees, clamped to -15...15"),
@@ -254,11 +254,22 @@ final class CoachTools {
             return ["ball_speed": units.speed(r.ballSpeedKmh), "speed_unit": units.speedUnit, "spin_rpm": r.spinRPM,
                     "spin_type": r.spin.rawValue, "applied_parameters": try JSONSerialization.jsonObject(with: JSONEncoder().encode(r.parameters))]
         }
+        let before = try output(base), after = try output(changed)
+        let spinBar = max(max((before["spin_rpm"] as! Double) * WhatIf.Deltas.decisiveSpinRatio,
+                              (before["spin_rpm"] as! Double) + WhatIf.Deltas.decisiveSpinRPM),
+                          WhatIf.Deltas.spinFloorRPM)
+        let contact = (after["applied_parameters"] as! [String: Any])
+        let gain = ["spin": (after["spin_rpm"] as! Double) >= spinBar ? "decisive" : "small",
+                    "pace": (after["ball_speed"] as! Double) >= (before["ball_speed"] as! Double) * WhatIf.Deltas.decisivePaceRatio ? "decisive" : "small",
+                    "contact": hypot(contact["contactXcm"] as! Double, contact["contactYcm"] as! Double) <= WhatIf.Deltas.centeredContactCm ? "centered" : "off_center"]
         return ["estimated": true, "sample_count": baseline.sampleCount, "applied_deltas": applied,
                 "limits": ["swing_percent": WhatIf.Deltas.swingLimit, "face_deg": WhatIf.Deltas.angleLimit,
                            "path_deg": WhatIf.Deltas.angleLimit, "contact_x_cm": WhatIf.Deltas.contactLimit,
                            "contact_y_cm": WhatIf.Deltas.contactLimit],
-                "before": try output(base), "after": try output(changed),
+                "before": before, "after": after,
+                "delta": ["ball_speed": (after["ball_speed"] as! Double) - (before["ball_speed"] as! Double),
+                          "spin_rpm": (after["spin_rpm"] as! Double) - (before["spin_rpm"] as! Double)],
+                "gain": gain,
                 "limitations": "Sensitivity estimate on an average shot, not a prediction. Incoming speed is assumed (serve 0, volley 54, groundstroke 43.2 km/h); incoming direction, side spin, contact height, launch angle and flight are unmodeled. Do not claim landing depth or net clearance."]
     }
 

@@ -54,6 +54,13 @@ final class CoachToolsTests: XCTestCase {
     }
     func testSystemPromptRequiresEstimatedOnSimulationNumbers() {
         XCTAssertTrue(MuseCoach.systemPrompt.contains("Every sentence stating a simulation number must contain the word estimated."))
+        XCTAssertTrue(MuseCoach.systemPrompt.contains("re-simulate your final recommendation last so its numbers are verified."))
+        XCTAssertTrue(MuseCoach.systemPrompt.contains("never answer a fix-it question from the digest alone."))
+        XCTAssertTrue(MuseCoach.systemPrompt.contains("simulate a larger change before answering"))
+        XCTAssertTrue(MuseCoach.systemPrompt.contains("simulate at least two sizes of the change at once"))
+        XCTAssertTrue(MuseCoach.systemPrompt.contains("never do arithmetic on them"))
+        XCTAssertTrue(MuseCoach.systemPrompt.contains("or why shots feel wrong"))
+        XCTAssertTrue(MuseCoach.systemPrompt.contains("whose verdict clears the bar"))
     }
     func testValidationErrorsStayInToolResults() throws {
         let (_, _, tools) = fixture()
@@ -80,6 +87,16 @@ final class CoachToolsTests: XCTestCase {
         XCTAssertEqual(limits["path_deg"] as? Double, 15)
         XCTAssertEqual(limits["contact_x_cm"] as? Double, 5)
         XCTAssertEqual(limits["contact_y_cm"] as? Double, 5)
+        let before = result["before"] as! [String: Any]
+        let delta = result["delta"] as! [String: Any]
+        XCTAssertEqual(delta["ball_speed"] as! Double,
+                       (after["ball_speed"] as! Double) - (before["ball_speed"] as! Double))
+        XCTAssertEqual(delta["spin_rpm"] as! Double,
+                       (after["spin_rpm"] as! Double) - (before["spin_rpm"] as! Double))
+        let gain = result["gain"] as! [String: Any]
+        XCTAssertEqual(gain["spin"] as? String, "small") // +15 deg opens the face, killing brush
+        XCTAssertEqual(gain["pace"] as? String, "decisive")
+        XCTAssertEqual(gain["contact"] as? String, "off_center") // contact (1, 2) is 2.24 cm out
         XCTAssertNotNil(try object(tools, "simulate_change", "{\"type\":\"hit\"}")["error"])
     }
     func testListShotsFiltersOrdersAndLimits() throws {

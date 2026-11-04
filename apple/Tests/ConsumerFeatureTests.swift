@@ -85,3 +85,27 @@ final class AppleSignInChallengeTests: XCTestCase {
         XCTAssertThrowsError(try first.validate(returnedState: nil))
     }
 }
+
+@MainActor
+final class WhatIfTrialTests: XCTestCase {
+    func testTrialRoundTripsFromSuggestionToFollowUp() throws {
+        let schema = Schema([WhatIfTrial.self])
+        let container = try ModelContainer(for: schema,
+            configurations: ModelConfiguration(schema: schema, isStoredInMemoryOnly: true, cloudKitDatabase: .none))
+        let context = container.mainContext
+        let trial = WhatIfTrial(sessionID: UUID(), stroke: "forehand", goal: "more spin",
+            deltas: WhatIf.Deltas(pathDeg: 8), predicted: (110, 110, 1058, 1554),
+            measuredBefore: (106, 1049))
+        context.insert(trial)
+        try context.save()
+        XCTAssertFalse(trial.isComplete)
+        XCTAssertEqual(try context.fetch(FetchDescriptor<WhatIfTrial>(
+            predicate: #Predicate { $0.completedAt == nil })).count, 1)
+        trial.complete(followUpSessionID: UUID(), measuredBall: 108, measuredSpin: 1420)
+        try context.save()
+        XCTAssertTrue(trial.isComplete)
+        XCTAssertEqual(trial.deltas.pathDeg, 8)
+        XCTAssertEqual(try context.fetch(FetchDescriptor<WhatIfTrial>(
+            predicate: #Predicate { $0.completedAt != nil })).count, 1)
+    }
+}

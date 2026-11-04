@@ -132,8 +132,9 @@ muse     Your backhand contact sits 2.0 cm toward the tip. Try this: move contac
 
 | Check | Result | Source |
 |---|---|---|
-| Swift tests | 105 test methods (62 RacketKit + 43 app): C++ ↔ Swift shot parity, labeled real sessions, replay, scoring, simulator, Muse agent with mocked HTTP, scout/plan/review prompts and parsers | [`apple/RacketKit/Tests/`](apple/RacketKit/Tests/), [`apple/Tests/`](apple/Tests/) |
-| Python tests | 128 cases: ML and what-if tools (unittest), robot pipeline (pytest) | `ml/test_*.py`, `tools/test_*.py`, `TennisRobot/tests/` |
+| Swift tests | 106 test methods (62 RacketKit + 44 app): C++ ↔ Swift shot parity, labeled real sessions, replay, scoring, simulator, Muse agent with mocked HTTP, scout/plan/review prompts and parsers | [`apple/RacketKit/Tests/`](apple/RacketKit/Tests/), [`apple/Tests/`](apple/Tests/) |
+| Python tests | 150 cases: ML and what-if tools (99 unittest), robot pipeline (51 pytest); 2 pre-existing unittest collection errors (installed scipy dropped `sph_harm`, `serial` module missing) | `ml/test_*.py`, `tools/test_*.py`, `TennisRobot/tests/` |
+| What-if agent answers (Baseten spark-open) | 87.7% strict all-pass on 243 val cases: digest-first, grounded numbers, estimate labels, target reached (45 tail cases lost to a proxy outage, excluded per scorer convention) | [`tools/agent_eval.py`](tools/agent_eval.py), [`docs/WHATIF_DATASET.md`](docs/WHATIF_DATASET.md) |
 | Backend tests | Migration + social logic in embedded PGlite (`npm test`) | [`backend/supabase/tests/`](backend/supabase/tests/) |
 | Firmware host test | Flash backlog against a fake flash, under ASan/UBSan | [`firmware/tools/backlog_test`](firmware/tools/backlog_test) |
 | Firmware ↔ Python ML parity | Same decision on 296 clips; max distance error 7e-7 cm | `ml/test_parity.py` |

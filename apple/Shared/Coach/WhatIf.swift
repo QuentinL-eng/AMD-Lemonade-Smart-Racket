@@ -13,6 +13,10 @@ enum WhatIf {
 
         static let swingLimit = 30.0, angleLimit = 15.0, contactLimit = 5.0
 
+        /// The worth-it bar: the gain a coach would call done. Shared with the Python mirror and the eval's reaches_target.
+        static let decisiveSpinRatio = 1.3, decisiveSpinRPM = 400.0, spinFloorRPM = 1200.0
+        static let decisivePaceRatio = 1.05, centeredContactCm = 2.0
+
         var clamped: Deltas {
             func c(_ v: Double, _ l: Double) -> Double { min(l, max(-l, v.isFinite ? v : 0)) }
             return Deltas(swingPercent: c(swingPercent, Self.swingLimit), faceDeg: c(faceDeg, Self.angleLimit),

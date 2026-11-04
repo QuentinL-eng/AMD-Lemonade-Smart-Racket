@@ -62,7 +62,12 @@ appears in a tool result.
 
 - ShotSimulator is a sensitivity model. The ball speeds it gives are high for the racket speeds (median forehand:
   95 km/h racket, 143 km/h ball). The dataset teaches Muse to use the tool honestly; it doesn't make the tool right.
-  Recalibrate `acorCenter` from TennisCamera ball tracks and regenerate.
+  Recalibrating `acorCenter` from the TennisCamera ball tracks was attempted and is blocked: in session
+  `10-29-26-1005`, most post-impact track windows sit near 0 km/h (static and second balls poison the tracks) with a
+  few wild outliers, so no trustworthy launch-speed fit exists yet, and no constant was changed. The recalibration
+  data now comes from WhatIfTrial instead: the What-if screen stores predicted vs measured ball/spin per change, so
+  the slow-swing bias can be fit from completed trials once they accumulate, then `acorCenter` updated and the
+  dataset regenerated.
 - Face and path changes move spin identically in the model. Which one Muse picks comes from the digest heuristic
   (`diagnosis()` in `whatif_synth.py`), not from the physics.
 - Answers are templated, so their wording is repetitive. To vary the wording, paraphrase the final turns with a

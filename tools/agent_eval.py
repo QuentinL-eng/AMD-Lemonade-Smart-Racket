@@ -16,6 +16,7 @@ Report: data/whatif/eval_<preset>_s<sample>.json (git-ignored).
 """
 import argparse
 import csv
+import datetime
 import json
 import math
 import os
@@ -37,6 +38,7 @@ PRESETS = {
                 "model": "meta-models/muse-spark-open-1026", "effort": None},
 }
 MAX_REQUESTS, MAX_TOOLS = 5, 8  # the app's agent limits: 5 rounds, 8 calls per round
+KNOWN_TOOLS = {t["function"]["name"] for t in cs.tool_schemas()}
 
 
 def secret(name):
@@ -91,11 +93,12 @@ def load_data():
             saturated=r["saturated"] == "1")
         shots.setdefault(r["session_id"], []).append((int(r["index"]), s))
     sessions, players = {}, {}
-    for r in csv.DictReader(open(os.path.join(ROOT, "data/whatif/sessions.csv"))):
+    base = datetime.datetime(2026, 10, 28, 19, tzinfo=datetime.timezone.utc)
+    for i, r in enumerate(csv.DictReader(open(os.path.join(ROOT, "data/whatif/sessions.csv")))):
         sl = [s for _, s in sorted(shots.get(r["session_id"], []))]
+        start = (base + datetime.timedelta(days=i)).isoformat().replace("+00:00", "Z")
         sessions[r["session_id"]] = cs.Session(
-            id=r["session_id"], start="2026-10-28T19:00:00Z", duration_s=3600,
-            shots=sl)
+            id=r["session_id"], start=start, duration_s=3600, shots=sl)
         players.setdefault(r["player_id"], []).append(sessions[r["session_id"]])
     return sessions, players
 
@@ -117,6 +120,44 @@ def call(base, key, model, effort, messages, tools):
 FINAL_NUDGE = "Give your final answer now using the tool results already available."  # MuseCoach.generate
 
 
+def dispatch_tool(name, args, session, catalog, units, notes):
+    """Pure tool dispatch (no API calls): mirrors CoachTools.execute + dispatch."""
+    if args is None:
+        return {"error": "Unknown tool or invalid argument object."}
+    err = cs.validate_call(name, args)
+    if err:
+        return {"error": err}
+    try:
+        if name == "get_session_digest":
+            sess = cs.resolve_session(args.get("session"), session, catalog)
+            return cs.get_session_digest(sess, catalog, units)
+        if name == "simulate_change":
+            kw = {k: v for k, v in args.items() if k != "session"}
+            try:
+                return cs.simulate_on(args.get("session"), session, catalog, units, **kw)
+            except TypeError as e:
+                return {"error": f"bad arguments: {e}"}
+        if name == "list_shots":
+            return cs.list_shots(session, catalog, units, sid=args.get("session"), type=args.get("type"),
+                                 from_=args.get("from"), to_=args.get("to"), contact=args.get("contact"),
+                                 order=args.get("order", "newest"), limit=args.get("limit", 20))
+        if name == "query_shots":
+            return cs.query_shots(session, catalog, units, sid=args.get("session"), type=args.get("type"),
+                                  metric=args.get("metric"), from_=args.get("from"), to_=args.get("to"))
+        if name == "compare_sessions":
+            return cs.compare_sessions(session, catalog, units, args["a"], args["b"])
+        if name == "recall_notes":
+            return cs.recall_notes(notes, category=args.get("category"), query=args.get("query"),
+                                   limit=args.get("limit", 20))
+        if name == "remember_note":
+            return cs.remember_note(notes, args["text"], args["category"])
+        if name in cs.LIVE_ERRORS:
+            return {"error": cs.LIVE_ERRORS[name]}
+    except cs.ToolError as e:
+        return {"error": str(e)}
+    return {"error": f"{name} is not available in this eval"}
+
+
 def run_case(ref, sessions, players, base, key, model, effort):
     """MuseCoach.generate's loop: 5 rounds, last round nudged without tools. Empty finals and
     tool calls on the last round raise, mirroring the app's invalidResponse/roundLimit fallback."""
@@ -126,6 +167,7 @@ def run_case(ref, sessions, players, base, key, model, effort):
     units = cs.Units(metric=meta["units"] == "km/h")
     messages = [m for m in ref["messages"][:2]]
     tools, seq, pool, usage = ref["tools"], [], [], {"prompt": 0, "completion": 0}
+    notes = cs.NoteStore()
     for round in range(MAX_REQUESTS):
         last = round == MAX_REQUESTS - 1
         if last:
@@ -158,18 +200,7 @@ def run_case(ref, sessions, players, base, key, model, effort):
             except json.JSONDecodeError:
                 args = None
             seq.append(name)
-            if args is None:
-                out = {"error": "arguments were not valid JSON"}
-            elif name == "get_session_digest":
-                out = cs.get_session_digest(session, catalog, units)
-            elif name == "simulate_change":
-                kw = {k: v for k, v in args.items() if k != "session"}
-                try:
-                    out = cs.simulate_change(session, units, **kw)
-                except TypeError as e:
-                    out = {"error": f"bad arguments: {e}"}
-            else:
-                out = {"error": f"{name} is not available in this eval"}
+            out = dispatch_tool(name, args, session, catalog, units, notes)
             pool += numbers(out)
             messages.append({"role": "tool", "tool_call_id": tc["id"],
                              "content": cs.tool_json(out)})
@@ -193,12 +224,12 @@ def score(ref, messages, seq, pool):
             simulated = simulated or (isinstance(c, dict) and "before" in c and "after" in c)
     has_estimate = "estimat" in answer.lower()
     out = {"digest_first": bool(seq) and seq[0] == "get_session_digest",
-           "tool_calls": len(seq), "unknown_tools": [t for t in seq if t not in
-                        ("get_session_digest", "simulate_change")],
+           "tool_calls": len(seq), "seq": seq,
+           "unknown_tools": [t for t in seq if t not in KNOWN_TOOLS],
            "ungrounded_numbers": bad, "has_estimate": has_estimate,
            "simulated": simulated, "estimate_ok": has_estimate or not simulated,
            "words": len(answer.split()), "target": None, "exact_pick": None,
-           "answer": answer}
+           "last_sim": None, "pool": pool, "answer": answer}
     if meta["kind"] in ("objective", "player_whatif", "player_whatif_extreme") and meta.get("chosen"):
         sims = [m for m in messages if m.get("role") == "tool"]
         last = {}
@@ -215,6 +246,17 @@ def score(ref, messages, seq, pool):
                 out["target"] = bool(reaches_target(meta["objective"], last["before"], last["after"]))
             except (KeyError, ValueError):
                 pass
+            try:
+                b, a = last["before"], last["after"]
+                out["last_sim"] = {"applied_deltas": last.get("applied_deltas", {}),
+                                   "before_ball": b["ball_speed"], "before_spin": b["spin_rpm"],
+                                   "after_ball": a["ball_speed"], "after_spin": a["spin_rpm"],
+                                   "after_contact": [a["applied_parameters"]["contactXcm"],
+                                                   a["applied_parameters"]["contactYcm"]]}
+            except (KeyError, TypeError):
+                pass
+        elif meta.get("objective"):
+            out["target"] = False  # a goal case answered without any simulation fails
             ref = meta["chosen"]
             got = last.get("applied_deltas", {})
             out["exact_pick"] = all(abs(got.get(k, 0) - v) < 1e-6 for k, v in ref.items())

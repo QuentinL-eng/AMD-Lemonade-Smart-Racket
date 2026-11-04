@@ -6,8 +6,10 @@ import SwiftUI
 /// change. Same baseline and physics as Muse's `simulate_change` tool (`WhatIf`, `ShotSimulator`).
 struct WhatIfView: View {
     @Query(sort: \SessionRecord.startDate) private var sessions: [SessionRecord]
+    @Query(filter: #Predicate<WhatIfTrial> { $0.completedAt == nil }) private var pendingTrials: [WhatIfTrial]
     @Environment(CoachModel.self) private var coach
     @Environment(AppModel.self) private var model
+    @Environment(\.modelContext) private var context
     @AppStorage(UnitSystem.storageKey) private var useMetric = false
     @State private var stroke = ShotType.forehand
     @State private var deltas = WhatIf.Deltas()
@@ -87,6 +89,8 @@ struct WhatIfView: View {
                     leverTiles
                     leverEditor
                     results(before: b, after: a, film: film != nil)
+                    tryItButton(session, type: type, before: b, after: a)
+                    pendingTrialsSection()
                     askAbout(type, session: session)
                 }
                 .padding(16)
@@ -255,6 +259,73 @@ struct WhatIfView: View {
             .accessibilityHidden(true)
             if let note { Text(note).font(.caption.weight(.semibold)).foregroundStyle(MuseStyle.good) }
         }
+    }
+
+    // MARK: Trials
+
+    /// Save the change on the levers so its estimate can be checked against measured play later.
+    private func tryItButton(_ session: SessionRecord, type: ShotType, before: ShotSimulator.Result,
+                             after: ShotSimulator.Result) -> some View {
+        Button { saveTrial(session, type: type, before: before, after: after) } label: {
+            Label("Try it: save this change to check later", systemImage: "flag")
+                .font(.subheadline.weight(.semibold)).frame(maxWidth: .infinity, minHeight: 44)
+        }
+        .buttonStyle(.plain)
+        .foregroundStyle(MuseStyle.text)
+        .background(MuseStyle.card, in: .capsule)
+        .disabled(deltas.isZero)
+    }
+
+    private func saveTrial(_ session: SessionRecord, type: ShotType, before: ShotSimulator.Result,
+                           after: ShotSimulator.Result) {
+        let measured = ShotSummary(WhatIf.usable(session.shots).filter { $0.type == type })
+        let ups = [after.spinRPM > before.spinRPM * 1.05 ? "more spin" : nil,
+                   after.ballSpeedKmh > before.ballSpeedKmh * 1.05 ? "more pace" : nil].compactMap { $0 }
+        context.insert(WhatIfTrial(sessionID: session.id, stroke: type.rawValue,
+            goal: ups.isEmpty ? "test a change" : ups.joined(separator: " + "), deltas: deltas,
+            predicted: (before.ballSpeedKmh, after.ballSpeedKmh, before.spinRPM, after.spinRPM),
+            measuredBefore: (measured.avgBallKmh, measured.avgSpinRPM)))
+    }
+
+    private func pendingTrialsSection() -> some View {
+        VStack(alignment: .leading, spacing: 10) {
+            if !pendingTrials.isEmpty {
+                Text("Changes you are trying").font(.headline).foregroundStyle(MuseStyle.text)
+                ForEach(pendingTrials.sorted { $0.createdAt < $1.createdAt }) { trial in
+                    HStack {
+                        VStack(alignment: .leading, spacing: 2) {
+                            Text(trial.goal.capitalizedFirst).font(.subheadline.weight(.semibold))
+                                .foregroundStyle(MuseStyle.text)
+                            Text(WhatIf.describe(trial.deltas, units: units)).font(.caption)
+                                .foregroundStyle(MuseStyle.muted)
+                        }
+                        Spacer()
+                        if let session = followUpSession(for: trial) {
+                            Button("Log follow-up") { logFollowUp(trial, session: session) }
+                                .buttonStyle(.plain).font(.subheadline.weight(.semibold))
+                                .foregroundStyle(MuseStyle.lime)
+                        }
+                    }
+                    .padding(12)
+                    .background(MuseStyle.card, in: .rect(cornerRadius: 18))
+                }
+            }
+        }
+    }
+
+    /// The latest session with swings the trial's stroke can be measured on.
+    private func followUpSession(for trial: WhatIfTrial) -> SessionRecord? {
+        let stroke = ShotType(rawValue: trial.stroke)
+        return sessions.last {
+            !WhatIf.usable($0.shots).filter { stroke == nil || $0.type == stroke }.isEmpty
+        }
+    }
+
+    private func logFollowUp(_ trial: WhatIfTrial, session: SessionRecord) {
+        let stroke = ShotType(rawValue: trial.stroke)
+        let measured = ShotSummary(WhatIf.usable(session.shots).filter { stroke == nil || $0.type == stroke })
+        trial.complete(followUpSessionID: session.id, measuredBall: measured.avgBallKmh,
+                       measuredSpin: measured.avgSpinRPM)
     }
 
     // MARK: Muse
