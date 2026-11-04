@@ -23,7 +23,8 @@ judges watch muted. Every number on screen comes from the repo.
 | 1:04 | Phone, Watch, Ray-Ban Display with the Meta Wearables badge | CGI | Meta |
 | 1:10 | Through the lens | CGI (labelled simulated), or **film** the real one | Meta |
 | 1:17 | Muse Spark as an agent: real trace, 10 tools lighting up | CGI | Meta |
-| 1:28 | Hero, 32 s: real iPhone recording of the what-if and the drill. It carries the what-if line, so the CGI what-if is out | **Film** | Meta, Demo |
+| 1:28 | What-if: `simulate_change`, an estimate on an example shot | CGI, real simulator numbers | Meta |
+| 1:38 | Hero: real iPhone recording of the what-if and the drill | **Film** | Meta, Demo |
 | 2:00 | Watch counts down, phone says "Drill complete!" | **Film** | Impact |
 | 2:07 | SAM 3.1: the real cached boxes on your real 240 fps forehand | CGI over real | Meta |
 | 2:14 | Swing film from Muse's real script, on a demo session | CGI | Meta |

@@ -96,9 +96,9 @@ export const demo: Entry[] = [
   { footage: 'glasses-pov', seconds: 7, fallback: 'glassesPov',
     shot: 'Optional: through the lens of the real Ray-Ban Display. Until then, the simulated-view CGI plays, and says so.' },
   { scene: 'museAgent', seconds: 12 },
-  // The real app carries the what-if here, so the CGI whatIf scene is out of this cut.
-  { footage: 'muse-screen-recording', seconds: 32, layout: 'phone',
-    overlays: [{ type: 'callouts', text: 'museCallouts', at: 1, every: 7.5 }],
+  { scene: 'whatIf', seconds: 10 },
+  { footage: 'muse-screen-recording', seconds: 22, layout: 'phone',
+    overlays: [{ type: 'callouts', text: 'museCallouts', at: 1, every: 5 }],
     shot: 'iPhone screen recording, about a minute, slowly: Muse tab, What if, ask it, wait for the numbers. Then Next drill, then Start on Watch. Set playbackRate to speed it up and move the callouts to match.' },
   { footage: 'drill-on-watch', seconds: 7.5,
     shot: 'Close on the Watch: the to-go count drops as you hit. Finish on the phone Live tab saying Drill complete!' },
