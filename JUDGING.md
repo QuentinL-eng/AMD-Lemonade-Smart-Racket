@@ -2,7 +2,7 @@
 
 **What this is.** A smart tennis racket: a sensor insert in the handle (ESP32-C3, IMU, mic) computes
 every shot on the racket and shows it live on iPhone, Mac, Apple Watch, and Meta Ray-Ban Display.
-Meta Muse Spark (`muse-spark-1.3`) works as a tool-calling agent over the player's own shots and the
+Meta's open Muse Spark (`meta-models/muse-spark-open-1026`, served by Baseten) works as a tool-calling agent over the player's own shots and the
 live racket: it runs a physics simulator to **predict** what a swing change would do, then plans a
 drill the Watch and glasses track. This is a hardware + software instrument, not a generic advice
 chatbot: every number Muse reports must come from a tool result.
@@ -25,8 +25,8 @@ chatbot: every number Muse reports must come from a tool result.
 
 | Meta technology | Evidence |
 |---|---|
-| Muse Spark `muse-spark-1.3`, native function calling, 10 tools | [`apple/Shared/Coach/CoachTools.swift`](apple/Shared/Coach/CoachTools.swift) (tool schemas), [`apple/Shared/Coach/MuseClient.swift`](apple/Shared/Coach/MuseClient.swift) (client + bounded loop: 5 requests, 8 tool calls, 45 s timeout) |
-| Server proxy holds the key (app never ships one) | [`backend/supabase/functions/muse/index.ts`](backend/supabase/functions/muse/index.ts) (`POST https://api.meta.ai/v1/chat/completions`) |
+| Open Muse Spark `meta-models/muse-spark-open-1026` on Baseten, native function calling, 10 tools | [`apple/Shared/Coach/CoachTools.swift`](apple/Shared/Coach/CoachTools.swift) (tool schemas), [`apple/Shared/Coach/MuseClient.swift`](apple/Shared/Coach/MuseClient.swift) (client + bounded loop: 5 requests, 8 tool calls, 45 s timeout) |
+| Server proxy holds the key (app never ships one) | [`backend/supabase/functions/muse/index.ts`](backend/supabase/functions/muse/index.ts) (`POST https://inference.baseten.co/v1/chat/completions`) |
 | `simulate_change`: Muse tests swing changes on the player's own average stroke | [`apple/Shared/Coach/WhatIf.swift`](apple/Shared/Coach/WhatIf.swift), [`ml/coach_sim.py`](ml/coach_sim.py) (Python mirror) |
 | Muse directs the 3D swing film from validated simulations | [`apple/Shared/Coach/SwingFilm.swift`](apple/Shared/Coach/SwingFilm.swift), [`docs/SWING_FILM.md`](docs/SWING_FILM.md) |
 | Meta Wearables Device Access Toolkit (`MWDATCore`, `MWDATDisplay`), Ray-Ban Display HUD | [`apple/iOS/Glasses/GlassesController.swift`](apple/iOS/Glasses/GlassesController.swift) |
@@ -34,8 +34,8 @@ chatbot: every number Muse reports must come from a tool result.
 | Head-to-head agent eval vs the Meta API and open Muse Spark | [`tools/agent_eval.py`](tools/agent_eval.py) (`--preset meta` / `--preset baseten`) |
 | Meta SAM 3.1 video + image APIs | Racket tracks + contact pre-fill behind the reviewed contacts; tracks convert to emulator sessions (9 matches, 2,265 hits; stroke types are F3Tennis dataset labels for the Ostrava final and F3Tennis model predictions, flagged as predicted, for the other 8) | [`tools/sam_f3set_video.py`](tools/sam_f3set_video.py), [`tools/sam_track_to_session.py`](tools/sam_track_to_session.py) |
 
-Quick automated checks: `muse-spark-1.3` in `apple/Shared/Coach/MuseClient.swift:27` and
-`backend/supabase/functions/muse/index.ts` (which calls `POST https://api.meta.ai/v1/chat/completions`);
+Quick automated checks: `meta-models/muse-spark-open-1026` in `apple/Shared/Coach/MuseClient.swift:27` and
+`backend/supabase/functions/muse/index.ts` (which calls `POST https://inference.baseten.co/v1/chat/completions`);
 `import MWDATCore` / `import MWDATDisplay` in `apple/iOS/Glasses/`; `sam-3.1` across
 `tools/sam_*.py` and `ml/stroke_system/`.
 
@@ -68,7 +68,7 @@ python3 ml/test_parity.py                            # C++ and Python agree on 2
 python3 -m unittest discover -s ml -p test_whatif_synth.py  # simulator mirror, 11 tests
 python3 -m unittest discover -s tools -p "test_*.py" # 15 tests
 npm test --prefix backend/supabase                   # migration + social logic in PGlite
-grep -rn "muse-spark-1.3\|api.meta.ai" apple/Shared/Coach backend/supabase/functions/muse
+grep -rn "muse-spark-open\|inference.baseten.co" apple/Shared/Coach backend/supabase/functions/muse
 grep -rln "MWDATCore\|MWDATDisplay" apple/iOS/Glasses
 ```
 
@@ -91,7 +91,7 @@ grep -rln "MWDATCore\|MWDATDisplay" apple/iOS/Glasses
 - Every commit dates Oct 26 – Nov 2, 2026 (built for the Meta Global AI Developer Hackathon).
 - MIT licensed ([`LICENSE`](LICENSE)); forked idea from
   [AahanPrajapati/Smart-Tennis-Racket](https://github.com/AahanPrajapati/Smart-Tennis-Racket) (MIT).
-- Privacy: shots stay on-device/iCloud; only what Muse fetches goes to Meta via our proxy
+- Privacy: shots stay on-device/iCloud; only what Muse fetches goes to Baseten via our proxy
   ([`docs/PRIVACY.md`](docs/PRIVACY.md)).
 
 ## What to skip

@@ -1,13 +1,13 @@
-// Muse Spark proxy, served by Meta's Model API (OpenAI-compatible). The Meta key lives only in this
-// function's secrets (META_API_KEY); the app authenticates with the signed-in user's Supabase session.
-// MUSE_MODEL defaults to muse-spark-1.3 (see `GET https://api.meta.ai/v1/models`). MUSE_BASE_URL points
-// at another OpenAI-compatible host; MUSE_REASONING_EFFORT (default "low") keeps replies fast.
+// Muse Spark proxy: Meta's open Muse Spark, served by Baseten (OpenAI-compatible). The Baseten key lives only in
+// this function's secrets (BASETEN_API_KEY); the app authenticates with the signed-in user's Supabase session.
+// MUSE_MODEL defaults to meta-models/muse-spark-open-1026. MUSE_BASE_URL points at another OpenAI-compatible host;
+// MUSE_REASONING_EFFORT is optional and unset by default.
 import { createClient } from "npm:@supabase/supabase-js@2";
 
-const BASE_URL = Deno.env.get("MUSE_BASE_URL") ?? "https://api.meta.ai/v1";
+const BASE_URL = Deno.env.get("MUSE_BASE_URL") ?? "https://inference.baseten.co/v1";
 const ENDPOINT = `${BASE_URL}/chat/completions`;
-const MODEL = Deno.env.get("MUSE_MODEL") ?? "muse-spark-1.3";
-const EFFORT = Deno.env.get("MUSE_REASONING_EFFORT") ?? "low";
+const MODEL = Deno.env.get("MUSE_MODEL") ?? "meta-models/muse-spark-open-1026";
+const EFFORT = Deno.env.get("MUSE_REASONING_EFFORT");
 const MAX_BODY_BYTES = 256 * 1024;
 
 const json = (body: unknown, status: number) =>
@@ -28,7 +28,7 @@ Deno.serve(async (req) => {
   try { input = JSON.parse(raw); } catch { return json({ error: "bad json" }, 400); }
   if (!Array.isArray(input.messages)) return json({ error: "messages required" }, 400);
 
-  const key = Deno.env.get("META_API_KEY");
+  const key = Deno.env.get("BASETEN_API_KEY");
   if (!key) return json({ error: "model not configured" }, 500);
 
   // Only forward fields the app needs, with the model and limits pinned server-side.

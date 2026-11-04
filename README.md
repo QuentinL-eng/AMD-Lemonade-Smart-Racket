@@ -57,7 +57,7 @@ state, and a robot-arm rig for repeatable ground truth ([`TennisRobot/`](TennisR
 
 | Meta technology | What it does here | Code |
 |---|---|---|
-| **Muse Spark** (`muse-spark-1.3`, native function calling) | An agent with 10 tools over the player's data and the live racket | [`apple/Shared/Coach/`](apple/Shared/Coach/), [`CoachTools.swift`](apple/Shared/Coach/CoachTools.swift) |
+| **Open Muse Spark** (`meta-models/muse-spark-open-1026` on Baseten, native function calling) | An agent with 10 tools over the player's data and the live racket | [`apple/Shared/Coach/`](apple/Shared/Coach/), [`CoachTools.swift`](apple/Shared/Coach/CoachTools.swift) |
 | **Muse Spark through a server proxy** | A Supabase edge function holds the Meta API key; the app never ships one | [`backend/supabase/functions/muse/`](backend/supabase/functions/muse/index.ts) |
 | **Muse Spark directs the swing film** | Muse tests swing changes with `simulate_change` and returns a short, validated script; the What-if screen animates the player's swing and the change in 3D | [`SwingFilm.swift`](apple/Shared/Coach/SwingFilm.swift), [`SwingAnimationView.swift`](apple/Shared/Views/SwingAnimationView.swift), [`docs/SWING_FILM.md`](docs/SWING_FILM.md) |
 | **Meta Wearables Device Access Toolkit** (`MWDATCore`, `MWDATDisplay`) | Live HUD on **Meta Ray-Ban Display**: latest shot, sweet-spot rate, score, drill progress | [`apple/iOS/Glasses/`](apple/iOS/Glasses/) |
@@ -191,7 +191,7 @@ Details: [`apple/README.md`](apple/README.md), [`firmware/README.md`](firmware/R
 ## Privacy
 
 Shot data stays on the player's devices and private iCloud. Shared scores and summaries go to our Supabase backend
-only when the player shares them. Only what Muse fetches for an answer goes to Meta, through our proxy. See
+only when the player shares them. Only what Muse fetches for an answer goes to Baseten, which hosts Meta's open Muse Spark, through our proxy. See
 [`docs/PRIVACY.md`](docs/PRIVACY.md).
 
 ## License

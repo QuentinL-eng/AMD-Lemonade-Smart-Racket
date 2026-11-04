@@ -4,7 +4,7 @@ A swing film shows **your swing**, then **the change Muse recommends**, then the
 live 3D animation on the What-if screen (Insights → Muse → What if): it loops your average forehand, backhand, serve or volley and
 the changed swing in slow motion, follows the sliders as you move them, and **Show me the best change** has Muse pick
 and test the change, which then sets the sliders and the title. `video/` renders the same thing as an 8-second clip.
-Every film looks the same because Muse never makes pixels. Muse (Meta's Muse Spark, through the Meta Model API)
+Every film looks the same because Muse never makes pixels. Muse (Meta's open Muse Spark, served by Baseten)
 reads the racket's numbers, tests changes with the `simulate_change` tool and returns a small, validated script.
 A fixed Remotion scene (`video/src/swingfilm/`) turns that script into video. Meta's API has no video model, and
 we would not want one here: a generated video could invent a body, a court or a ball flight the racket never measured.

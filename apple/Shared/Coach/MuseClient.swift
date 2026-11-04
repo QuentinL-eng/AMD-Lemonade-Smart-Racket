@@ -20,11 +20,11 @@ enum MuseError: LocalizedError {
 
 @MainActor
 struct MuseClient: MuseTransport {
-    /// The app's own `muse` edge function. The Meta API key and the served model live only in the server's secrets.
+    /// The app's own `muse` edge function. The Baseten API key and the served model live only in the server's secrets.
     let endpoint: URL
     let publishableKey: String
     let accessToken: String
-    var model = "muse-spark-1.3"
+    var model = "meta-models/muse-spark-open-1026"
     var session: URLSession = .shared
 
     func complete(messages: [[String: Any]], tools: [[String: Any]]) async throws -> [String: Any] {

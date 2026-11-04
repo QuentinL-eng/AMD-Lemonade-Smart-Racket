@@ -22,7 +22,7 @@ struct MemoryView: View {
                 Toggle("Let Muse use these notes", isOn: $coach.memoryEnabled)
             } footer: {
                 Text(coach.memoryEnabled
-                     ? "When Muse answers, it can read these notes and add new ones. They're sent to Meta with your question, including any injury notes. Notes sync through your iCloud."
+                     ? "When Muse answers, it can read these notes and add new ones. They're sent to Baseten, which hosts Muse Spark, with your question, including any injury notes. Notes sync through your iCloud."
                      : "Notes stay on your devices. Muse can't read or add them.")
             }
             Section("Add a note about \(model.activePlayer?.name ?? "you")") {

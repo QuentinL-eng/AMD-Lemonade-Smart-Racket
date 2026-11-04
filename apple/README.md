@@ -21,18 +21,17 @@ screen works without hardware. Switch to the real racket from the connection men
 
 ## Muse Spark
 
-Muse runs through the `muse` Supabase edge function (`backend/supabase/functions/muse`), which holds the Meta API key
+Muse runs through the `muse` Supabase edge function (`backend/supabase/functions/muse`), which holds the Baseten API key
 as a server secret; the app never contains or asks for a key. Muse online needs a signed-in account
 (Settings → Account) and can be turned off with **Use Muse online** on the Muse tab.
-Muse sends questions and requested shot/session statistics to Meta. Health data and session notes are excluded.
+Muse sends questions and requested shot/session statistics to Baseten, which hosts Meta's open Muse Spark. Health data and session notes are excluded.
 Any Muse error, or being signed out, uses the deterministic built-in engine, and the UI shows the engine that answered.
-Deploy once: `supabase secrets set META_API_KEY=... --project-ref birutnqxduzwldvymeun` then
+Deploy once: `supabase secrets set BASETEN_API_KEY=... --project-ref birutnqxduzwldvymeun` then
 `supabase functions deploy muse --project-ref birutnqxduzwldvymeun`.
 No local language model is downloaded or loaded.
 
-The function calls `POST https://api.meta.ai/v1/chat/completions`, Bearer authentication and `muse-spark-1.3` (Standard mode).
-Native function calling is confirmed in [Meta's tool calling docs](https://dev.meta.ai/docs/tool-calling).
-[Published limits](https://dev.meta.ai/docs/pricing-rate-limits) are 3,000 RPM / 4,000,000 TPM for this model as of October 27, 2026;
+The function calls `POST https://inference.baseten.co/v1/chat/completions`, Bearer authentication and `meta-models/muse-spark-open-1026` (Meta's open Muse Spark).
+`tools/agent_eval.py --preset baseten` exercises native function calling on this model.
 HTTP 429 immediately falls back, without automatic retries. Each request times out after 45 seconds.
 The agent makes at most five requests and runs at most eight tool calls per round. The final request omits tools.
 
@@ -46,7 +45,7 @@ question and fetches what it needs.
 **Muse memory** (`CoachNote`, synced in the same SwiftData/iCloud store): per-player notes such as habits, goals or
 past injuries, edited in Muse → Memory. With **Let Muse use these notes** on (the default), Muse can read
 them and add up to two per answer (240 characters each, 200 per player, duplicates skipped). Notes it adds are tagged
-"Added by Muse" and listed under the answer. Notes, including injury notes, go to Meta when Muse reads them; turning
+"Added by Muse" and listed under the answer. Notes, including injury notes, go to Baseten when Muse reads them; turning
 the switch off keeps them on the device.
 
 **What if** (Muse → What if): sliders for swing speed, face, path and contact on the player's average

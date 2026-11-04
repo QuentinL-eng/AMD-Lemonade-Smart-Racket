@@ -11,7 +11,7 @@ Tennis Buddee works with a sensor inside your tennis racket to measure your shot
 - **Accounts (optional):** if you sign in with Apple or Google, your profile, friends, and the matches, points and
   racket summaries you choose to share are stored in our Supabase database so your friends can see them.
 - **Meta Muse Spark (optional):** when you ask a question, the app sends the question and only the shot or session
-  statistics Muse asks for to Meta, through our server. Player notes are sent only while "Let Muse use these notes"
+  statistics Muse asks for to Baseten, which hosts Meta's open Muse Spark model, through our server. Player notes are sent only while "Let Muse use these notes"
   is on. Health data is never sent. Turn Muse off in Insights to keep everything on the device.
 - **Meta Ray-Ban Display (optional):** live shot numbers are sent from your phone to your own glasses.
 - **Health data** is used only to show your workout stats and is saved to Apple Health only with your permission.

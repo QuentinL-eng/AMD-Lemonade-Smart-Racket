@@ -400,7 +400,7 @@ struct CoachScreen: View {
                 .tint(MuseStyle.lime)
                 .foregroundStyle(MuseStyle.text)
             Text(coach.museAvailable
-                 ? "Muse sends your question and the shot data, racket readings and player notes it asks for to Meta. Health data and session notes are excluded; turn off player notes under Memory."
+                 ? "Muse sends your question and the shot data, racket readings and player notes it asks for to Baseten, which hosts Meta's open Muse Spark. Health data and session notes are excluded; turn off player notes under Memory."
                  : "Sign in under Settings → Account to use Muse online. Until then the built-in engine answers offline.")
                 .font(.caption).foregroundStyle(MuseStyle.muted)
             if let reason = coach.lastFallbackReason {

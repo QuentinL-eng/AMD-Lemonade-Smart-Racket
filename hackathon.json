@@ -14,13 +14,14 @@
   "meta_technology": [
     {
       "name": "Muse Spark",
-      "model": "muse-spark-1.3",
+      "model": "meta-models/muse-spark-open-1026",
+      "served_by": "Baseten",
       "use": "tool-calling agent (10 native function-calling tools) over the player's shots and the live racket; predicts swing-change outcomes via a physics simulator",
       "code": ["apple/Shared/Coach/CoachTools.swift", "apple/Shared/Coach/MuseClient.swift"]
     },
     {
       "name": "Muse Spark server proxy",
-      "use": "Supabase edge function holds the Meta API key; calls POST https://api.meta.ai/v1/chat/completions",
+      "use": "Supabase edge function holds the Baseten API key; calls POST https://inference.baseten.co/v1/chat/completions",
       "code": ["backend/supabase/functions/muse/index.ts"]
     },
     {
