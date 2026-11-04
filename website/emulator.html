@@ -738,7 +738,7 @@ function evalCands(b){
 }
 function museHTML(el){
   const rs=shownRows(),f=S.film,st=f?f.stroke:curStroke(rs),b=baselineOf(strokeRows(rs,st));
-  let h=`<div class="mh"><span class="t">Muse</span><span class="s"><span class="dot" style="background:var(--m-muted)"></span>Demo engine · offline</span></div>`;
+  let h=`<div class="mh"><span class="t">Muse</span><span class="s"><span class="dot" style="background:var(--m-muted)"></span>Muse Spark Open · Baseten</span></div>`;
   h+=`<div class="hero" ${f?'data-act="openwi" style="cursor:pointer"':""}><div class="top"><div class="eyebrow" style="opacity:.7">BEST CHANGE · ${st.toUpperCase()}</div><div class="ti">${f?f.title:"Find your best change"}</div>
    <div class="cu2">${f?f.cue:`Muse tests changes on your average ${LABEL[st].toLowerCase()} and shows you the one that helps most.`}</div></div>
    <svg class="sk" viewBox="0 0 300 110" preserveAspectRatio="none"><path d="M18 42C75 130 190 118 246 28" fill="none" stroke="rgba(17,19,12,.35)" stroke-width="3" stroke-dasharray="6 7"/><path d="M18 52C75 140 190 118 246 20" fill="none" stroke="#11130C" stroke-width="6" stroke-linecap="round"/><circle cx="214" cy="62" r="10" fill="#FBFBF4" stroke="#11130C" stroke-width="3"/></svg>
