@@ -233,16 +233,46 @@ svg.i .f{fill:currentColor;stroke:none}
  .phone{order:1;width:100%;height:calc(100dvh - 44px);max-height:none;border-radius:0;box-shadow:none}
  .side{order:2;width:100%;padding:0 14px}.foot{order:3}
  .island,.sbar{display:none}}
+
+/* Keep the broadcast and the app together, including on shorter laptop screens. */
+.wrap{max-width:1320px;padding:24px 32px 40px;display:grid;grid-template-columns:minmax(0,1fr) minmax(320px,393px);gap:20px 32px;align-items:start}
+.brandrow{grid-column:1/-1;margin:0;min-height:24px;align-items:center}
+.side{width:auto;min-width:0;position:static;display:grid;gap:14px}
+.panel{margin:0;padding:18px}
+#vidpanel{padding:20px}
+#vidpanel h2{color:#1c1c1e;font-size:15px;letter-spacing:.03em;margin-bottom:16px}
+.match-label{display:block;font-size:12px;color:#6B6B70;margin-bottom:6px}
+#players{display:block;width:100%;min-width:0;min-height:42px;border:1px solid #D8D8DE;border-radius:10px;background:#F8F8FA;color:#1c1c1e;font:600 14px var(--sys);padding:9px 32px 9px 12px;margin-bottom:16px;text-overflow:ellipsis}
+#vidbox{aspect-ratio:16/9;display:flex;flex-direction:column;justify-content:center;align-items:center;text-align:center;gap:12px;background:#F2F2F7;border-radius:10px;padding:24px}
+#vidbox[hidden]{display:none}
+#vidbox .vnote{max-width:42ch;margin:0}
+.hits{max-height:152px;overflow-y:auto;overscroll-behavior:contain}
+.phone{width:100%;height:min(852px,calc(100dvh - 96px));max-height:none;position:sticky;top:24px;grid-column:2;grid-row:2;border-radius:44px;box-shadow:0 0 0 7px #101012,0 0 0 9px #3A3A3E,0 16px 40px rgba(0,0,0,.18)}
+.rk{height:clamp(160px,28dvh,260px)}
+.foot{grid-column:1/-1;max-width:none;margin:8px 0 0;padding:0}
+button:focus-visible,select:focus-visible,a:focus-visible{outline:3px solid #6E8D00;outline-offset:3px}
+@media(max-height:800px) and (min-width:761px){
+ .sbar{height:46px}.nav .bar{height:36px}.large{font-size:28px}.tabs{padding-bottom:16px}
+ .rk{height:160px}.scroll{padding-top:10px}.scroll>*+*{margin-top:12px}
+}
+@media(max-width:1000px) and (min-width:761px){.wrap{padding:20px 24px;gap:20px 24px;grid-template-columns:minmax(0,1fr) 340px}.panel,#vidpanel{padding:16px}}
+@media(max-width:760px){
+ .wrap{padding:18px 16px 32px;grid-template-columns:minmax(0,1fr);gap:20px;max-width:620px}
+ .brandrow{grid-column:1;grid-row:1;font-size:13px;gap:16px}
+ .side{display:contents}
+ #vidpanel{grid-row:2;padding:16px}
+ .phone{grid-column:1;grid-row:3;position:relative;top:auto;width:100%;max-width:393px;justify-self:center;height:min(852px,85dvh);border-radius:36px;box-shadow:0 0 0 5px #101012,0 0 0 7px #3A3A3E}
+ .mobnote{display:none}.island{display:block}.sbar{display:flex}
+ .foot{grid-column:1;order:10}.prov{font-size:12px}.rk{height:200px}
+}
 </style>
 </head>
 <body>
 <div class="wrap">
  <div class="mobnote"><b style="color:#B0DA1C">Pro-match replay.</b> Strokes and timing come from labelled data and video; speeds, spin and contacts are model estimates. Details below the phone.</div>
+ <div class="brandrow"><a href="index.html">Tennis Buddee</a><a href="https://github.com/QuentinL-eng/Tennis-Buddy-Smart-Racket/blob/main/docs/EMULATOR_DATA.md">How this data was made</a></div>
  <div class="side">
-  <div class="brandrow"><a href="index.html">Tennis Buddee</a><a href="https://github.com/QuentinL-eng/Tennis-Buddy-Smart-Racket/blob/main/docs/EMULATOR_DATA.md">How this data was made</a></div>
-  <div class="panel prov" id="prov">Loading…</div>
-  <div class="panel"><h2>Whose match</h2><div class="pl" id="players"></div></div>
-  <div class="panel" id="vidpanel"><h2>Source video</h2>
+  <div class="panel" id="vidpanel"><h2>Source video</h2><label class="match-label" for="players">Replay a match</label><select id="players" aria-label="Replay a match"></select>
     <div id="vidbox"><button class="btn" id="vidload" style="border:1.5px solid #D8D8DE;border-radius:10px;padding:8px 12px;font-weight:600;background:#fff;font-size:13px">Load the source video</button>
     <div class="vnote">Watch the real match next to the data. It plays from YouTube, and nothing is requested from YouTube until you press this.</div></div>
     <div id="vidwrap" hidden><div class="vid"><div id="ytp"></div></div>
@@ -255,6 +285,7 @@ svg.i .f{fill:currentColor;stroke:none}
     <button class="btn" id="skip">Skip to end of match</button></div>
     <div class="row2" style="margin-top:8px"><span class="note" style="margin:0">Racket swing</span><div class="seg2" id="pace"><button data-k="1">Real time</button><button data-k="0.6" class="on">Slower</button></div></div>
     <div class="note" style="margin-top:8px">These controls aren't in the app; everything inside the phone is. “Slower” stretches each swing around contact; the hit itself stays on the video's hit.</div></div>
+  <div class="panel prov" id="prov">Loading…</div>
   <div class="panel"><h2>Try it</h2><ol>
     <li>Tap <b>Start Session</b> on Live and watch the racket swing and every hit land.</li>
     <li>Open the <b>Muse</b> tab for the best change, questions, a practice plan and more.</li>
@@ -1200,13 +1231,13 @@ function setPlayer(i){
   const lab=ses.provenance.labels,pred=ses.provenance.predicted;
   $("prov").innerHTML=pred?`<b>Predicted by a model:</b> each hit's stroke type, which player hit it and when — the F3Tennis tsm_e2espot model (97% stroke-type accuracy on held-out Ostrava hits; not measured on this broadcast). <b>From video:</b> how the hitter's racket moved, tracked with SAM 3.1 (box centre, 25 fps, windows spread through the match). <b>Estimated:</b> speeds, spin, angles, contact points, and the 3D swing built from that motion.<br><a href="${P.video_url}">Source video</a>`:lab?`<b>From the dataset (real):</b> each hit's stroke, forehand/backhand, technique and outcome — ${ses.provenance.labels}. <b>From video:</b> when each hit happened and how the hitter's racket moved, tracked with SAM 3.1 (box centre, 25 fps). <b>Estimated:</b> speeds, spin, angles, contact points, and the 3D swing built from that motion.<br><a href="${P.video_url}">F3Tennis dataset</a>`:
    `<b>From video:</b> ${ses.provenance.source} — shot times and swing intensity, tracked with SAM 3.1 in short windows around contacts (not the full match). Stroke types aren't labelled for this match, so every hit shows as "Hit" with a generic swing. <b>Estimated:</b> speeds, spin, angles, contact points, and the racket's 3D motion.${P.video_url?`<br><a href="${P.video_url}">Source video</a>`:""}`;
-  [...$("players").children].forEach((b,k)=>b.classList.toggle("on",k===i));
+  $("players").value=String(i);
   paintSess();paintShot();paintRecent();renderNav();refreshOther();onVidPlayerChange();
 }
 function boot(players){
   PLAYERS=players;
-  $("players").innerHTML=players.map((p,i)=>`<button data-i="${i}">${p.name}</button>`).join("");
-  $("players").addEventListener("click",e=>{const b=e.target.closest("button");if(b)setPlayer(+b.dataset.i);});
+  $("players").innerHTML=players.map((p,i)=>`<option value="${i}">${p.name}</option>`).join("");
+  $("players").addEventListener("change",e=>setPlayer(+e.target.value));
   buildLive();setPlayer(0);
   S.last=performance.now();
   (function loop(now){frameLive(now);requestAnimationFrame(loop);})(performance.now());
