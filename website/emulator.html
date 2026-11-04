@@ -794,7 +794,7 @@ function answer(q){
     return {tools:["get_racket_status"],a:"This is a video replay, so no racket hardware is connected and there is no battery or firmware to report. With a real racket, Muse reads those straight from its status packet."};
   return {tools:[],a:"In this demo I can answer the four suggested questions. Tap one above."};
 }
-let musePending=false;
+let musePending=false,museGeneration=0;
 const chatEscape=s=>String(s).replace(/[&<>"']/g,c=>({'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;',"'":'&#39;'}[c]));
 async function museRequest(q,task="chat"){
  const rs=shownRows();const context={source:"Session replay; physics figures are estimates, contact points assumed",shotCount:rs.length,shots:rs.map(x=>({stroke:x.type,time:x.t,parameters:x.p,estimates:{ball:x.r.ball,rpm:x.r.rpm,dist:x.r.dist},outcome:x.outcome})),units:"km/h, degrees, rpm, cm"};
@@ -807,15 +807,16 @@ async function museRequest(q,task="chat"){
  const data=await r.json();if(!r.ok)throw Error(data.error||'Muse is temporarily unavailable. Please try again.');return data;
 }
 async function askMuse(q){
- q=(q||"").trim();if(!q||musePending)return;musePending=true;const c={q:chatEscape(q),a:"Asking Muse Spark…",tools:[]};S.chat.push(c);S.question="";refreshOther();
- try{const data=await museRequest(q);c.a=chatEscape(data.answer);c.tools=data.tools||[];}catch(e){c.a=chatEscape(e.name==='TimeoutError'?'Muse took too long to reply. Please try again.':e.message||'Muse unavailable. Please try again.');}
- finally{musePending=false;refreshOther();const sc=$("v-other");sc.scrollTop=sc.scrollHeight;}
+ q=(q||"").trim();if(!q||musePending)return;musePending=true;const generation=museGeneration;const c={q:chatEscape(q),a:"Asking Muse Spark…",tools:[]};S.chat.push(c);S.question="";refreshOther();
+ try{const data=await museRequest(q);if(generation!==museGeneration)return;c.a=chatEscape(data.answer);c.tools=data.tools||[];}catch(e){if(generation!==museGeneration)return;c.a=chatEscape(e.name==='TimeoutError'?'Muse took too long to reply. Please try again.':e.message||'Muse unavailable. Please try again.');}
+ finally{if(generation===museGeneration){musePending=false;refreshOther();const sc=$("v-other");sc.scrollTop=sc.scrollHeight;}}
 }
 function museJSON(text){const match=text.match(/\{[\s\S]*\}/);if(!match)throw Error('Muse returned an incomplete result. Please try again.');return JSON.parse(match[0]);}
 async function generateFeature(task){
- if(musePending)return;musePending=true;toast('Asking Muse…');
+ if(musePending)return;musePending=true;const generation=museGeneration;toast('Asking Muse…');
  try{
  const w=wiBase();const data=await museRequest(task==='film'?`Find the best change for my ${w.st}.`:({drill:'Create my next drill.',plan:'Create my practice plan.',scout:'Scout my game.',review:'Review my session.'}[task]),task);
+ if(generation!==museGeneration)return;
  if(task==='scout')S.scout=chatEscape(data.answer);
  else {const a=museJSON(data.answer),clean=x=>chatEscape(String(x||'').slice(0,300));
   if(task==='drill'){if(!a.title||!a.goal||!a.why)throw Error('Muse returned an incomplete drill.');S.drill={title:clean(a.title),goal:clean(a.goal),why:clean(a.why)};S.drillRun=false;}
@@ -824,7 +825,7 @@ async function generateFeature(task){
   if(task==='film'){const d={swing:+a.swing_percent||0,face:+a.face_deg||0,path:+a.path_deg||0,cx:+a.contact_x_cm||0,cy:+a.contact_y_cm||0};if(a.stroke!==w.st||!a.title||!a.cue||!a.why||Object.values(d).filter(Boolean).length<1||Object.values(d).filter(Boolean).length>2||Math.abs(d.swing)>15||Math.abs(d.face)>6||Math.abs(d.path)>10||Math.abs(d.cx)>3||Math.abs(d.cy)>3)throw Error('Muse returned an invalid swing change. Please try again.');S.film={title:clean(a.title),cue:clean(a.cue),why:clean(a.why),d,stroke:w.st};S.wiStroke=w.st;S.d={...d};}
  }
  refreshOther();
- }catch(e){toast(e.message||'Muse is unavailable. Please try again.');}finally{musePending=false;}
+ }catch(e){if(generation===museGeneration)toast(e.message||'Muse is unavailable. Please try again.');}finally{if(generation===museGeneration)musePending=false;}
 }
 
 function memoryHTML(el){el.innerHTML=`<div class="mh"><span class="t">Memory</span></div>${`<div class="mcard" style="text-align:center;padding:40px 20px"><div style="font-size:44px;color:var(--m-lime)">${ic("brain")}</div><div style="font:800 20px var(--rounded);margin:8px 0">No notes yet</div><div style="color:var(--m-muted)">Muse keeps short notes about your habits between sessions. This replay starts with none.</div></div>`}`;}
@@ -1257,6 +1258,7 @@ $("hitlist").addEventListener("click",e=>{
 });
 
 function setPlayer(i){
+  museGeneration++;musePending=false;
   S.pi=i;S.active=false;S.shown=0;S.clock=-LEAD;S.lastRow=null;S.d=Z();S.film=null;S.trials=[];S.chat=[];S.drill=null;S.drillRun=false;S.plan=null;S.planRun=-1;S.scout="";S.reviews=[];
   const P=PLAYERS[i],ses=P.session;rows=(ses.shots||[]).map(enrich);
   const lab=ses.provenance.labels,pred=ses.provenance.predicted;
