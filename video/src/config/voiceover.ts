@@ -20,7 +20,7 @@ export const voiceover: VoLine[] = [
   // talk-intro is you on camera, and robotShort plays on its own song: no line on either.
   { id: 'hardware', at: 'insideHandle', text: 'A sensor insert replaces the foam in the handle: a thousand samples a second, up to 320 g, and a microphone that hears where the ball met the strings. It computes every shot itself.' },
   // The on-racket model is ridge regression (firmware/src/sweetspot.cpp). Don't call it a neural net until one ships.
-  { id: 'models', at: 'twoModels', text: 'On the racket, our own ML model runs right on the ESP32. In the app, Muse Spark, tested head to head with Meta\'s open Muse Spark.' },
+  { id: 'models', at: 'twoModels', text: 'On the racket, our own ML model runs on the ESP32. In the app, Muse Spark, tested head to head with Meta\'s open Muse Spark.' },
   { id: 'evidence', at: 'evidence', text: 'The firmware matches Python on every clip, distance error stays under two centimeters, and Muse passes a strict test 88 percent of the time.' },
   { id: 'everywhere', at: 'devices', lead: 0.8, text: 'Every shot lands on your phone, your Apple Watch, and Meta Ray-Ban Display, through the Meta Wearables toolkit, in a UI you can read at a glance.' },
   { id: 'agent', at: 'museAgent', text: 'Muse Spark isn\'t a chat box here. It\'s an agent with ten tools, over your shots and the live racket. Every number it reports has to come from a tool.' },
