@@ -18,7 +18,7 @@ judges watch muted. Every number on screen comes from the repo.
 | 0:22 | Exploded handle from the real CAD | CGI, done | Tech |
 | 0:30 | Build montage: solder, board, printed insert, code | Real, cut | Tech |
 | 0:36 | Robot arm: the first 24 beats of the X clip, on its own song, no voiceover | Real + CGI, cut | Tech |
-| 0:47 | Two models: our own on the ESP32, Muse Spark in the app, tested on open Muse Spark | CGI, new | Meta, Tech |
+| 0:47 | Two models: our own on the ESP32, open Muse Spark on Baseten in the app | CGI, new | Meta, Tech |
 | 0:56 | Measured: 296/296, 1.83 cm, 87.7%. Replace the distance card when the IMU + mic sessions are scored | CGI | Tech |
 | 1:05 | Phone, Watch, Ray-Ban Display with the Meta Wearables badge | CGI | Meta |
 | 1:11 | Through the lens | CGI (labelled simulated), or **film** the real one | Meta |
@@ -33,7 +33,7 @@ judges watch muted. Every number on screen comes from the repo.
 | 2:52 | Endcard: online simulator, no racket needed | CGI, done | Impact |
 
 Words to keep true: the model on the ESP32 is ridge regression, so it is "our own ML model", not a neural net, until one ships. The
-87.7% was scored on open Muse Spark, and the app runs `muse-spark-1.3`. A number measured on thrown balls says so on screen.
+87.7% was scored on open Muse Spark, the model the app uses, served by Baseten. A number measured on thrown balls says so on screen.
 
 ## Voiceover
 

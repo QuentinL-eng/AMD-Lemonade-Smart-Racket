@@ -24,7 +24,7 @@ const Side: React.FC<{ side: typeof c.racket; at: number; accent: string }> = ({
   );
 };
 
-// What runs where: our own model on the ESP32, Muse Spark in the app, open Muse Spark in the head-to-head test.
+// What runs where: our own model on the ESP32, open Muse Spark on Baseten in the app.
 export const TwoModels: React.FC = () => {
   const frame = useCurrentFrame();
   return (

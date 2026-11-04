@@ -100,7 +100,7 @@ export const copy = {
   },
 
   // On the racket: firmware/src/sweetspot.cpp, a ridge model. The older int8 MLP was never promoted (ml/README.md).
-  // In the app: muse-spark-1.3 through our proxy. Open Muse Spark: meta-models/muse-spark-open-1026 in tools/agent_eval.py.
+  // In the app: open Muse Spark on Baseten, per the owner: meta-models/muse-spark-open-1026 (the proxy's MUSE_MODEL and MUSE_BASE_URL secrets).
   twoModels: {
     kicker: 'Two models, one racket',
     title: 'Fast on the racket. Smart in the app.',
@@ -111,8 +111,8 @@ export const copy = {
     },
     app: {
       where: 'In the app',
-      name: 'Meta Muse Spark',
-      lines: ['Muse Spark 1.3 runs the agent', '10 tools, every number from a tool', 'Tested head to head on open Muse Spark'],
+      name: 'Open Muse Spark',
+      lines: ['Meta\'s open model, served by Baseten', '10 tools, every number from a tool', 'Scored on 243 what-if cases'],
     },
   },
 
