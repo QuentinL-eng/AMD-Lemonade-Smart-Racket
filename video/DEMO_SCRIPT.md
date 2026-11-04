@@ -32,7 +32,7 @@ judges watch muted. Every number on screen comes from the repo.
 | 2:45 | The online simulator, tennisbuddy.net/emulator | **Film** (screen recording) | Impact, Demo |
 | 2:52 | Endcard: online simulator, no racket needed | CGI, done | Impact |
 
-Words to keep true: the model on the ESP32 is ridge regression, so it is "our own model", not a neural net, until one ships. The
+Words to keep true: the model on the ESP32 is ridge regression, so it is "our own ML model", not a neural net, until one ships. The
 87.7% was scored on open Muse Spark, and the app runs `muse-spark-1.3`. A number measured on thrown balls says so on screen.
 
 ## Voiceover

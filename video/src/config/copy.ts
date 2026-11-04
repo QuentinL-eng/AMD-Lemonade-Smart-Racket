@@ -106,7 +106,7 @@ export const copy = {
     title: 'Fast on the racket. Smart in the app.',
     racket: {
       where: 'On the racket',
-      name: 'Our own model',
+      name: 'Our own ML model',
       lines: ['Runs on the ESP32-C3', 'Ridge regression on 156 sound features', 'Trained on our own labelled hits'],
     },
     app: {
