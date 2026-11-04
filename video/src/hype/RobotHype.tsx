@@ -387,7 +387,7 @@ export const RobotHypeIntro: React.FC = () => {
       <Audio
         src={staticFile(s.src)}
         trimBefore={Math.round(s.start * FPS)}
-        volume={(fr) => s.volume * duck(fr) * interpolate(fr, [end - 14, end - 4], [1, 0], clamp)}
+        volume={(fr) => 0.65 * s.volume * duck(fr) * interpolate(fr, [end - 14, end - 4], [1, 0], clamp)}
       />
       {robotHypeCues.filter((c) => c.beat < INTRO_BEATS - 1).map((c, i) => <Effect key={i} cue={{ ...c, at: 0 }} frame={f(c.beat)} />)}
     </AbsoluteFill>

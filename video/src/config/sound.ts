@@ -11,13 +11,13 @@ export type Music = {
 };
 
 /** Default music bed for the Reveal and Demo cuts (the song cut sets its own). */
-export const music: Music = { src: 'audio/keep-it-movin.mp3', from: 0.386, volume: 0.55 };
+export const music: Music = { src: 'audio/keep-it-movin.mp3', from: 0.386, volume: 0.42 };
 
 export const sound = {
   /** Music level while a footage slot with `muted: false` plays (people talking). */
-  musicUnderTalk: 0.12,
+  musicUnderTalk: 0.07,
   /** Music level under a recorded voiceover line (public/audio/vo/). */
-  musicUnderVoiceover: 0.16,
+  musicUnderVoiceover: 0.09,
   /** Fade the music out over the last N seconds. */
   musicFadeOut: 3,
 };

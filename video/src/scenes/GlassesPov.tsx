@@ -1,5 +1,5 @@
 import React from 'react';
-import { AbsoluteFill, Img, staticFile, useCurrentFrame, useVideoConfig } from 'remotion';
+import { AbsoluteFill, OffthreadVideo, staticFile, useCurrentFrame, useVideoConfig } from 'remotion';
 import { colors, fonts } from '../config/brand';
 import { copy } from '../config/copy';
 import { Vignette } from '../hype/kit';
@@ -9,7 +9,7 @@ const c = copy.glassesPov;
 // Frames a shot lands on the HUD
 const HITS = [45, 135];
 
-// Looking through Meta Ray-Ban Display: the fields of GlassesHUD.swift in the right lens, over the court.
+// The player's view from court, with the fields of GlassesHUD.swift drawn where the right lens shows them. Labelled as simulated.
 export const GlassesPov: React.FC = () => {
   const frame = useCurrentFrame();
   const { fps } = useVideoConfig();
@@ -21,7 +21,7 @@ export const GlassesPov: React.FC = () => {
   return (
     <AbsoluteFill style={{ background: '#000', fontFamily: fonts.sans }}>
       <AbsoluteFill style={{ overflow: 'hidden' }}>
-        <Img src={staticFile('footage/ev-plate-court.jpg')} style={{ width: '100%', height: '100%', objectFit: 'cover', transform: `scale(${drift})`, filter: 'blur(1.4px) brightness(0.8) saturate(0.95)' }} />
+        <OffthreadVideo muted src={staticFile('footage/sl-pov.mp4')} style={{ width: '100%', height: '100%', objectFit: 'cover', transform: `scale(${drift})`, filter: 'blur(1.4px) brightness(0.8) saturate(0.95)' }} />
       </AbsoluteFill>
       <AbsoluteFill style={{ background: 'radial-gradient(ellipse 88% 96% at 54% 50%, rgba(0,0,0,0) 54%, rgba(0,0,0,0.3) 84%, rgba(0,0,0,0.62) 100%)' }} />
       <Vignette strength={0.3} />

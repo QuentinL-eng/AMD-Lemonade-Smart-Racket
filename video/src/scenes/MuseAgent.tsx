@@ -59,7 +59,7 @@ export const MuseAgent: React.FC = () => {
       {/* Muse */}
       <div style={{ position: 'absolute', left: HUB.x - 145, top: HUB.y - 95, width: 290, height: 190, borderRadius: 28, background: colors.card, border: `3px solid ${colors.accent}`, display: 'flex', flexDirection: 'column', alignItems: 'center', justifyContent: 'center', opacity: ramp(frame, 0, 12), boxShadow: `0 0 ${activeTool ? 70 : 30}px rgba(221,232,91,${activeTool ? 0.45 : 0.18})` }}>
         <div style={{ fontFamily: fonts.display, fontSize: 46, fontWeight: 800 }}>Muse Spark</div>
-        <div style={{ fontFamily: fonts.mono, fontSize: 24, color: colors.muted }}>{facts.model}</div>
+        <div style={{ fontFamily: fonts.mono, fontSize: 24, color: colors.muted }}>{copy.museAgent.model}</div>
         <div style={{ fontSize: 26, color: colors.accent, fontWeight: 700, marginTop: 6 }}>{facts.agentTools.length} tools</div>
       </div>
 

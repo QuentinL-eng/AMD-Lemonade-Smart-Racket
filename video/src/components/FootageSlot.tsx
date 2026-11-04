@@ -48,9 +48,9 @@ const Clips: React.FC<{ clips: NonNullable<FootageEntry['clips']> }> = ({ clips 
 };
 
 /** A portrait screen recording in an iPhone frame. */
-const PhoneFrame: React.FC<{ children: React.ReactNode }> = ({ children }) => (
+const PhoneFrame: React.FC<{ children: React.ReactNode; width?: number }> = ({ children, width = 470 }) => (
   <Backdrop glow={0.12}>
-    <div style={{ position: 'absolute', left: 300, top: 40, width: 470, height: 1000, borderRadius: 70, background: '#000', border: '12px solid #2b2d27', overflow: 'hidden', boxShadow: '0 30px 120px rgba(0,0,0,0.7)' }}>
+    <div style={{ position: 'absolute', left: 300, top: 40, width, height: 1000, borderRadius: 70, background: '#000', border: '12px solid #2b2d27', overflow: 'hidden', boxShadow: '0 30px 120px rgba(0,0,0,0.7)' }}>
       {children}
     </div>
   </Backdrop>
@@ -76,7 +76,7 @@ export const FootageSlot: React.FC<{ entry: FootageEntry }> = ({ entry }) => {
   const Fallback = !file && entry.fallback ? scenes[entry.fallback] : null;
   return (
     <AbsoluteFill style={{ background: colors.bg }}>
-      {phone ? <PhoneFrame>{video ?? <Placeholder entry={entry} small />}</PhoneFrame> : video}
+      {phone ? <PhoneFrame width={entry.phoneWidth}>{video ?? <Placeholder entry={entry} small />}</PhoneFrame> : video}
       {!file && entry.clips && <Clips clips={entry.clips} />}
       {Fallback && <Fallback />}
       {!file && !phone && !entry.clips && !Fallback && <Placeholder entry={entry} />}

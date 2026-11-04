@@ -18,9 +18,9 @@ import { voiceover, type VoLine } from './voiceover.ts';
 export type Overlay =
   | { type: 'headline'; text: 'hook'; at: number; seconds: number }
   | { type: 'shotCard'; at: number; seconds: number }
-  | { type: 'badge'; text: 'deviceBadge' | 'filmBadge'; at: number; seconds: number; x?: number; y?: number }
-  | { type: 'callouts'; text: 'museCallouts'; at: number; every: number }
-  | { type: 'lowerThird'; text: 'testimonial1' | 'testimonial2'; at: number; seconds: number };
+  | { type: 'badge'; text: 'deviceBadge' | 'filmBadge' | 'emuBadge'; at: number; seconds: number; x?: number; y?: number }
+  | { type: 'callouts'; text: 'museCallouts' | 'simCallouts'; at: number; every: number }
+  | { type: 'lowerThird'; text: 'testimonial1' | 'testimonial2' | 'talkName'; at: number; seconds: number };
 
 export type SceneEntry = {
   scene: SceneId;
@@ -46,6 +46,8 @@ export type FootageEntry = {
   fallback?: SceneId;
   /** 'phone': a portrait screen recording in an iPhone frame, ungraded. Default: full frame, graded. */
   layout?: 'full' | 'phone';
+  /** Width of the phone frame, for a screen that isn't iPhone-shaped. Default 470. */
+  phoneWidth?: number;
   playbackRate?: number;
   overlays?: Overlay[];
 };
@@ -78,40 +80,49 @@ export const demoTransition = 0.25;
 const songBar = (n: number) => 0.386 + ((n - 1) * 4 * 60) / 95;
 const demoMusic: Music = { ...music, jump: { at: songBar(49), to: songBar(9) } };
 export const demo: Entry[] = [
-  { footage: 'cold-open', seconds: 8, standIn: true, clips: [['ev-toss', 3.2, 0.5], ['ev-serve', 4.8, 0.3]],
-    overlays: [{ type: 'headline', text: 'hook', at: 0.4, seconds: 3.6 }, { type: 'shotCard', at: 4.6, seconds: 3.4 }],
-    shot: 'Your serve at the court: toss, then contact. Film 240 fps slow-mo from the side. Phone on the Live tab so the card numbers are real.' },
-  { scene: 'racketReveal', seconds: 6 },
-  { footage: 'talk-intro', seconds: 9, muted: false,
-    caption: 'I built a smart racket that combines Meta AI with real data from your own swings, so you can see what a change will do before you make it.',
-    shot: 'Bedroom, landscape, racket in hand. One line on the problem, one on what you built. Say what the caption says, in your own words, and change the caption to match.' },
+  // Real footage comes from E:/Tennis selects through scripts/cut-selects.py and scripts/cut-emulator.py.
+  { footage: 'cold-open', seconds: 8, clips: [['sl-serve', 5.2, 0.65], ['sl-forehand', 3]],
+    overlays: [{ type: 'headline', text: 'hook', at: 0.4, seconds: 4.2 }],
+    shot: 'Cut from the serve and forehand selects.' },
+  { scene: 'racketReveal', seconds: 5.25 },
+  { footage: 'talk-intro', seconds: 12, muted: false,
+    overlays: [{ type: 'lowerThird', text: 'talkName', at: 0.4, seconds: 3.6 }],
+    shot: 'TalkingToCamera.MP4, trimmed to the words.' },
   { scene: 'insideHandle', seconds: 8 },
   { footage: 'build-montage', seconds: 6, clips: [['bt-smoke', 1.2], ['bt-solder', 1], ['bt-pcb', 1], ['bt-pod', 0.7], ['bt-code', 1.1], ['bt-wired', 0.6], ['bt-cad', 0.4]],
     shot: 'Already cut from the build footage. Replace only if you have something better.' },
   // The first 24 beats of the X clip, on its own song. It stops before the claims the Demo doesn't make.
   { scene: 'robotShort', seconds: 11.25, ownMusic: true },
   { scene: 'twoModels', seconds: 8.75 },
-  { scene: 'evidence', seconds: 9 },
-  { scene: 'devices', seconds: 6, overlays: [{ type: 'badge', text: 'deviceBadge', at: 1.6, seconds: 4.2, x: 1560, y: 300 }] },
-  { footage: 'glasses-pov', seconds: 7, fallback: 'glassesPov',
-    shot: 'Optional: through the lens of the real Ray-Ban Display. Until then, the simulated-view CGI plays, and says so.' },
-  { scene: 'museAgent', seconds: 12 },
-  { scene: 'whatIf', seconds: 10 },
-  { footage: 'muse-screen-recording', seconds: 22, layout: 'phone',
-    overlays: [{ type: 'callouts', text: 'museCallouts', at: 1, every: 5 }],
-    shot: 'iPhone screen recording, about a minute, slowly: Muse tab, What if, ask it, wait for the numbers. Then Next drill, then Start on Watch. Set playbackRate to speed it up and move the callouts to match.' },
-  { footage: 'drill-on-watch', seconds: 7.5,
-    shot: 'Close on the Watch: the to-go count drops as you hit. Finish on the phone Live tab saying Drill complete!' },
-  { scene: 'samTrack', seconds: 6.75 },
-  { scene: 'swingFilm', seconds: 7, overlays: [{ type: 'badge', text: 'filmBadge', at: 0.3, seconds: 6.5, x: 960, y: 40 }] },
-  // Made by scripts/testimonials.py, which cleans the audio. The files are full length: pick each line with `from` and `seconds`.
-  { footage: 'testimonial-1', seconds: 12, from: 15, muted: false, overlays: [{ type: 'lowerThird', text: 'testimonial1', at: 0.4, seconds: 4 }],
-    shot: 'npm run testimonials' },
-  { footage: 'testimonial-2', seconds: 12, from: 1.5, muted: false, overlays: [{ type: 'lowerThird', text: 'testimonial2', at: 0.4, seconds: 4 }],
-    shot: 'npm run testimonials' },
-  { footage: 'simulator', seconds: 10,
-    shot: 'Screen record tennisbuddy.net/emulator in landscape: pick a match, Start Session on Live, let a few hits land, then open Muse and What if.' },
-  { scene: 'endcard', seconds: 6 },
+  { scene: 'evidence', seconds: 8 },
+  // The camera and the phone recording at their real offset, phone cropped to the 3D view.
+  { footage: 'live-twin', seconds: 8.5, caption: 'A real serve. The app\'s racket follows it live.',
+    shot: 'scripts/cut-selects.py: MVI_0927 beside the iPhone screen recording.' },
+  { scene: 'devices', seconds: 8.75, overlays: [{ type: 'badge', text: 'deviceBadge', at: 1.6, seconds: 4.2, x: 1560, y: 300 }] },
+  // The real court view, with the HUD's fields drawn on it and labelled as simulated.
+  { footage: 'glasses-pov', seconds: 6, fallback: 'glassesPov',
+    shot: 'Optional: through the lens of the real Ray-Ban Display. Until then, the labelled HUD plays over the court footage.' },
+  { footage: 'score-tap', file: 'sl-score.mp4', seconds: 5.5, caption: 'Tap the handle to score.',
+    shot: 'scripts/cut-selects.py: select 08.' },
+  { scene: 'museAgent', seconds: 10.75 },
+  { scene: 'whatIf', seconds: 8.75 },
+  // Recorded from the live site, with real calls to Muse Spark Open: scripts/capture-emulator.mjs, scripts/cut-emulator.py.
+  { footage: 'muse-screen-recording', seconds: 20, layout: 'phone', phoneWidth: 536,
+    overlays: [{ type: 'callouts', text: 'museCallouts', at: 0.5, every: 3.9 }, { type: 'badge', text: 'emuBadge', at: 0.5, seconds: 19, x: 1400, y: 90 }],
+    shot: 'scripts/capture-emulator.mjs records it.' },
+  { footage: 'drill-on-watch', seconds: 6, clips: [['sl-watch', 3], ['sl-side', 3.2]],
+    shot: 'Optional: close on the Watch as the to-go count drops. Until then, the Watch and serve selects.' },
+  { scene: 'samTrack', seconds: 8.5 },
+  { scene: 'swingFilm', seconds: 6, overlays: [{ type: 'badge', text: 'filmBadge', at: 0.3, seconds: 5.5, x: 960, y: 40 }] },
+  // scripts/cut-selects.py keeps each person's own lines and drops the questions.
+  { footage: 'testimonial-1', file: 'testimonial-1-cut.mp4', seconds: 9.9, muted: false, overlays: [{ type: 'lowerThird', text: 'testimonial1', at: 0.4, seconds: 4 }],
+    shot: 'scripts/cut-selects.py' },
+  { footage: 'testimonial-2', file: 'testimonial-2-cut.mp4', seconds: 5.5, muted: false, overlays: [{ type: 'lowerThird', text: 'testimonial2', at: 0.4, seconds: 3.5 }],
+    shot: 'scripts/cut-selects.py' },
+  { footage: 'simulator', seconds: 7.5, layout: 'phone', phoneWidth: 536,
+    overlays: [{ type: 'callouts', text: 'simCallouts', at: 0.4, every: 2.3 }],
+    shot: 'scripts/capture-emulator.mjs records it.' },
+  { scene: 'endcard', seconds: 5.5 },
 ];
 
 // ---------------------------------------------------------------------------

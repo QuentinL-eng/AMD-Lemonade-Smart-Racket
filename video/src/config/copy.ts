@@ -118,6 +118,7 @@ export const copy = {
 
   // Every tool must appear once (npm run check compares this with hackathon.json).
   museAgent: {
+    model: 'muse-spark-open-1026',
     kicker: 'An agent, not a chat box',
     groups: [
       { name: 'Your shots', tools: ['query_shots', 'list_shots', 'compare_sessions', 'get_session_digest'] },
@@ -148,7 +149,7 @@ export const copy = {
 
   // Mirrors GlassesHUD.swift field by field. A simulated view: film the real lens and it replaces this scene.
   glassesPov: {
-    tag: 'Simulated view · real HUD fields',
+    tag: 'Filmed on court · HUD simulated, real HUD fields',
     badge: 'Meta Ray-Ban Display · Meta Wearables Device Access Toolkit',
     elapsed: '12:48',
     idleTitle: 'Ready', // GlassesHUD.swift
@@ -177,7 +178,10 @@ export const copy = {
     hook: ['Hundreds of hits per match.', 'Which ones are good?'],
     deviceBadge: 'Meta Wearables Device Access Toolkit',
     filmBadge: 'Real Muse Spark script, on a demo forehand session',
-    museCallouts: ['You ask in your own words', 'Muse calls simulate_change', 'An estimate, on your own shots', 'Then it plans a drill'],
+    museCallouts: ['Muse tests changes', 'Live on Muse Spark Open', 'An estimate: +7% ball speed', 'Then it plans a drill', 'Ask it anything: tools first'],
+    emuBadge: 'Recorded live on the online simulator, on a pro match replay',
+    simCallouts: ['tennisbuddy.net/emulator', 'No racket needed', 'Real pro matches, tracked with SAM 3.1'],
+    talkName: { name: 'Quentin Lynch', detail: 'Built Tennis Buddee' },
     // Each player's name and what they do. An empty detail shows the name alone.
     // Kellam's job title is about the person, not the product, so it's the one allowed use of the word.
     testimonial1: { name: 'Kellam Adams', detail: 'Part-time tennis coach' },

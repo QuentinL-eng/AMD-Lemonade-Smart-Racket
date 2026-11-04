@@ -31,7 +31,7 @@ for (const e of cut.entries.filter((x) => x.footage)) {
 if (!existsSync('public/footage/sam-clip.mp4')) blockers.push('Missing public/footage/sam-clip.mp4 (npm run sam)');
 
 // Sample numbers and blank names
-if (copy.coldOpenShot.sample) blockers.push('copy.coldOpenShot is still SAMPLE: put your real serve\'s numbers in, then set sample: false');
+if (copy.coldOpenShot.sample && cut.entries.some((e) => e.overlays?.some((o) => o.type === 'shotCard'))) blockers.push('copy.coldOpenShot is still SAMPLE: put your real serve\'s numbers in, then set sample: false');
 for (const e of cut.entries) for (const o of e.overlays ?? []) {
   if (o.type === 'lowerThird' && copy.overlays[o.text].name === 'Name') blockers.push(`${id(e)}: fill in copy.overlays.${o.text}`);
 }
@@ -47,7 +47,7 @@ lines.forEach((l, i) => {
   if (next && l.from + l.len > next.from) notes.push(`Voiceover "${l.id}" runs ${(l.from + l.len - next.from).toFixed(1)} s into "${next.id}": shorten it, or lengthen the entry`);
 });
 const recorded = existsSync('public/audio/vo') ? readdirSync('public/audio/vo').map((f) => f.replace(/\.\w+$/, '')) : [];
-const missing = lines.filter((l) => !recorded.includes(l.id)).map((l) => l.id);
+const missing = lines.filter((l) => !l.captionOnly && !recorded.includes(l.id)).map((l) => l.id);
 if (missing.length) blockers.push(`Voiceover not recorded (public/audio/vo/<id>.wav): ${missing.join(', ')}`);
 
 // Words the hackathon's anti-project list rules out, in anything that reaches the screen
