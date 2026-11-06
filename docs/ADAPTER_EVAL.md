@@ -85,3 +85,16 @@ More training barely helped (+3 cases). The same two objectives fail: 21 of 48 `
 **Cause found in the training data.** Scoring the final `simulate_change` result of each training conversation with the evaluator's own rule (`reaches_target`) shows that 113 of 436 `cleaner_contact` and 74 of 338 `more_spin` training conversations end on a change that does not reach the goal, and 24 goal conversations run no simulation at all. The model's miss rate matches the data it imitated.
 
 **Round 4 (in progress when this was written):** train on a target-conditioned copy of the training split made by `tools/filter_train_by_target.py` (drops 211 of 1,809 conversations: 125 `cleaner_contact`, 80 `more_spin`, 6 `more_pace`; `fix_slice` is left alone because only 1 of 61 of its training conversations reaches its goal under this rule). It reads only the training file. This is rejection sampling on the training data using the evaluator's rule, so it must be disclosed with any resulting score. Validation and test data are not used to build it. Rounds 2 to 4 were all chosen by looking at the same 243 validation cases.
+
+## Round 4: target-conditioned training data, 400 steps
+
+Trained on `conversations_train_target.jsonl` (1,598 of the 1,809 training conversations; built by `tools/filter_train_by_target.py`, which keeps goal conversations only when their last simulation reaches the goal under the evaluator's rule; `fix_slice` untouched). 400 steps, same seed and settings, Modal A100-40GB. Weights SHA-256 begins `33bf5786`; training-file SHA-256 `2293a5ec...`. See [report](../evaluation/adapter-target400-validation.json) and [manifest](../evaluation/training-target400.json).
+
+| Round | Training data | Steps | Strict all-pass | Response errors |
+|---|---|---:|---:|---:|
+| 1 | full, empty turns kept | 300 | 169/243 (69.5%) | 62 |
+| 2 | full, empty turns dropped | 300 | 204/243 (84.0%) | 0 |
+| 3 | full, empty turns dropped | 700 | 207/243 (85.2%) | 0 |
+| 4 | target-filtered, empty turns dropped | 400 | **212/243 (87.2%)** | 0 |
+
+The 90% goal was **not reached**. Remaining 31 failures, all `objective`: 12 `more_spin` and 11 `cleaner_contact` answers that miss the goal (down from 29 target misses in round 3), and 8 `cleaner_contact` answers quoting a number that is not in any tool result (up from 6). Filtering helped on target misses but did not remove them, and the grounded-number failures are now the clearest next lever. Four rounds were chosen by looking at the same 243 validation cases, so 87.2% is somewhat optimistic; the untouched test split has not been run. Ideas not yet tried: also filter ungrounded-number answers out of the training data, add training examples that copy the tool's exact offset into the move, a larger LoRA rank, or a larger base model.
