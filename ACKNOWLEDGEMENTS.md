@@ -8,3 +8,5 @@ Tennis Buddee is a smart racket project. Its agent and integrations have changed
 - **Meta Wearables Device Access Toolkit**, including `MWDATCore` and `MWDATDisplay`, powers the optional Ray-Ban Display integration. It remains an optional integration and is not part of the default product story. The SDK is Meta's and retains its original name.
 
 The project retains its MIT license and acknowledges the idea's starting point in the MIT-licensed [Smart-Tennis-Racket repository](https://github.com/AahanPrajapati/Smart-Tennis-Racket).
+
+The browser emulator vendors Three.js, GLTFLoader, and BufferGeometryUtils under the MIT license; see [the retained license](website/emulator/LICENSE-three.txt). Its compact racket GLB is generated from the existing app resource by `tools/optimize_racket_glb.py`. The replay JSON retains video and dataset provenance; source footage is not bundled.

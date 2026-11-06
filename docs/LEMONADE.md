@@ -2,29 +2,57 @@
 
 Tennis Buddee can send its tool-calling agent requests to a Lemonade server on the same device or local network. No Tennis Buddee account is needed for this path. Supabase is used only for friend sharing and account features.
 
-> **Current verification status:** the native app transport and connection UI are implemented in source but have not been built or run here. The web emulator still uses its legacy `/api/muse` endpoint; it does not yet connect directly to a judge's Lemonade server. Browser CORS has not been tested, and this document's browser connection steps are a target setup, not a verified workflow. Do not describe the emulator as Lemonade-ready until that integration is implemented and tested.
+> **Current verification status:** native Swift app execution needs a Mac. Lemonade Server 2026.45.3 and the full 243-case Python evaluation ran on Windows. The local browser replay loaded successfully and its proxy passed a mock tool-loop test. A real local model answer also reached the browser, but answered a shot-count question incorrectly. Treat the current model as an experimental demo; the measured strict score is 51.0%.
 
 ## Install and prepare a model
 
-Install Lemonade for your platform using the [official installation guide](https://lemonade-server.ai/docs/guide/install/). Use the Lemonade model manager, or its CLI, to pull a local chat model that supports tool calling:
+Install Lemonade for your platform using the [official installation guide](https://lemonade-server.ai/docs/guide/install/). On Windows, the verified package command is:
 
-```bash
-lemonade pull <model-id>
+```powershell
+winget install --id AMD.LemonadeServer --exact
 ```
 
-Choose an available model in Lemonade's model list. This project does not assume that all models support the same tool-call behavior.
+The installed CLI reports its version and server state with `lemonade --version` and `lemonade status`. Pull a small chat model with tool-calling support:
+
+```bash
+lemonade pull Qwen3-1.7B-GGUF
+```
+
+This model is about 1 GB in Lemonade's catalog and is marked `tool-calling`. Choose another available model from Lemonade's list if appropriate. The app sends `enable_thinking: false` to keep Qwen3 from spending its response budget on reasoning text before emitting tool calls. This request parameter is a Lemonade API extension; other providers may ignore it.
 
 ## Start the server
 
-Start the Lemonade server:
+The Windows installer starts the local Lemonade service. Check that it is running:
 
-```bash
-lemonade-server serve
+```powershell
+lemonade status
 ```
 
-The app's initial server address is `http://localhost:8000/api/v1`. Use **Test connection** in the Racket agent screen. A successful test lists the models Lemonade returns and reports the request latency. Pick the model to use. The address and model choice are saved locally, and the app checks the server again on each launch. If it cannot connect, the screen shows the failure and answers with the built-in engine.
+Lemonade's current default port is `13305`; this app's configured default is `8000`. Set Lemonade to the app's port once:
 
-For a future direct-browser connection, the emulator will need a configurable Lemonade server address. The browser page and Lemonade are different origins, so Lemonade must allow the page's origin. Lemonade documents this with its `allowed_origins` setting; configure the exact origin of the page, including scheme and port, rather than a wildcard. See [Lemonade CORS configuration](https://lemonade-server.ai/docs/guide/configuration/#allowed-origins).
+```powershell
+lemonade config set port=8000
+```
+
+The server applies and saves the setting. Then load the model:
+
+```powershell
+lemonade load Qwen3-1.7B-GGUF
+```
+
+Use **Test connection** in the Racket agent screen. A successful test lists the models Lemonade returns and reports the request latency. Pick the model to use. The address and model choice are saved locally, and the app checks the server again on each launch. If it cannot connect, the screen shows the failure and answers with the built-in engine.
+
+## Run the local browser emulator
+
+With Node.js 20 or later installed, run this from the repository root:
+
+```bash
+node tools/emulator-server.mjs
+```
+
+Open `http://localhost:8765/emulator`, press **Start Session**, then **Skip to end of match** and open **Racket agent**. No racket, Apple device, or account is required. The launcher serves the committed replay assets and routes `/api/muse` to Lemonade on loopback; the route name is retained for compatibility. The default model is `Qwen3-1.7B-GGUF`. Override `LEMONADE_MODEL` and `LEMONADE_BASE_URL` in the environment to select another local model or port. `LEMONADE_API_KEY` is supported by the proxy if the server requires it.
+
+The local proxy uses the browser's own origin, so its agent requests avoid cross-origin configuration. A direct-browser connection to Lemonade would need the proper origin headers. A loopback preflight from `http://localhost:8765` was verified to return HTTP 204 and the matching `Access-Control-Allow-Origin` header. See [Lemonade CORS configuration](https://lemonade-server.ai/docs/guide/configuration/#allowed-origins).
 
 Before implementing or testing a direct-browser chat request, check that the browser preflight succeeds. Replace the example origin and address with the actual page and server values:
 
@@ -39,7 +67,7 @@ The response must allow the page origin and the requested method and headers. If
 
 ## Connect an iPhone over the LAN
 
-`localhost` on an iPhone means the iPhone itself. To reach Lemonade on a laptop, use the laptop's LAN address in the app, such as `http://192.168.1.20:8000/api/v1`. The laptop server must listen on a network interface, not only loopback; launch it with the server's `--host 0.0.0.0` option when needed. Allow the server port through the laptop firewall, and keep both devices on a network that permits device-to-device traffic. The exact server address and port depend on the Lemonade launch configuration.
+`localhost` on an iPhone means the iPhone itself. To reach Lemonade on a laptop, use the laptop's LAN address in the app, such as `http://192.168.1.20:8000/api/v1`. The laptop server must bind to a network interface, not only loopback; the current configuration command is `lemonade config set host=0.0.0.0`. Allow the server port through the laptop firewall and restrict it to a trusted private network. Lemonade warns that binding to `0.0.0.0` exposes inference and internal control endpoints; the current app does not send an API key, so do not use this unauthenticated LAN configuration on a public or untrusted network. See [Lemonade server configuration](https://lemonade-server.ai/docs/guide/configuration/).
 
 ## What the app sends
 

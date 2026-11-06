@@ -76,5 +76,13 @@ TennisRobot/TennisBuddyDayOne_20261029/
 
 # Website and marketing production files remain local.
 /website/
+!/website/
+/website/*
+!/website/emulator.html
+!/website/emulator_sessions.json
+!/website/api/
+/website/api/*
+!/website/api/muse-worker.js
+!/website/emulator/
 /marketing/*
 !/marketing/tennis-buddee-logo/
