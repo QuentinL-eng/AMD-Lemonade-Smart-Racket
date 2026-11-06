@@ -12,6 +12,14 @@ lemonade load Qwen3-1.7B-GGUF --ctx-size 8192
 
 The backend is selected automatically. For an older AMD GPU, add `--llamacpp vulkan`; the RX 580 is under test. The context size above is a demo setting, not the context used for the published Windows benchmark. Reduce it if the machine cannot allocate enough memory, and record the resulting limit.
 
+## One command
+
+```bash
+node tools/judge-demo.mjs
+```
+
+Runs the offline checks, probes Lemonade (printing the exact `lemonade pull`/`load` commands if it is missing), then starts the emulator at `http://localhost:8765/emulator`. Add `--check` to stop before starting the server. The longer steps below are the same thing done by hand.
+
 ## Check and launch
 
 ```bash
