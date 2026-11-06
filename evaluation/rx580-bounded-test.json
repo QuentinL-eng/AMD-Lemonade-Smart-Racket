@@ -1,0 +1,61 @@
+{
+  "elapsed_seconds": 0.27323270007036626,
+  "response": {
+    "choices": [
+      {
+        "finish_reason": "stop",
+        "index": 0,
+        "message": {
+          "content": "Ready.",
+          "role": "assistant"
+        }
+      }
+    ],
+    "created": 1793937884,
+    "id": "chatcmpl-gJdPULPPHOJ8JT6mGBlUsCrYEEM3R2nz",
+    "model": "Qwen3-1.7B-GGUF",
+    "object": "chat.completion",
+    "system_fingerprint": "b11846-1a24df163",
+    "timings": {
+      "cache_n": 0,
+      "predicted_ms": 23.361,
+      "predicted_n": 3,
+      "predicted_per_second": 85.61277342579513,
+      "predicted_per_token_ms": 11.6805,
+      "prompt_ms": 67.516,
+      "prompt_n": 22,
+      "prompt_per_second": 325.84868771846675,
+      "prompt_per_token_ms": 3.068909090909091
+    },
+    "usage": {
+      "completion_tokens": 3,
+      "prompt_tokens": 22,
+      "prompt_tokens_details": {
+        "cached_tokens": 0
+      },
+      "total_tokens": 25
+    }
+  },
+  "test_date_local": "2026-11-05",
+  "timezone": "America/Los_Angeles",
+  "scope": "One short response; not agent accuracy or sustained stability.",
+  "limits": {
+    "cpu_cores": 0.5,
+    "memory_gib": 2,
+    "swap_gib": 0,
+    "context_tokens": 1024,
+    "max_completion_tokens": 16
+  },
+  "monitor": {
+    "window_seconds": 45,
+    "sample_interval_seconds": 1,
+    "max_cpu_c": 74.75,
+    "max_gpu_c": 51,
+    "minimum_available_memory_mib": 9096.421875,
+    "temperature_abort_c": 75,
+    "memory_abort_mib": 4096,
+    "container_oom_killed": false,
+    "final_container_state": "stopped"
+  },
+  "prompt": "Reply with the word ready."
+}
