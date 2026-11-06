@@ -1,0 +1,21 @@
+{
+  "base_model": "Qwen/Qwen2.5-1.5B-Instruct",
+  "base_license": "Apache-2.0",
+  "parameter_count": 1562179072,
+  "qlora": true,
+  "quantization": "4-bit NF4 with double quantization",
+  "rank": 16,
+  "steps": 300,
+  "seed": 7,
+  "max_length": 4608,
+  "gradient_accumulation": 8,
+  "supervision": "assistant messages only; selective vocabulary logits",
+  "training_examples": 1809,
+  "empty_assistant_turns_dropped": 377,
+  "training_data": "data/whatif/conversations_train.jsonl",
+  "training_data_sha256": "983c6535d8c08e7887a846f16acf117bfbefbde0b149131682f1b4a81f14d713",
+  "hardware": "NVIDIA A100-SXM4-40GB",
+  "cuda": "12.8",
+  "adapter_path": "/__modal/volumes/vo-vMH2ssXX2TXlYfxlXeHcr3/qwen2.5-1.5b-noempty/adapter",
+  "validation_or_test_loaded": false
+}

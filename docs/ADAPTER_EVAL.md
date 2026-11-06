@@ -59,3 +59,14 @@ The server binds only `127.0.0.1:8001`. The evaluator writes `data/whatif/eval_o
 ## Finding for the next training run
 
 An audit found 377 training conversations with an empty intermediate assistant turn (all in the objective kind); none of those empty turns was the final answer. The current loader normalized and supervised them, teaching an end-of-turn token with no content at those positions. This may contribute to empty-answer failures, but causation has not been proven. The next recipe should remove empty intermediate assistant turns in preprocessing, retain every original conversation and all measurement files, and be evaluated again before claiming an improvement. No second training run was started as part of this validation.
+
+## Round 2: empty-turn fix (300 steps, same recipe)
+
+After dropping the 377 empty intermediate assistant turns in preprocessing (`tools/train_ondevice.py`, tested in `tools/test_train_preprocessing.py`), the same recipe (rank 16, 300 steps, seed 7, 1,809 conversations) was retrained on a Modal A100-40GB and validated on the laptop RTX 4070 with the same server, scorer, and `--sample 243 --seed 7`. Training took about 29 minutes. Weights SHA-256 begins `5272f518`; see [training manifest](../evaluation/training-noempty-step300.json) and [full report](../evaluation/adapter-noempty-step300-validation.json).
+
+| Engine | Strict all-pass (errors count as failures) | Response errors |
+|---|---:|---:|
+| Round 1: step-300 adapter (empty turns in training) | 169/243 (69.5%) | 62 |
+| Round 2: empty turns dropped, 300 steps | **204/243 (84.0%)** | **0** |
+
+All 62 response errors disappeared, and contact-spread went from 0/14 to 14/14. This supports the empty-turn explanation, though it was one change measured once. The 39 remaining failures: 30 objective cases whose chosen change misses the goal (17 of 48 `cleaner_contact`, 13 of 43 `more_spin`; `more_pace` and `fix_slice` had none), and 9 cases with an ungrounded number in the answer. For example, a model asked to center contact 3.2 cm off-center moved it only 1.7 cm. Next: more training steps, since this run covered 1.32 epochs. Because the validation set is used to choose between rounds, later rounds are tuned on it; the untouched test split should be run once at the end.

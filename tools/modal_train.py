@@ -30,15 +30,15 @@ app = modal.App("tennis-buddee-train", image=image)
 
 
 @app.function(gpu=GPU, timeout=3 * 3600, volumes={"/out": volume})
-def train(steps: int = 300, seed: int = 7):
+def train(steps: int = 300, seed: int = 7, name: str = "qwen2.5-1.5b-noempty"):
     import subprocess
     subprocess.run(
         ["python", f"{REMOTE}/tools/train_ondevice.py", "--steps", str(steps), "--seed", str(seed),
-         "--output", "/out/qwen2.5-1.5b-noempty"],
+         "--output", f"/out/{name}"],
         check=True)
     volume.commit()
 
 
 @app.local_entrypoint()
-def main(steps: int = 300, seed: int = 7):
-    train.remote(steps, seed)
+def main(steps: int = 300, seed: int = 7, name: str = "qwen2.5-1.5b-noempty"):
+    train.remote(steps, seed, name)
