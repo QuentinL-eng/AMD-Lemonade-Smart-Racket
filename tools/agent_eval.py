@@ -300,6 +300,8 @@ def main():
     ap.add_argument("--sample", type=int, default=25)
     ap.add_argument("--seed", type=int, default=7)
     ap.add_argument("--data-dir", default=os.path.join(ROOT, "data", "whatif"))
+    ap.add_argument("--split", choices=("val", "test"), default="val",
+                    help="Reference conversations to score. Run test only once, on the final model.")
     a = ap.parse_args()
     p = PRESETS[a.preset]
     key_name = p["key"]
@@ -313,7 +315,7 @@ def main():
     if not model:
         sys.exit(f"Set {prefix}_MODEL to the model id loaded by this endpoint")
     sessions, players = load_data(a.data_dir)
-    refs = [json.loads(l) for l in open(os.path.join(a.data_dir, "conversations_val.jsonl"))]
+    refs = [json.loads(l) for l in open(os.path.join(a.data_dir, f"conversations_{a.split}.jsonl"))]
     rng = random.Random(a.seed)
     by_kind, sample = {}, []
     for r in refs:
@@ -364,7 +366,7 @@ def main():
            "simulated_cases": sum(r["simulated"] for r in ok),
            "target": [r["target"] for r in ok if r["target"] is not None],
            "per_kind": per_kind, "usage": usage, "rows": rows}
-    out = os.path.join(ROOT, "data/whatif", f"eval_{a.preset}_s{a.sample}.json")
+    out = os.path.join(ROOT, "data/whatif", f"eval_{a.preset}_s{a.sample}" + ("_test" if a.split == "test" else "") + ".json")
     json.dump(agg, open(out, "w"), indent=1)
     t = agg["target"]
     print("kind              strict  digest  grounded  estimate  errors")

@@ -57,9 +57,24 @@ def drop_empty_assistant_turns(messages):
                     and not m.get("tool_calls"))]
 
 
+def sort_tool_parameters(tools):
+    """Sort the keys inside each tool's `parameters` only.
+
+    Lemonade re-serializes request JSON with sorted keys, but llama.cpp then rebuilds each tool
+    wrapper in its own fixed order (type, function, name, description, parameters). The prompt a
+    model sees through Lemonade therefore has the wrapper in canonical order and `parameters`
+    sorted. Verified byte for byte against llama-server's /apply-template."""
+    out = []
+    for tool in tools:
+        fn = dict(tool["function"])
+        if "parameters" in fn:
+            fn["parameters"] = sort_keys(fn["parameters"])
+        out.append({**tool, "function": fn})
+    return out
+
+
 def sort_keys(value):
-    """Recursively sort dict keys. Lemonade re-serializes request JSON with sorted keys, so the
-    tool schemas a model sees through Lemonade are in this order, not the app's order."""
+    """Recursively sort dict keys."""
     if isinstance(value, dict):
         return {k: sort_keys(value[k]) for k in sorted(value)}
     if isinstance(value, list):
@@ -109,7 +124,7 @@ def main() -> None:
         messages = template_messages(drop_empty_assistant_turns(item["messages"]))
         tools = item.get("tools") or []
         if args.sort_tool_keys:
-            tools = sort_keys(tools)
+            tools = sort_tool_parameters(tools)
         text = tokenizer.apply_chat_template(messages, tools=tools, tokenize=False,
                                              add_generation_prompt=False)
         ids = tokenizer(text)["input_ids"]
