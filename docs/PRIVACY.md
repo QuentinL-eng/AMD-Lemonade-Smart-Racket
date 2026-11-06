@@ -1,23 +1,17 @@
-# Tennis Buddee: Privacy Policy
+# Tennis Buddee privacy
 
-_Last updated: November 2, 2026_
+_Updated November 2026_
 
-Tennis Buddee works with a sensor inside your tennis racket to measure your shots.
+Tennis Buddee uses a sensor inside the racket handle to measure shots.
 
-- **What it collects:** motion and impact-sound results from your racket (over Bluetooth), the shots and sessions
-  computed from them, and, if you allow it on Apple Watch, heart rate and active calories during a tennis workout.
-- **Where it's stored:** on your devices. If you're signed in to iCloud, sessions sync between your own devices
-  through your private iCloud database. We (the developers) cannot see that data.
-- **Accounts (optional):** if you sign in with Apple or Google, your profile, friends, and the matches, points and
-  racket summaries you choose to share are stored in our Supabase database so your friends can see them.
-- **Meta Muse Spark (optional):** when you ask a question, the app sends the question and only the shot or session
-  statistics Muse asks for to Baseten, which hosts Meta's open Muse Spark model, through our server. Player notes are sent only while "Let Muse use these notes"
-  is on. Health data is never sent. Turn Muse off in Insights to keep everything on the device.
-- **Meta Ray-Ban Display (optional):** live shot numbers are sent from your phone to your own glasses.
-- **Health data** is used only to show your workout stats and is saved to Apple Health only with your permission.
-  It is never used for advertising or shared with anyone.
-- **No ads, analytics or tracking.**
-- **Deleting data:** delete sessions in the app's History tab, or delete the app. Remove iCloud data in
-  Settings → [your name] → iCloud → Manage Storage. To delete your account and shared data, open an issue below.
+- **Shot history:** racket readings and computed sessions are stored on the player's devices. When iCloud is enabled, sessions sync through the player's private iCloud account.
+- **Friend sharing:** account sign-in and Supabase are used only for profile, friend, match, and session totals that the player chooses to share.
+- **Lemonade agent:** when the player enables the agent and chooses a Lemonade server, the app sends the question and the tool requests/results needed to answer to that configured server. The local agent path does not use Supabase sign-in. The server may be on the same device or another device on the player's network.
+- **Player notes:** notes remain in the local app data and iCloud. If the player enables note access for the agent, relevant notes are included in the request to the configured Lemonade server.
+- **Health data:** workout data is used to show the player's workout stats and is saved to Apple Health only with permission. It is not sent to the agent server.
+- **Optional glasses integration:** live racket information can be shown on a paired display when that optional integration is enabled.
+- **Ads and tracking:** the app has no ads or analytics tracking.
 
-Questions: open an issue at https://github.com/QuentinL-eng/Tennis-Buddy-Smart-Racket/issues
+To remove local session data, delete sessions in the app or remove the app and its iCloud data through Apple settings. To remove shared account data, use the account support process in the repository's issue tracker.
+
+For the history of third-party model hosting, video labeling, and wearable SDKs, see [Acknowledgements](../ACKNOWLEDGEMENTS.md).

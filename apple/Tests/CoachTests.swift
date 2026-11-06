@@ -53,14 +53,14 @@ final class CoachToolsTests: XCTestCase {
         XCTAssertTrue(hit["avgContactTowardTip"] is NSNull)
     }
     func testSystemPromptRequiresEstimatedOnSimulationNumbers() {
-        XCTAssertTrue(MuseCoach.systemPrompt.contains("Every sentence stating a simulation number must contain the word estimated."))
-        XCTAssertTrue(MuseCoach.systemPrompt.contains("re-simulate your final recommendation last so its numbers are verified."))
-        XCTAssertTrue(MuseCoach.systemPrompt.contains("never answer a fix-it question from the digest alone."))
-        XCTAssertTrue(MuseCoach.systemPrompt.contains("simulate a larger change before answering"))
-        XCTAssertTrue(MuseCoach.systemPrompt.contains("simulate at least two sizes of the change at once"))
-        XCTAssertTrue(MuseCoach.systemPrompt.contains("never do arithmetic on them"))
-        XCTAssertTrue(MuseCoach.systemPrompt.contains("or why shots feel wrong"))
-        XCTAssertTrue(MuseCoach.systemPrompt.contains("whose verdict clears the bar"))
+        XCTAssertTrue(RacketAgent.systemPrompt.contains("Every sentence stating a simulation number must contain the word estimated."))
+        XCTAssertTrue(RacketAgent.systemPrompt.contains("re-simulate your final recommendation last so its numbers are verified."))
+        XCTAssertTrue(RacketAgent.systemPrompt.contains("never answer a fix-it question from the digest alone."))
+        XCTAssertTrue(RacketAgent.systemPrompt.contains("simulate a larger change before answering"))
+        XCTAssertTrue(RacketAgent.systemPrompt.contains("simulate at least two sizes of the change at once"))
+        XCTAssertTrue(RacketAgent.systemPrompt.contains("never do arithmetic on them"))
+        XCTAssertTrue(RacketAgent.systemPrompt.contains("or why shots feel wrong"))
+        XCTAssertTrue(RacketAgent.systemPrompt.contains("whose verdict clears the bar"))
     }
     func testValidationErrorsStayInToolResults() throws {
         let (_, _, tools) = fixture()
@@ -189,14 +189,14 @@ final class CoachToolsTests: XCTestCase {
 
 @MainActor
 final class MuseLoopTests: XCTestCase {
-    final class Fake: MuseTransport {
+    final class Fake: AgentTransport {
         var requests: [([[String: Any]], [[String: Any]])] = []
         var reply: [String: Any] = ["role": "assistant", "content": "A Muse answer."]
         var toolRounds = 0
         var fail = false
         func complete(messages: [[String: Any]], tools: [[String: Any]]) async throws -> [String: Any] {
             requests.append((messages, tools))
-            if fail { throw MuseError.http(429) }
+            if fail { throw AgentError.http(429) }
             if toolRounds > 0 {
                 toolRounds -= 1
                 return ["role": "assistant", "content": NSNull(), "reasoning_content": "opaque test context", "tool_calls": [
@@ -210,7 +210,7 @@ final class MuseLoopTests: XCTestCase {
         let fake = Fake(); fake.toolRounds = 1
         let s = SessionRecord()
         let tools = CoachTools(current: s, app: nil, sessions: { [s] })
-        let coach = MuseCoach(client: fake, tools: tools)
+        let coach = RacketAgent(client: fake, tools: tools)
         let text = try await coach.answer("How was my shot?", digest: SessionDigest(session: s))
         XCTAssertEqual(text, "A Muse answer.")
         XCTAssertEqual(fake.requests.count, 2)
@@ -224,7 +224,7 @@ final class MuseLoopTests: XCTestCase {
     func testQuestionsLetTheAgentFetchItsOwnData() async throws {
         let fake = Fake()
         let s = SessionRecord()
-        let coach = MuseCoach(client: fake, tools: CoachTools(current: s, app: nil, sessions: { [s] }))
+        let coach = RacketAgent(client: fake, tools: CoachTools(current: s, app: nil, sessions: { [s] }))
         _ = try await coach.answer("How was my backhand?", digest: SessionDigest(session: s))
         let first = fake.requests[0]
         XCTAssertEqual(first.0.map { $0["role"] as? String }, ["system", "user"])
@@ -239,16 +239,16 @@ final class MuseLoopTests: XCTestCase {
     func testRoundLimitStopsEvenIfModelKeepsCallingTools() async {
         let fake = Fake(); fake.toolRounds = 100
         let s = SessionRecord()
-        let coach = MuseCoach(client: fake, tools: CoachTools(current: s, app: nil, sessions: { [s] }))
+        let coach = RacketAgent(client: fake, tools: CoachTools(current: s, app: nil, sessions: { [s] }))
         do { _ = try await coach.drill(SessionDigest(session: s)); XCTFail("Expected limit") }
-        catch { XCTAssertTrue(error is MuseError) }
+        catch { XCTAssertTrue(error is AgentError) }
         XCTAssertEqual(fake.requests.count, 5)
         XCTAssertTrue(fake.requests.last!.1.isEmpty)
     }
     func testEmptyAnswerAndTransportFailurePropagate() async {
         let fake = Fake(); fake.reply = ["role": "assistant", "content": " "]
         let s = SessionRecord()
-        let coach = MuseCoach(client: fake, tools: CoachTools(current: s, app: nil, sessions: { [s] }))
+        let coach = RacketAgent(client: fake, tools: CoachTools(current: s, app: nil, sessions: { [s] }))
         do { _ = try await coach.summarize(SessionDigest(session: s)); XCTFail() } catch {}
         fake.fail = true
         do { _ = try await coach.summarize(SessionDigest(session: s)); XCTFail() } catch {}
@@ -258,12 +258,12 @@ final class MuseLoopTests: XCTestCase {
 @MainActor
 final class CoachFallbackTests: XCTestCase {
     func testMuseFailureFallsBackAndReportsActualEngine() async {
-        let original = UserDefaults.standard.object(forKey: "coach.museEnabled")
-        defer { UserDefaults.standard.set(original, forKey: "coach.museEnabled") }
+        let original = UserDefaults.standard.object(forKey: "agent.enabled")
+        defer { UserDefaults.standard.set(original, forKey: "agent.enabled") }
         let fake = MuseLoopTests.Fake(); fake.fail = true
         let model = CoachModel(transportProvider: { fake })
-        model.setSignedIn(true)
-        model.museEnabled = true
+        model.setEngineAvailable(true)
+        model.agentEnabled = true
         let text = await model.summarize(SessionRecord())
         XCTAssertEqual(text, "No shots recorded yet. Start a session and hit a few balls.")
         XCTAssertEqual(model.engineName, "Built-in engine")
@@ -271,16 +271,16 @@ final class CoachFallbackTests: XCTestCase {
         XCTAssertFalse(model.isWorking)
     }
     func testMuseSuccessAndDisabledMode() async {
-        let original = UserDefaults.standard.object(forKey: "coach.museEnabled")
-        defer { UserDefaults.standard.set(original, forKey: "coach.museEnabled") }
+        let original = UserDefaults.standard.object(forKey: "agent.enabled")
+        defer { UserDefaults.standard.set(original, forKey: "agent.enabled") }
         let fake = MuseLoopTests.Fake()
         let model = CoachModel(transportProvider: { fake })
-        model.setSignedIn(true)
-        model.museEnabled = true
+        model.setEngineAvailable(true)
+        model.agentEnabled = true
         let text = await model.summarize(SessionRecord())
         XCTAssertEqual(text, "A Muse answer.")
-        XCTAssertEqual(model.engineName, "Muse Spark · online")
-        model.museEnabled = false
+        XCTAssertEqual(model.engineName, "Lemonade · online")
+        model.agentEnabled = false
         _ = await model.summarize(SessionRecord())
         XCTAssertEqual(fake.requests.count, 1)
         XCTAssertEqual(model.engineName, "Built-in engine")
@@ -290,11 +290,16 @@ final class CoachFallbackTests: XCTestCase {
 final class MuseURLProtocol: URLProtocol, @unchecked Sendable {
     static var status = 200
     static var payload = Data()
+    static var failure: URLError.Code?
     static var capturedRequest: URLRequest?
     override class func canInit(with request: URLRequest) -> Bool { true }
     override class func canonicalRequest(for request: URLRequest) -> URLRequest { request }
     override func startLoading() {
         Self.capturedRequest = request
+        if let failure = Self.failure {
+            client?.urlProtocol(self, didFailWithError: URLError(failure))
+            return
+        }
         let response = HTTPURLResponse(url: request.url!, statusCode: Self.status, httpVersion: nil, headerFields: nil)!
         client?.urlProtocol(self, didReceive: response, cacheStoragePolicy: .notAllowed)
         client?.urlProtocol(self, didLoad: Self.payload)
@@ -304,13 +309,13 @@ final class MuseURLProtocol: URLProtocol, @unchecked Sendable {
 }
 
 @MainActor
-final class MuseClientTests: XCTestCase {
-    func client(status: Int = 200, payload: String) -> MuseClient {
+final class CloudProxyTransportTests: XCTestCase {
+    func client(status: Int = 200, payload: String) -> CloudProxyTransport {
         MuseURLProtocol.status = status
         MuseURLProtocol.payload = Data(payload.utf8)
         let config = URLSessionConfiguration.ephemeral
         config.protocolClasses = [MuseURLProtocol.self]
-        return MuseClient(endpoint: URL(string: "https://example.supabase.co/functions/v1/muse")!, publishableKey: "pub", accessToken: "user-jwt", session: URLSession(configuration: config))
+        return CloudProxyTransport(endpoint: URL(string: "https://example.supabase.co/functions/v1/muse")!, publishableKey: "pub", accessToken: "user-jwt", session: URLSession(configuration: config))
     }
     func testTextAndToolResponseDecoding() async throws {
         let c = client(payload: #"{"choices":[{"finish_reason":"stop","message":{"role":"assistant","content":"Good contact."}}]}"#)
@@ -327,8 +332,48 @@ final class MuseClientTests: XCTestCase {
     func testRateLimitAndTruncatedResponsesThrow() async {
         let rate = client(status: 429, payload: "{}")
         do { _ = try await rate.complete(messages: [], tools: []); XCTFail() }
-        catch { XCTAssertEqual(error.localizedDescription, "Muse request failed (HTTP 429).") }
+        catch { XCTAssertEqual(error.localizedDescription, "The agent request failed (HTTP 429).") }
         let truncated = client(payload: #"{"choices":[{"finish_reason":"length","message":{"role":"assistant","content":"Partial"}}]}"#)
         do { _ = try await truncated.complete(messages: [], tools: []); XCTFail() } catch {}
+    }
+}
+
+@MainActor
+final class LemonadeTransportTests: XCTestCase {
+    func transport(status: Int = 200, payload: String, failure: URLError.Code? = nil) -> LemonadeTransport {
+        MuseURLProtocol.status = status
+        MuseURLProtocol.payload = Data(payload.utf8)
+        MuseURLProtocol.failure = failure
+        let config = URLSessionConfiguration.ephemeral
+        config.protocolClasses = [MuseURLProtocol.self]
+        return LemonadeTransport(baseAddress: "http://127.0.0.1:8000/api/v1", model: "test-model",
+                                 session: URLSession(configuration: config), timeout: 0.1)
+    }
+
+    func testListsModelsAndDecodesToolCalls() async throws {
+        let c = transport(payload: #"{"data":[{"id":"test-model"}]}"#)
+        let result = try await c.testConnection()
+        XCTAssertEqual(result.models, ["test-model"])
+        XCTAssertEqual(MuseURLProtocol.capturedRequest?.httpMethod, "GET")
+        XCTAssertEqual(MuseURLProtocol.capturedRequest?.url?.absoluteString, "http://127.0.0.1:8000/api/v1/models")
+
+        let tool = transport(payload: #"{"choices":[{"finish_reason":"tool_calls","message":{"role":"assistant","content":null,"tool_calls":[{"id":"1","type":"function","function":{"name":"get_live_state","arguments":"{}"}}]}}]}"#)
+        let reply = try await tool.complete(messages: [], tools: CoachTools.schemas)
+        XCTAssertEqual((reply["tool_calls"] as? [[String: Any]])?.count, 1)
+        let body = try JSONSerialization.jsonObject(with: MuseURLProtocol.capturedRequest!.httpBody!) as! [String: Any]
+        XCTAssertEqual(body["model"] as? String, "test-model")
+        XCTAssertEqual(body["tool_choice"] as? String, "auto")
+    }
+
+    func testRateLimitMalformedTimeoutAndUnreachableHost() async {
+        do { _ = try await transport(status: 429, payload: "{}").complete(messages: [], tools: []); XCTFail() }
+        catch { XCTAssertEqual(error.localizedDescription, "The agent request failed (HTTP 429).") }
+        do { _ = try await transport(payload: "not-json").complete(messages: [], tools: []); XCTFail() }
+        catch { XCTAssertNotNil(error) }
+        do { _ = try await transport(payload: "{}", failure: .timedOut).complete(messages: [], tools: []); XCTFail() }
+        catch { XCTAssertEqual((error as? URLError)?.code, .timedOut) }
+        do { _ = try await transport(payload: "{}", failure: .cannotFindHost).complete(messages: [], tools: []); XCTFail() }
+        catch { XCTAssertEqual((error as? URLError)?.code, .cannotFindHost) }
+        MuseURLProtocol.failure = nil
     }
 }

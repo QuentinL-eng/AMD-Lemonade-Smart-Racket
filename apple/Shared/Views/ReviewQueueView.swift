@@ -2,7 +2,7 @@ import RacketKit
 import SwiftData
 import SwiftUI
 
-/// Session reviews waiting for a human's eyes: Muse flags what stood out, you approve or dismiss each one.
+/// Session reviews waiting for a human's eyes: Racket agent flags what stood out, you approve or dismiss each one.
 struct ReviewQueueView: View {
     @Query(sort: \CoachReview.createdAt, order: .reverse) private var reviews: [CoachReview]
     @Query(sort: \SessionRecord.startDate) private var sessions: [SessionRecord]
@@ -22,7 +22,7 @@ struct ReviewQueueView: View {
                         Text("\(pendingCount) pending").font(.caption.weight(.semibold)).foregroundStyle(MuseStyle.lime)
                     }
                 }
-                Text("Muse flags the moments in a session that need a human look. Approve what you'll work on; dismiss the rest.")
+                Text("Racket agent flags the moments in a session that need a human look. Approve what you'll work on; dismiss the rest.")
                     .font(.subheadline).foregroundStyle(MuseStyle.muted)
                 reviewButton
                 if reviews.isEmpty {

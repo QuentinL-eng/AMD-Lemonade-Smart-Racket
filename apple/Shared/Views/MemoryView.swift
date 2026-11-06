@@ -2,7 +2,7 @@ import SwiftData
 import SwiftUI
 
 /// What the coach remembers about the active player across sessions. The player can add, edit and delete notes,
-/// and turn off Muse's access to them.
+/// and turn off Racket agent's access to them.
 struct MemoryView: View {
     @Query(sort: \CoachNote.updatedAt, order: .reverse) private var allNotes: [CoachNote]
     @Environment(AppModel.self) private var model
@@ -19,11 +19,11 @@ struct MemoryView: View {
         @Bindable var coach = coach
         List {
             Section {
-                Toggle("Let Muse use these notes", isOn: $coach.memoryEnabled)
+                Toggle("Let Racket agent use these notes", isOn: $coach.memoryEnabled)
             } footer: {
                 Text(coach.memoryEnabled
-                     ? "When Muse answers, it can read these notes and add new ones. They're sent to Baseten, which hosts Muse Spark, with your question, including any injury notes. Notes sync through your iCloud."
-                     : "Notes stay on your devices. Muse can't read or add them.")
+                     ? "When the racket agent uses Lemonade, it can read these notes and add new ones. The notes and your question are sent to your configured Lemonade server. Notes sync through iCloud."
+                     : "Notes stay on your devices. Racket agent can't read or add them.")
             }
             Section("Add a note about \(model.activePlayer?.name ?? "you")") {
                 TextField("e.g. Rushes the backhand when tired", text: $draft, axis: .vertical)
@@ -37,7 +37,7 @@ struct MemoryView: View {
             if notes.isEmpty {
                 Section {
                     ContentUnavailableView("Nothing remembered yet", systemImage: "brain",
-                        description: Text("Add habits, goals or past injuries, and Muse will take them into account."))
+                        description: Text("Add habits, goals or past injuries, and Racket agent will take them into account."))
                 }
             }
             ForEach(CoachNote.Category.allCases) { cat in
@@ -62,7 +62,7 @@ struct MemoryView: View {
             Text(note.text)
             HStack(spacing: 6) {
                 Text(note.updatedAt.formatted(date: .abbreviated, time: .omitted))
-                if note.addedByCoach { Label("Added by Muse", systemImage: "sparkles") }
+                if note.addedByCoach { Label("Added by Racket agent", systemImage: "sparkles") }
             }
             .font(.caption).foregroundStyle(.secondary)
         }
@@ -91,7 +91,7 @@ private struct NoteEditor: View {
                     ForEach(CoachNote.Category.allCases) { Label($0.label, systemImage: $0.symbol).tag($0) }
                 }
                 if note.addedByCoach {
-                    Text("Added by Muse on \(note.createdAt.formatted(date: .abbreviated, time: .omitted)).")
+                    Text("Added by Racket agent on \(note.createdAt.formatted(date: .abbreviated, time: .omitted)).")
                         .font(.caption).foregroundStyle(.secondary)
                 }
                 Button("Delete note", role: .destructive) { context.delete(note); dismiss() }

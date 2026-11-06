@@ -1,26 +1,13 @@
-> **Historical.** The first live-demo script. The current 3-minute demo is planned in
-> [video/SHOOT_PLAN.md](../video/SHOOT_PLAN.md).
+# Demonstrate Tennis Buddee
 
-# Demo script (3 minutes)
+Use a recorded session or the in-app Simulator source to demonstrate the smart racket without physical hardware. For a live hardware demonstration, connect the racket and Watch before starting.
 
-**Before going on:** Mac app open full screen on the projector, racket connected (or Simulator as backup), signed in
-on the Mac and iPhone (Muse needs the network), Watch on the presenter's non-playing wrist, a ball and a hanging blanket or a partner.
+## Walkthrough
 
-1. **The fork (15 s).** "We forked an open-source smart racket that sent one acceleration number over Wi-Fi and lit a
-   red or green LED. We kept its idea and rebuilt everything around it." Show `legacy/` and the fork badge on GitHub.
-2. **The trick: the racket (60 s).**
-   - Pick up the racket: the 3D racket on screen moves with it. Hit **Recenter** first.
-   - Start a session from the **Watch** (it also starts a Tennis workout).
-   - Hit a ball into the blanket: the shot card pops up with ball speed, swing speed, spin, face angle, and the dot
-     where the ball hit the strings. The card edge flashes **green** for the sweet spot, **red** for a mishit (the
-     original project's LEDs, reborn). The Watch taps your wrist the same way.
-   - Mention the hardware: two IMUs (gyro + 200 g accelerometer) streaming 1,000 samples/s from inside the handle.
-3. **The treat: analytics (60 s).**
-   - End the session on the Watch → History: shot mix, impact heat map per stroke, speed over the session.
-   - Tap **Ask Muse**: Muse Spark (Meta) pulls the session through tools and writes the report.
-   - Insights → Muse → ask "What's my weakest stroke?" and "Plan my next drill". Muse calls the tools live
-     (shots, racket sensors, notes, the what-if simulator); point out the "Muse remembered…" line.
-4. **How accurate? (30 s).** Show the slide comparing app numbers with 240 fps slow-mo measurements.
+1. Show the racket and its sensor insert in the handle.
+2. Start a session and show how each shot appears in Live and History.
+3. Open What if and change a swing parameter. Explain that the simulator produces an estimate from the player's own shot data.
+4. Ask the racket agent a question about the session. Show the engine name under the answer. To demonstrate Lemonade, start the configured server and run **Test connection** first.
+5. Show the friend-sharing flow only if the player has chosen to sign in and share session totals.
 
-**If Bluetooth fails:** Racket tab → Recorder → replay a recorded session (it plays exactly like the live racket), or
-switch the source to Simulator.
+For the current local-server workflow, see [Lemonade setup](LEMONADE.md). The app's Lemonade integration has not been verified on a Mac in this checkout, so do not claim an end-to-end result without running it.

@@ -3,7 +3,7 @@ import Observation
 import RacketKit
 import SwiftData
 
-/// Builds the facts the coach talks about. Shared by the template coach and Muse.
+/// Builds the facts the coach talks about. Shared by the template coach and Racket agent.
 struct SessionDigest: Codable {
     struct Stroke: Codable {
         var type: String
@@ -69,7 +69,7 @@ struct SessionDigest: Codable {
     }
 }
 
-/// Something that can turn stats into words: Muse or the built-in template fallback.
+/// Something that can turn stats into words: Racket agent or the built-in template fallback.
 @MainActor
 protocol CoachEngine {
     var name: String { get }
@@ -100,7 +100,7 @@ struct ScoutOpponent: Codable, Sendable {
 
 enum CoachPrompts {
     static let system = """
-    You are Muse, the AI in Tennis Buddee, a smart tennis racket. You are upbeat and know tennis well. You are given measurements from a sensor in the \
+    You are Racket agent, the AI in Tennis Buddee, a smart tennis racket. You are upbeat and know tennis well. You are given measurements from a sensor in the \
     player's racket. Only use numbers that appear in the data; never invent stats. Speeds use the data's speedUnit, \
     spin is rpm, contact positions use lengthUnit from the sweet spot (positive toward the tip / to the right). \
     Always write the units next to numbers and never mention JSON field names. Keep answers short, \
@@ -313,27 +313,38 @@ final class CoachModel {
     var isWorking = false
     private(set) var lastEngineName: String?
     private(set) var lastFallbackReason: String?
-    /// Muse's last validated swing film, shown on the Muse home and set on the What-if sliders.
+    var engineName: String { lastEngineName ?? (agentEnabled && engineAvailable ? "Lemonade" : fallback.name) }
+    /// Racket agent's last validated swing film, shown on the Racket agent home and set on the What-if sliders.
     var lastFilm: SwingFilm?
-    /// Notes Muse saved while producing the last answer, shown under it so nothing is remembered silently.
+    /// Notes Racket agent saved while producing the last answer, shown under it so nothing is remembered silently.
     private(set) var lastRemembered: [String] = []
-    /// Online coaching is available while signed in (the server holds the Muse key).
-    private(set) var museAvailable = false
-    var engineName: String { lastEngineName ?? (museEnabled && museAvailable ? "Muse Spark · online" : fallback.name) }
-    var museEnabled: Bool {
-        didSet { UserDefaults.standard.set(museEnabled, forKey: "coach.museEnabled"); lastEngineName = nil }
+    /// Lemonade is reachable on the local network. It does not depend on an account.
+    private(set) var engineAvailable = false
+    private(set) var engineLatencyMilliseconds: Int?
+    private(set) var engineConnectionMessage = "Not connected yet."
+    private(set) var availableEngineModels: [String] = []
+    var lemonadeBaseAddress: String {
+        didSet { UserDefaults.standard.set(lemonadeBaseAddress, forKey: "agent.lemonadeBaseAddress"); engineAvailable = false }
     }
-    /// Lets Muse read the player's notes and add new ones. Off: notes stay on the device.
+    var lemonadeModel: String {
+        didSet { UserDefaults.standard.set(lemonadeModel, forKey: "agent.lemonadeModel"); lastEngineName = nil }
+    }
+    var agentEnabled: Bool {
+        didSet { UserDefaults.standard.set(agentEnabled, forKey: "agent.enabled"); lastEngineName = nil }
+    }
+    /// Lets Racket agent read the player's notes and add new ones. Off: notes stay on the device.
     var memoryEnabled: Bool {
         didSet { UserDefaults.standard.set(memoryEnabled, forKey: "coach.memoryEnabled") }
     }
     @ObservationIgnored private weak var app: AppModel?
     private let fallback = TemplateCoach()
-    @ObservationIgnored private var transportProvider: @MainActor () async -> MuseTransport?
+    @ObservationIgnored private var transportProvider: @MainActor () async -> AgentTransport?
 
-    init(transportProvider: @escaping @MainActor () async -> MuseTransport? = { nil }) {
+    init(transportProvider: @escaping @MainActor () async -> AgentTransport? = { nil }) {
         self.transportProvider = transportProvider
-        museEnabled = UserDefaults.standard.object(forKey: "coach.museEnabled") as? Bool ?? true
+        lemonadeBaseAddress = UserDefaults.standard.string(forKey: "agent.lemonadeBaseAddress") ?? LemonadeTransport.defaultBaseAddress
+        lemonadeModel = UserDefaults.standard.string(forKey: "agent.lemonadeModel") ?? ""
+        agentEnabled = UserDefaults.standard.object(forKey: "agent.enabled") as? Bool ?? true
         memoryEnabled = UserDefaults.standard.object(forKey: "coach.memoryEnabled") as? Bool ?? true
         if let data = UserDefaults.standard.data(forKey: "coach.activePlan") {
             activePlan = try? JSONDecoder().decode(PracticePlan.self, from: data)
@@ -341,8 +352,30 @@ final class CoachModel {
     }
 
     func connect(to app: AppModel) { self.app = app }
-    func useTransport(_ provider: @escaping @MainActor () async -> MuseTransport?) { transportProvider = provider }
-    func setSignedIn(_ signedIn: Bool) { museAvailable = signedIn }
+    func useTransport(_ provider: @escaping @MainActor () async -> AgentTransport?) { transportProvider = provider }
+    func configuredTransport() -> AgentTransport {
+        LemonadeTransport(baseAddress: lemonadeBaseAddress, model: lemonadeModel)
+    }
+
+    func setEngineAvailable(_ available: Bool) { engineAvailable = available }
+
+    func testLemonadeConnection() async {
+        engineAvailable = false
+        engineConnectionMessage = "Testing Lemonade connection…"
+        do {
+            let result = try await LemonadeTransport(baseAddress: lemonadeBaseAddress).testConnection()
+            availableEngineModels = result.models
+            engineLatencyMilliseconds = result.latencyMilliseconds
+            if !result.models.contains(lemonadeModel) { lemonadeModel = result.models.first ?? "" }
+            engineAvailable = !result.models.isEmpty && !lemonadeModel.isEmpty
+            engineConnectionMessage = result.models.isEmpty
+                ? "Connected, but Lemonade reported no local models."
+                : "Connected · \(result.latencyMilliseconds) ms"
+        } catch {
+            engineLatencyMilliseconds = nil
+            engineConnectionMessage = "Lemonade unavailable: \(error.localizedDescription)"
+        }
+    }
 
     func summarize(_ session: SessionRecord) async -> String {
         let digest = SessionDigest(session: session)
@@ -409,10 +442,10 @@ final class CoachModel {
         return record
     }
 
-    /// Muse picks and tests the change for a swing film. Needs Muse online; there is no offline director.
+    /// Racket agent picks and tests the change for a swing film. Needs Racket agent online; there is no offline director.
     func swingFilm(_ session: SessionRecord, stroke: ShotType) async -> Result<SwingFilm, Error> {
-        guard !isWorking else { return .failure(MuseError.invalidResponse) }
-        guard museEnabled, museAvailable, let transport = await transportProvider() else { return .failure(MuseError.signInRequired) }
+        guard !isWorking else { return .failure(AgentError.invalidResponse) }
+        guard agentEnabled, engineAvailable, let transport = await transportProvider() else { return .failure(AgentError.invalidResponse) }
         isWorking = true
         defer { isWorking = false }
         let app = self.app
@@ -426,7 +459,7 @@ final class CoachModel {
         }
         do {
             let film = try await SwingFilmDirector(client: transport, tools: tools).direct(stroke)
-            lastEngineName = "Muse Spark · online"
+            lastEngineName = "Lemonade"
             lastFilm = film
             return .success(film)
         } catch {
@@ -435,12 +468,12 @@ final class CoachModel {
     }
 
     private func run(session: SessionRecord, _ body: (CoachEngine) async throws -> String) async -> String {
-        guard !isWorking else { return "Muse is already answering. Please try again shortly." }
+        guard !isWorking else { return "The racket agent is already answering. Please try again shortly." }
         isWorking = true
         lastFallbackReason = nil
         lastRemembered = []
         defer { isWorking = false }
-        if museEnabled, museAvailable, let transport = await transportProvider() {
+        if agentEnabled, engineAvailable, let transport = await transportProvider() {
             let app = self.app
             let memory = memoryEnabled ? app.flatMap { app in
                 app.modelContext.map { context in
@@ -456,10 +489,10 @@ final class CoachModel {
                 guard let context = app?.modelContext else { return [session] }
                 return try context.fetch(FetchDescriptor<SessionRecord>(sortBy: [SortDescriptor(\.startDate)]))
             }
-            let muse = MuseCoach(client: transport, tools: tools)
+            let agent = RacketAgent(client: transport, tools: tools)
             do {
-                let text = try await body(muse)
-                lastEngineName = muse.name
+                let text = try await body(agent)
+                lastEngineName = agent.name
                 return text
             } catch {
                 if Task.isCancelled { return "Cancelled." }

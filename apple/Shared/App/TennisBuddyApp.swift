@@ -25,8 +25,8 @@ struct TennisBuddyApp: App {
                 .onOpenURL { glasses.handle(url: $0) }
                 #endif
                 .task { await account.observeAuthentication() }
+                .task { await coach.testLemonadeConnection() }
                 .onChange(of: account.displayName) { _, value in model.signedInPlayerName = value }
-                .onChange(of: account.isSignedIn) { _, value in coach.setSignedIn(value) }
                 .task(id: scenePhase) {
                     guard scenePhase == .active else { return }
                     while !Task.isCancelled {
@@ -39,8 +39,7 @@ struct TennisBuddyApp: App {
                     model.modelContext = container.mainContext
                     model.signedInPlayerName = account.displayName
                     coach.connect(to: model)
-                    coach.useTransport { await account.museTransport() }
-                    coach.setSignedIn(account.isSignedIn)
+                    coach.useTransport { coach.configuredTransport() }
                     #if os(iOS)
                     watchBridge.connect(to: model, account: account)
                     glasses.connect(to: model, account: account)
@@ -66,12 +65,12 @@ struct RootView: View {
         TabView(selection: $tab) {
             Tab("Live", systemImage: "figure.tennis", value: "live") { NavigationStack { LiveView() } }
             Tab("Score", systemImage: "trophy", value: "score") { NavigationStack { ScoreView() } }
-            Tab("Muse", systemImage: "sparkles", value: "muse") { NavigationStack { CoachScreen() } }
+            Tab("Racket agent", systemImage: "sparkles", value: "muse") { NavigationStack { CoachScreen() } }
             Tab("Insights", systemImage: "chart.line.uptrend.xyaxis", value: "insights") { NavigationStack { InsightsView() } }
             Tab("Settings", systemImage: "gearshape", value: "settings") { NavigationStack { RacketView() } }
         }
         .tabViewStyle(.sidebarAdaptable)
-        // Old tab values: History moved under Insights; Together became Muse; Racket became Settings.
+        // Old tab values: History moved under Insights; Together became Racket agent; Racket became Settings.
         .onAppear {
             switch tab {
             case "history": tab = "insights"

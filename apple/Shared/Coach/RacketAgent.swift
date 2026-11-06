@@ -1,13 +1,13 @@
 import Foundation
 
 @MainActor
-final class MuseCoach: CoachEngine {
-    let name = "Muse Spark · online"
-    private let client: MuseTransport
+final class RacketAgent: CoachEngine {
+    let name = "Lemonade · online"
+    private let client: AgentTransport
     private let tools: CoachTools
     private let maxRounds: Int
 
-    init(client: MuseTransport, tools: CoachTools, maxRounds: Int = 5) {
+    init(client: AgentTransport, tools: CoachTools, maxRounds: Int = 5) {
         self.client = client; self.tools = tools; self.maxRounds = min(5, max(1, maxRounds))
     }
 
@@ -53,22 +53,22 @@ final class MuseCoach: CoachEngine {
             let reply = try await client.complete(messages: messages, tools: last ? [] : CoachTools.schemas)
             let calls = reply["tool_calls"] as? [[String: Any]] ?? []
             if calls.isEmpty {
-                guard let text = reply["content"] as? String, !text.trimmingCharacters(in: .whitespacesAndNewlines).isEmpty else { throw MuseError.invalidResponse }
+                guard let text = reply["content"] as? String, !text.trimmingCharacters(in: .whitespacesAndNewlines).isEmpty else { throw AgentError.invalidResponse }
                 return text.trimmingCharacters(in: .whitespacesAndNewlines)
             }
-            guard !last else { throw MuseError.roundLimit }
+            guard !last else { throw AgentError.roundLimit }
             // Bound fan-out as well as the number of requests. Preserve the entire assistant message on replay.
-            guard calls.count <= 8 else { throw MuseError.roundLimit }
+            guard calls.count <= 8 else { throw AgentError.roundLimit }
             messages.append(reply)
             var ids = Set<String>()
             for call in calls {
                 guard let id = call["id"] as? String, !id.isEmpty, ids.insert(id).inserted,
                       call["type"] as? String == "function", let f = call["function"] as? [String: Any],
-                      let name = f["name"] as? String, let args = f["arguments"] as? String else { throw MuseError.invalidResponse }
+                      let name = f["name"] as? String, let args = f["arguments"] as? String else { throw AgentError.invalidResponse }
                 try Task.checkCancellation()
                 messages.append(["role": "tool", "tool_call_id": id, "content": tools.execute(name: name, arguments: args)])
             }
         }
-        throw MuseError.roundLimit
+        throw AgentError.roundLimit
     }
 }

@@ -6,17 +6,16 @@ Upload a new build: `tools/testflight.sh` (archives the iPhone + Watch app and u
 
 ## Test information (App Store Connect → TestFlight → Test Information)
 
-- **Beta App Description:** Tennis Buddee reads a sensor-equipped tennis racket: swing speed, ball speed, spin and
-  sweet-spot hits, explained by Muse (Meta's Muse Spark) with a 3D what-if of your swing. No racket? The app starts in
-  Simulator mode so you can try every screen. The Apple Watch app taps your wrist for each shot and runs a tennis workout.
-- **What to Test:** Open the Live tab and press Start Session; the simulated racket hits a shot every few seconds.
-  End the session, then check History and Insights. Sign in under Racket → Account, then in Insights → Muse try
-  "Ask Muse", "Plan my next drill" and What if → "Show me the best change". On Apple Watch, start a session
-  from the watch.
+- **Beta App Description:** Tennis Buddee is a smart racket with a sensor inside the handle. Explore shot history,
+  scoring, and physics-based what-if estimates in Simulator mode. The Apple Watch companion can track a tennis workout.
+- **What to Test:** Open Live and press Start Session using Simulator. End the session and check History and Insights.
+  Open Racket agent settings to enter a Lemonade server address, select **Test connection**, and confirm which engine
+  answers. A Tennis Buddee account is only needed for friend sharing. On Apple Watch, start a session from the watch.
 - **Feedback Email:** your email
 - **Privacy Policy URL:** https://github.com/QuentinL-eng/Tennis-Buddy-Smart-Racket/blob/main/docs/PRIVACY.md
-- **Beta App Review notes:** The app connects to a custom Bluetooth sensor in a tennis racket (hackathon project).
-  Without the sensor it runs in Simulator mode by default, so all features can be reviewed without hardware.
+- **Beta App Review notes:** The app connects to a custom Bluetooth sensor in a tennis racket. Without the sensor it
+  runs in Simulator mode, so the racket screens can be reviewed without hardware. Lemonade features require a local
+  Lemonade server configured by the tester.
 
 ## Getting it to friends
 

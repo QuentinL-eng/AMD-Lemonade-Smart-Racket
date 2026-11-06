@@ -2,8 +2,8 @@ import RacketKit
 import SwiftData
 import SwiftUI
 
-/// Change one thing about your average stroke and see what the racket model estimates, or have Muse find the best
-/// change. Same baseline and physics as Muse's `simulate_change` tool (`WhatIf`, `ShotSimulator`).
+/// Change one thing about your average stroke and see what the racket model estimates, or have Racket agent find the best
+/// change. Same baseline and physics as Racket agent's `simulate_change` tool (`WhatIf`, `ShotSimulator`).
 struct WhatIfView: View {
     @Query(sort: \SessionRecord.startDate) private var sessions: [SessionRecord]
     @Query(filter: #Predicate<WhatIfTrial> { $0.completedAt == nil }) private var pendingTrials: [WhatIfTrial]
@@ -54,14 +54,14 @@ struct WhatIfView: View {
         return available.contains(stroke) ? stroke : available.first
     }
 
-    /// Open on Muse's last film when there is one and nothing has been changed yet.
+    /// Open on Racket agent's last film when there is one and nothing has been changed yet.
     private func applyLastFilm() {
         guard deltas.isZero, let film = coach.lastFilm, let session, strokes(session).contains(film.stroke) else { return }
         stroke = film.stroke
         deltas = film.deltas
     }
 
-    /// Muse's film while its change is still on the levers.
+    /// Racket agent's film while its change is still on the levers.
     private func currentFilm(_ type: ShotType) -> SwingFilm? {
         coach.lastFilm.flatMap { $0.deltas == deltas && $0.stroke == type ? $0 : nil }
     }
@@ -226,7 +226,7 @@ struct WhatIfView: View {
             bar("Ball speed", before: units.speed(b.ballSpeedKmh), after: units.speed(a.ballSpeedKmh), unit: units.speedUnit)
             bar("Spin", before: b.spinRPM, after: a.spinRPM, unit: "rpm",
                 note: a.spin == b.spin ? nil : "\(b.spin.label) → \(a.spin.label)")
-            Text(film ? "Estimated by the racket's physics model. Picked and tested by Muse."
+            Text(film ? "Estimated by the racket's physics model. Picked and tested by Racket agent."
                       : "Estimated by the racket's physics model on your average swing. Ball flight isn't modeled.")
                 .font(.caption).foregroundStyle(MuseStyle.muted)
         }
@@ -328,14 +328,14 @@ struct WhatIfView: View {
                        measuredSpin: measured.avgSpinRPM)
     }
 
-    // MARK: Muse
+    // MARK: Racket agent
 
     private func askAbout(_ type: ShotType, session: SessionRecord) -> some View {
         VStack(alignment: .leading, spacing: 10) {
             Button {
                 ask("What if I \(WhatIf.describe(deltas, units: units)) on my \(type.label.lowercased())?", session)
             } label: {
-                Label("Ask Muse about this change", systemImage: "questionmark.bubble")
+                Label("Ask Racket agent about this change", systemImage: "questionmark.bubble")
                     .font(.subheadline.weight(.semibold)).frame(maxWidth: .infinity, minHeight: 44)
             }
             .buttonStyle(.plain)
@@ -360,21 +360,21 @@ struct WhatIfView: View {
         VStack(spacing: 6) {
             if !filmError.isEmpty {
                 Text(filmError).font(.caption).foregroundStyle(MuseStyle.muted).multilineTextAlignment(.center)
-            } else if !coach.museAvailable {
-                Text("Sign in under Racket → Account to have Muse find the best change.").font(.caption)
+            } else if !coach.engineAvailable {
+                Text("Connect to Lemonade in Racket agent settings to find a tested change.").font(.caption)
                     .foregroundStyle(MuseStyle.muted).multilineTextAlignment(.center)
             }
             Button { showBestChange(session, type: type) } label: {
                 HStack(spacing: 8) {
                     if coach.isWorking { ProgressView().controlSize(.small).tint(MuseStyle.ink) } else { Image(systemName: "sparkles") }
-                    Text(coach.isWorking ? "Muse is testing changes…" : film == nil ? "Show me the best change" : "Find another change")
+                    Text(coach.isWorking ? "Racket agent is testing changes…" : film == nil ? "Show me the best change" : "Find another change")
                 }
                 .font(.headline).foregroundStyle(MuseStyle.ink)
                 .frame(maxWidth: .infinity, minHeight: 54)
-                .background(MuseStyle.lime.opacity(coach.museAvailable ? 1 : 0.4), in: .capsule)
+                .background(MuseStyle.lime.opacity(coach.engineAvailable ? 1 : 0.4), in: .capsule)
             }
             .buttonStyle(.plain)
-            .disabled(coach.isWorking || !coach.museAvailable)
+            .disabled(coach.isWorking || !coach.engineAvailable)
         }
         .padding(.horizontal, 16).padding(.top, 8).padding(.bottom, 8)
         .background(MuseStyle.background)
@@ -401,7 +401,7 @@ struct WhatIfView: View {
     }
 }
 
-/// "Muse remembered: …" under an answer, linking to the notes.
+/// "Racket agent remembered: …" under an answer, linking to the notes.
 struct RememberedNotes: View {
     @Environment(CoachModel.self) private var coach
 
@@ -409,7 +409,7 @@ struct RememberedNotes: View {
         if !coach.lastRemembered.isEmpty {
             NavigationLink { MemoryView() } label: {
                 Label {
-                    Text("Muse remembered: " + coach.lastRemembered.joined(separator: " · ")).font(.caption)
+                    Text("Racket agent remembered: " + coach.lastRemembered.joined(separator: " · ")).font(.caption)
                 } icon: { Image(systemName: "brain") }
             }
             .buttonStyle(.plain)

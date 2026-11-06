@@ -2,8 +2,8 @@ import Foundation
 import RacketKit
 import simd
 
-/// A swing film: Muse picks one or two changes to the player's average stroke, tests them with `simulate_change`,
-/// and hands back this short script. `SwingAnimationView` draws it with a fixed look, so Muse chooses the change and
+/// A swing film: Racket agent picks one or two changes to the player's average stroke, tests them with `simulate_change`,
+/// and hands back this short script. `SwingAnimationView` draws it with a fixed look, so Racket agent chooses the change and
 /// the words, never the picture. Limits and rationale: docs/SWING_FILM.md (tools/swing_film.py is the same loop).
 struct SwingFilm: Equatable {
     var stroke: ShotType
@@ -58,7 +58,7 @@ struct SwingFilm: Equatable {
                     "why": text(Limits.why, "Why this helps this player.")]]]]
     }()
 
-    /// The deltas `simulate_change` actually applied, rounded so Muse's echo of them matches.
+    /// The deltas `simulate_change` actually applied, rounded so Racket agent's echo of them matches.
     struct Key: Hashable {
         var values: [Double]
         init(_ d: WhatIf.Deltas) {
@@ -104,15 +104,15 @@ struct SwingFilm: Equatable {
 
     struct Rejection: LocalizedError {
         var reasons: [String]
-        var errorDescription: String? { "Muse's film didn't meet the limits: " + reasons.joined(separator: "; ") }
+        var errorDescription: String? { "Racket agent's film didn't meet the limits: " + reasons.joined(separator: "; ") }
     }
 }
 
-/// Runs Muse until it hands back a valid film: digest, notes and `simulate_change` through `CoachTools`, then
-/// `make_swing_film`, which is validated here. A rejected script goes back to Muse with the reasons, at most twice.
+/// Runs Racket agent until it hands back a valid film: digest, notes and `simulate_change` through `CoachTools`, then
+/// `make_swing_film`, which is validated here. A rejected script goes back to Racket agent with the reasons, at most twice.
 @MainActor
 struct SwingFilmDirector {
-    let client: MuseTransport
+    let client: AgentTransport
     let tools: CoachTools
     var maxRounds = 8
 
@@ -121,7 +121,7 @@ struct SwingFilmDirector {
     func direct(_ stroke: ShotType) async throws -> SwingFilm {
         let schemas = CoachTools.schemas.filter { Self.allowed.contains(($0["function"] as? [String: Any])?["name"] as? String ?? "") }
             + [SwingFilm.schema]
-        var messages: [[String: Any]] = [["role": "system", "content": MuseCoach.systemPrompt + SwingFilm.rules],
+        var messages: [[String: Any]] = [["role": "system", "content": RacketAgent.systemPrompt + SwingFilm.rules],
                                          ["role": "user", "content": SwingFilm.prompt(stroke)]]
         var tested = Set<SwingFilm.Key>()
         var rejections = 0
@@ -129,7 +129,7 @@ struct SwingFilmDirector {
             try Task.checkCancellation()
             let reply = try await client.complete(messages: messages, tools: schemas)
             let calls = reply["tool_calls"] as? [[String: Any]] ?? []
-            guard calls.count <= 8 else { throw MuseError.roundLimit }
+            guard calls.count <= 8 else { throw AgentError.roundLimit }
             messages.append(reply)
             if calls.isEmpty {
                 messages.append(["role": "user", "content": "Call make_swing_film now with a change you tested."])
@@ -138,7 +138,7 @@ struct SwingFilmDirector {
             var film: SwingFilm?
             for call in calls {
                 guard let id = call["id"] as? String, let f = call["function"] as? [String: Any],
-                      let name = f["name"] as? String, let raw = f["arguments"] as? String else { throw MuseError.invalidResponse }
+                      let name = f["name"] as? String, let raw = f["arguments"] as? String else { throw AgentError.invalidResponse }
                 let args = (try? JSONSerialization.jsonObject(with: Data(raw.utf8))) as? [String: Any] ?? [:]
                 let output: String
                 switch name {
@@ -168,11 +168,11 @@ struct SwingFilmDirector {
             }
             if let film { return film }
         }
-        throw MuseError.roundLimit
+        throw AgentError.roundLimit
     }
 }
 
-/// The swing template behind the What-if animation and Muse's swing films (docs/SWING_FILM.md). A fixed pivot (the
+/// The swing template behind the What-if animation and Racket agent's swing films (docs/SWING_FILM.md). A fixed pivot (the
 /// arm) turns the racket through contact; only the five racket numbers (speed, path, face, contact across/along)
 /// shape it. The ball sits at the origin at contact and the target is +x. Metres, y up.
 enum SwingTemplate {

@@ -185,7 +185,7 @@ struct SharedSessionView: View {
                 NavigationLink {
                     ScoutView(opponent: stats, opponentName: rival.name)
                 } label: {
-                    Label(stats == nil ? "Scout yourself before playing \(rival.name)" : "Scout \(rival.name) with Muse",
+                    Label(stats == nil ? "Scout yourself before playing \(rival.name)" : "Scout \(rival.name) with Racket agent",
                           systemImage: "binoculars")
                 }
             }

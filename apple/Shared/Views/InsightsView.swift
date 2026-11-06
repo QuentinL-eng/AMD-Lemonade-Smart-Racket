@@ -21,7 +21,7 @@ struct CoachCard: View {
                     Button {
                         Task { session.coachSummary = await coach.summarize(session) }
                     } label: {
-                        Label(session.coachSummary.isEmpty ? "Ask Muse" : "Regenerate", systemImage: "sparkles")
+                        Label(session.coachSummary.isEmpty ? "Ask Racket agent" : "Regenerate", systemImage: "sparkles")
                     }
                     .buttonStyle(.borderedProminent)
                     .foregroundStyle(.black)
@@ -32,7 +32,7 @@ struct CoachCard: View {
                 }
             }
         } label: {
-            Label("Muse", systemImage: "sparkles")
+            Label("Racket agent", systemImage: "sparkles")
         }
     }
 }

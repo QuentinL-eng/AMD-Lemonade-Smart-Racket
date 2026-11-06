@@ -54,7 +54,7 @@ final class ShotRecord {
 }
 
 /// Something the coach should remember about a player across sessions ("rushes the backhand when tired",
-/// "sore right elbow in 2025"). Written by the player, or by Muse through `remember_note`.
+/// "sore right elbow in 2025"). Written by the player, or by Racket agent through `remember_note`.
 @Model
 final class CoachNote {
     var id: UUID = UUID()
@@ -137,7 +137,7 @@ struct ReviewFlag: Codable, Sendable, Equatable, Identifiable {
     }
 }
 
-/// A session review: Muse (or the built-in engine) flags what needs a human coach's eyes,
+/// A session review: Racket agent (or the built-in engine) flags what needs a human coach's eyes,
 /// and the coach approves or dismisses each review. Single-coach, single-player flow.
 @Model
 final class CoachReview {

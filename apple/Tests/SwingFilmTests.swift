@@ -57,7 +57,7 @@ final class SwingFilmTests: XCTestCase {
     }
 
     /// Muse tests a change, tries an untested one, gets the reasons back, then makes the tested film.
-    final class Director: MuseTransport {
+    final class Director: AgentTransport {
         var step = 0
         var requests: [[[String: Any]]] = []
         func call(_ name: String, _ args: String) -> [String: Any] {

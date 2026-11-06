@@ -2,7 +2,7 @@ import RacketKit
 import SwiftData
 import SwiftUI
 
-/// The Muse section's look ("Lab"): always dark, felt lime on near-black, rounded display type.
+/// The Racket agent section's look ("Lab"): always dark, felt lime on near-black, rounded display type.
 enum MuseStyle {
     static let background = Color(red: 0.063, green: 0.071, blue: 0.051)   // #10120D
     static let card = Color(red: 0.102, green: 0.114, blue: 0.082)         // #1A1D15
@@ -20,7 +20,7 @@ enum MuseStyle {
 }
 
 extension View {
-    /// Dark Muse background, also under the navigation bar on iPhone.
+    /// Dark Racket agent background, also under the navigation bar on iPhone.
     func museScreen() -> some View {
         background(MuseStyle.background.ignoresSafeArea())
             .environment(\.colorScheme, .dark)
@@ -55,7 +55,7 @@ struct SwingSketch: View {
     }
 }
 
-/// Muse: the best change for your game, the next drill, memory, and questions, pushed from Insights.
+/// Racket agent: the best change for your game, the next drill, memory, and questions, pushed from Insights.
 struct CoachScreen: View {
     @Query(sort: \SessionRecord.startDate) private var sessions: [SessionRecord]
     @Query(sort: \CoachNote.updatedAt, order: .reverse) private var allNotes: [CoachNote]
@@ -83,7 +83,7 @@ struct CoachScreen: View {
     }
     private var noteCount: Int { allNotes.filter { $0.playerID == model.activePlayerID }.count }
     private var pendingReviews: Int { pending.count }
-    private var online: Bool { coach.museEnabled && coach.museAvailable }
+    private var online: Bool { coach.agentEnabled && coach.engineAvailable }
 
     var body: some View {
         ScrollView {
@@ -101,7 +101,7 @@ struct CoachScreen: View {
                     PracticePlanView()
                 }
                 featureRow(symbol: "binoculars", title: "Scout yourself",
-                           detail: "Muse predicts where an opponent would attack") { ScoutView() }
+                           detail: "Racket agent predicts where an opponent would attack") { ScoutView() }
                 featureRow(symbol: "flag", title: "Review queue",
                            detail: pendingReviews == 0 ? "Flag a session for a human look" : "\(pendingReviews) waiting for you") {
                     ReviewQueueView()
@@ -123,17 +123,17 @@ struct CoachScreen: View {
 
     private var header: some View {
         HStack(alignment: .lastTextBaseline) {
-            Text("Muse").font(MuseStyle.display(34)).foregroundStyle(MuseStyle.text)
+            Text("Racket agent").font(MuseStyle.display(34)).foregroundStyle(MuseStyle.text)
             Spacer()
             HStack(spacing: 6) {
                 Circle().fill(online ? MuseStyle.good : MuseStyle.muted).frame(width: 8, height: 8)
-                Text(online ? "Muse Spark · online" : "Built-in engine").font(.caption).foregroundStyle(MuseStyle.muted)
+                Text(online ? coach.engineName : "Built-in engine").font(.caption).foregroundStyle(MuseStyle.muted)
             }
         }
         .padding(.top, 4)
     }
 
-    /// Muse's best change for the player's own swing, or the button that asks for one.
+    /// Racket agent's best change for the player's own swing, or the button that asks for one.
     @ViewBuilder private var hero: some View {
         let film = coach.lastFilm
         let stroke = film?.stroke ?? filmSource?.1 ?? .forehand
@@ -143,7 +143,7 @@ struct CoachScreen: View {
                     .foregroundStyle(MuseStyle.ink.opacity(0.7))
                 Text(film?.title ?? "Find your best change").font(MuseStyle.display(30)).foregroundStyle(MuseStyle.ink)
                     .fixedSize(horizontal: false, vertical: true)
-                Text(film?.cue ?? "Muse tests changes on your average \(stroke.label.lowercased()) and shows you the one that helps most.")
+                Text(film?.cue ?? "The racket agent tests changes on your average \(stroke.label.lowercased()) and shows you the one that helps most.")
                     .font(.subheadline).foregroundStyle(MuseStyle.ink.opacity(0.8))
             }
             .padding([.horizontal, .top], 18)
@@ -169,16 +169,16 @@ struct CoachScreen: View {
                 Text("Watch ›").font(.subheadline.weight(.bold)).foregroundStyle(MuseStyle.lime)
             } else if coach.isWorking {
                 ProgressView().controlSize(.small).tint(MuseStyle.lime)
-                Text("Muse is testing changes…").font(.subheadline).foregroundStyle(MuseStyle.text)
+                Text("The racket agent is testing changes…").font(.subheadline).foregroundStyle(MuseStyle.text)
                 Spacer()
             } else {
-                Text(filmError.isEmpty ? (coach.museAvailable ? "Uses Muse Spark online" : "Sign in under Account to use Muse")
+                Text(filmError.isEmpty ? (coach.engineAvailable ? "Uses Lemonade" : "Connect Lemonade below")
                      : filmError)
                     .font(.caption).foregroundStyle(MuseStyle.muted).lineLimit(2)
                 Spacer()
                 Button("Find it ›") { findBestChange() }
                     .font(.subheadline.weight(.bold)).foregroundStyle(MuseStyle.lime)
-                    .disabled(!coach.museAvailable || filmSource == nil)
+                    .disabled(!coach.engineAvailable || filmSource == nil)
                     .frame(minHeight: 44)
             }
         }
@@ -211,7 +211,7 @@ struct CoachScreen: View {
             Task { drill = await coach.drill(latest) }
         } label: {
             tile(symbol: "scope", title: model.activeDrill == nil ? "Next drill" : "Drill running",
-                 detail: model.activeDrill?.goal ?? (latest == nil ? "Play a session first" : "Muse plans one for you"))
+                 detail: model.activeDrill?.goal ?? (latest == nil ? "Play a session first" : "The racket agent can plan one"))
         }
         .buttonStyle(.plain)
         .disabled(coach.isWorking || latest == nil)
@@ -219,7 +219,7 @@ struct CoachScreen: View {
 
     private var memoryTile: some View {
         NavigationLink { MemoryView() } label: {
-            tile(symbol: "brain", title: "Memory", detail: noteCount == 1 ? "1 note Muse keeps" : "\(noteCount) notes Muse keeps")
+            tile(symbol: "brain", title: "Memory", detail: noteCount == 1 ? "1 saved note" : "\(noteCount) saved notes")
         }
         .buttonStyle(.plain)
     }
@@ -343,7 +343,7 @@ struct CoachScreen: View {
 
     private var askBar: some View {
         HStack(spacing: 10) {
-            TextField("Ask Muse anything about your game", text: $question)
+            TextField("Ask about your game", text: $question)
                 .textFieldStyle(.plain)
                 .foregroundStyle(MuseStyle.text)
                 .onSubmit { ask(question) }
@@ -374,14 +374,26 @@ struct CoachScreen: View {
     private var engineCard: some View {
         @Bindable var coach = coach
         return VStack(alignment: .leading, spacing: 8) {
-            Toggle("Use Muse online", isOn: $coach.museEnabled)
-                .disabled(!coach.museAvailable || coach.isWorking)
+            Toggle("Use Lemonade when available", isOn: $coach.agentEnabled)
+                .disabled(coach.isWorking)
                 .tint(MuseStyle.lime)
                 .foregroundStyle(MuseStyle.text)
-            Text(coach.museAvailable
-                 ? "Muse sends your question and the shot data, racket readings and player notes it asks for to Baseten, which hosts Meta's open Muse Spark. Health data and session notes are excluded; turn off player notes under Memory."
-                 : "Sign in under Account to use Muse online. Until then the built-in engine answers offline.")
-                .font(.caption).foregroundStyle(MuseStyle.muted)
+            TextField("Lemonade server address", text: $coach.lemonadeBaseAddress)
+                #if os(iOS)
+                .textInputAutocapitalization(.never)
+                .autocorrectionDisabled()
+                #endif
+            if !coach.availableEngineModels.isEmpty {
+                Picker("Local model", selection: $coach.lemonadeModel) {
+                    ForEach(coach.availableEngineModels, id: \.self) { Text($0).tag($0) }
+                }
+            }
+            HStack {
+                Text(coach.engineConnectionMessage).font(.caption).foregroundStyle(MuseStyle.muted)
+                Spacer()
+                Button("Test connection") { Task { await coach.testLemonadeConnection() } }
+                    .disabled(coach.isWorking)
+            }
             if let reason = coach.lastFallbackReason {
                 Text("Using the built-in engine: \(reason)").font(.caption).foregroundStyle(MuseStyle.muted)
             }

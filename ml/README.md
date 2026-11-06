@@ -1,10 +1,10 @@
-# ML: sweet-spot model and Muse what-if data
+# ML: sweet-spot model and what-if agent data
 
 Two jobs live here:
 
 1. **Sweet-spot model.** The racket's INMP441 mic hears each impact. A model on the ESP32-C3 estimates how far from
    the sweet spot the ball hit, and calls it sweet or not.
-2. **What-if dataset for Muse Spark.** Synthetic tool-use conversations that teach Muse to call `simulate_change`
+2. **What-if dataset for tool-calling agent.** Synthetic tool-use conversations that teach the agent to call `simulate_change`
    and report the predicted result. See [`docs/WHATIF_DATASET.md`](../docs/WHATIF_DATASET.md).
 
 ## The model on the racket

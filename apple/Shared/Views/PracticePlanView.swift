@@ -22,8 +22,8 @@ struct PracticePlanView: View {
                         stepCard(step, number: index + 1)
                     }
                 } else {
-                    Text(latest == nil ? "Play a session first, then Muse writes a plan from it."
-                         : "No plan yet. Muse writes one from your last session.")
+                    Text(latest == nil ? "Play a session first, then Racket agent writes a plan from it."
+                         : "No plan yet. Racket agent writes one from your last session.")
                         .foregroundStyle(MuseStyle.text)
                         .museCard()
                 }

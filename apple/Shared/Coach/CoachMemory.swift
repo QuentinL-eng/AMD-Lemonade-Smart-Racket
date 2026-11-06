@@ -6,7 +6,7 @@ import SwiftData
 struct CoachMemory {
     static let maxNoteLength = 240
     static let maxNotesPerPlayer = 200
-    /// Muse may add at most this many notes per answer, so a confused model can't flood the list.
+    /// Racket agent may add at most this many notes per answer, so a confused model can't flood the list.
     static let maxSavesPerAnswer = 2
 
     let notes: () throws -> [CoachNote]

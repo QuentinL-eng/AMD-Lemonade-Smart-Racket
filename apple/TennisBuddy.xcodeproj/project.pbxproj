@@ -34,7 +34,7 @@
 		2AEFC5FDAEB86C5C57C247EE /* TennisRacket.glb in Resources */ = {isa = PBXBuildFile; fileRef = 343375742A01D39CB5E6D41F /* TennisRacket.glb */; };
 		2C9AFC9E3FD18554F922575F /* WhatIf.swift in Sources */ = {isa = PBXBuildFile; fileRef = 54A828E7A08D24E4BBBC9A6A /* WhatIf.swift */; };
 		2FDD375CDBD93DA6E5D24A38 /* SocialModels.swift in Sources */ = {isa = PBXBuildFile; fileRef = 7AA1BAD03DABDEAFC506F38D /* SocialModels.swift */; };
-		2FFE390154509ACA2C095B92 /* MuseCoach.swift in Sources */ = {isa = PBXBuildFile; fileRef = A95212CDD7E03E99DE2060E5 /* MuseCoach.swift */; };
+		2FFE390154509ACA2C095B92 /* RacketAgent.swift in Sources */ = {isa = PBXBuildFile; fileRef = A95212CDD7E03E99DE2060E5 /* RacketAgent.swift */; };
 		318753221A01B8F20EFEDA9F /* WhatIfView.swift in Sources */ = {isa = PBXBuildFile; fileRef = 631AE84D17CB5BF53BA7E88F /* WhatIfView.swift */; };
 		3578E6B4D9E1B3E29A069483 /* GlassesHUD.swift in Sources */ = {isa = PBXBuildFile; fileRef = 236FFE32A5D82A97C42CC0DF /* GlassesHUD.swift */; };
 		36E935B1DFB21C4438B22EDE /* ReviewQueueView.swift in Sources */ = {isa = PBXBuildFile; fileRef = 34F57F5BC7609CBED7537EA2 /* ReviewQueueView.swift */; };
@@ -56,8 +56,8 @@
 		6378233C7A0268790A47CF6C /* Components.swift in Sources */ = {isa = PBXBuildFile; fileRef = 7E790DB056785306E5A4E26C /* Components.swift */; };
 		63A302D121580BFFF4E9551D /* AppleSignInChallenge.swift in Sources */ = {isa = PBXBuildFile; fileRef = 2FB650E789B25A3DC1BC3772 /* AppleSignInChallenge.swift */; };
 		643060A89493BC64502B2CEB /* TennisRacket.glb in Resources */ = {isa = PBXBuildFile; fileRef = 343375742A01D39CB5E6D41F /* TennisRacket.glb */; };
-		65A2D66B16AE3280C48695FD /* MuseClient.swift in Sources */ = {isa = PBXBuildFile; fileRef = 7E13B818CB23D8733395B203 /* MuseClient.swift */; };
-		65BA365DA7CAFE80010E4CBC /* MuseCoach.swift in Sources */ = {isa = PBXBuildFile; fileRef = A95212CDD7E03E99DE2060E5 /* MuseCoach.swift */; };
+		65A2D66B16AE3280C48695FD /* AgentTransport.swift in Sources */ = {isa = PBXBuildFile; fileRef = 7E13B818CB23D8733395B203 /* AgentTransport.swift */; };
+		65BA365DA7CAFE80010E4CBC /* RacketAgent.swift in Sources */ = {isa = PBXBuildFile; fileRef = A95212CDD7E03E99DE2060E5 /* RacketAgent.swift */; };
 		65D4F29ECD63B318321BBF4F /* RacketSceneView.swift in Sources */ = {isa = PBXBuildFile; fileRef = 5CE7A86CCDEFE9D1F8502AC1 /* RacketSceneView.swift */; };
 		679BC005B560A7AE4A5A91EF /* InsightsView.swift in Sources */ = {isa = PBXBuildFile; fileRef = F12AAA9C083779C5F7C4404A /* InsightsView.swift */; };
 		6F6453B3E2A133AFD0F375DB /* RacketFirmware.json in Resources */ = {isa = PBXBuildFile; fileRef = EAC10B9BA8B384E61A13C06C /* RacketFirmware.json */; };
@@ -87,7 +87,7 @@
 		9E84B51D564034336F8FC5B5 /* RacketFirmware.bin in Resources */ = {isa = PBXBuildFile; fileRef = 790582683D3D7A26D4F75DE5 /* RacketFirmware.bin */; };
 		A161491671423AA7E78A9E7D /* GlassesView.swift in Sources */ = {isa = PBXBuildFile; fileRef = 0A9946B6CF4A383F80879D30 /* GlassesView.swift */; };
 		A237A1851BCDEEF4483EAB7F /* HistoryView.swift in Sources */ = {isa = PBXBuildFile; fileRef = 5A34DFC69F764025C289A856 /* HistoryView.swift */; };
-		A29365338828346B2B9B6AD3 /* MuseClient.swift in Sources */ = {isa = PBXBuildFile; fileRef = 7E13B818CB23D8733395B203 /* MuseClient.swift */; };
+		A29365338828346B2B9B6AD3 /* AgentTransport.swift in Sources */ = {isa = PBXBuildFile; fileRef = 7E13B818CB23D8733395B203 /* AgentTransport.swift */; };
 		A85754268507A65E1386B8D2 /* WatchApp.swift in Sources */ = {isa = PBXBuildFile; fileRef = D4FEDDDA8021F41075F44461 /* WatchApp.swift */; };
 		A98BB1D3E770A40DB047B95D /* CoachMemory.swift in Sources */ = {isa = PBXBuildFile; fileRef = 1EE34726185AA44404C5C313 /* CoachMemory.swift */; };
 		AA1836C763981D2FB882E24D /* BackendConfig.plist in Resources */ = {isa = PBXBuildFile; fileRef = E2C677F14C8214171007F688 /* BackendConfig.plist */; };
@@ -100,7 +100,7 @@
 		BF00CAFD82192A4713D19ED9 /* Info.sync-conflict-20261027-204109-GC6FYOE.plist in Resources */ = {isa = PBXBuildFile; fileRef = 31B4851C1B388FB90B5E9AEC /* Info.sync-conflict-20261027-204109-GC6FYOE.plist */; };
 		BFBCAE2D21CC72D4A679AA4D /* SwingFilm.swift in Sources */ = {isa = PBXBuildFile; fileRef = DC3B382A5B3D765E48B4CB77 /* SwingFilm.swift */; };
 		C520ADDD7496A77DC1BD599B /* Assets.xcassets in Resources */ = {isa = PBXBuildFile; fileRef = C9D172411555FD246D6484F7 /* Assets.xcassets */; };
-		C57AA38341143B9C02A8AAD6 /* MuseCoach.swift in Sources */ = {isa = PBXBuildFile; fileRef = A95212CDD7E03E99DE2060E5 /* MuseCoach.swift */; };
+		C57AA38341143B9C02A8AAD6 /* RacketAgent.swift in Sources */ = {isa = PBXBuildFile; fileRef = A95212CDD7E03E99DE2060E5 /* RacketAgent.swift */; };
 		C6BEF6F26E632D614AAD425D /* WhatIf.swift in Sources */ = {isa = PBXBuildFile; fileRef = 54A828E7A08D24E4BBBC9A6A /* WhatIf.swift */; };
 		C73BC836A6D01063C408DF21 /* WhatIfView.swift in Sources */ = {isa = PBXBuildFile; fileRef = 631AE84D17CB5BF53BA7E88F /* WhatIfView.swift */; };
 		C778C31E3E5848A25F661A3A /* AppModel.swift in Sources */ = {isa = PBXBuildFile; fileRef = 93FF9841989C788B5B2C46D4 /* AppModel.swift */; };
@@ -112,7 +112,7 @@
 		DDE9324A8ADD56E702D6D57D /* ScoreAnnouncer.swift in Sources */ = {isa = PBXBuildFile; fileRef = A9C75A9CE4F4D5E84133CF54 /* ScoreAnnouncer.swift */; };
 		DF55C28128F77F7FD0FC192D /* AccountView.swift in Sources */ = {isa = PBXBuildFile; fileRef = 750EC5969F8A326324C4F2FF /* AccountView.swift */; };
 		E07684398C6F2C4CAE7D2163 /* CoachMemory.swift in Sources */ = {isa = PBXBuildFile; fileRef = 1EE34726185AA44404C5C313 /* CoachMemory.swift */; };
-		E076ADEAA3E3106B85BC6181 /* MuseClient.swift in Sources */ = {isa = PBXBuildFile; fileRef = 7E13B818CB23D8733395B203 /* MuseClient.swift */; };
+		E076ADEAA3E3106B85BC6181 /* AgentTransport.swift in Sources */ = {isa = PBXBuildFile; fileRef = 7E13B818CB23D8733395B203 /* AgentTransport.swift */; };
 		E087C594C150518A07848381 /* ScoreAnnouncer.swift in Sources */ = {isa = PBXBuildFile; fileRef = A9C75A9CE4F4D5E84133CF54 /* ScoreAnnouncer.swift */; };
 		E444E2D6CFA4B2CCBF80204E /* BackendConfig.plist in Resources */ = {isa = PBXBuildFile; fileRef = E2C677F14C8214171007F688 /* BackendConfig.plist */; };
 		E64946D2285658AB720BA443 /* RacketKit in Frameworks */ = {isa = PBXBuildFile; productRef = 4213A0360D6E158513E50004 /* RacketKit */; };
@@ -193,7 +193,7 @@
 		78F9C7A1045426C92A087323 /* Info.plist */ = {isa = PBXFileReference; lastKnownFileType = text.plist; path = Info.plist; sourceTree = "<group>"; };
 		790582683D3D7A26D4F75DE5 /* RacketFirmware.bin */ = {isa = PBXFileReference; lastKnownFileType = archive.macbinary; path = RacketFirmware.bin; sourceTree = "<group>"; };
 		7AA1BAD03DABDEAFC506F38D /* SocialModels.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = SocialModels.swift; sourceTree = "<group>"; };
-		7E13B818CB23D8733395B203 /* MuseClient.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = MuseClient.swift; sourceTree = "<group>"; };
+		7E13B818CB23D8733395B203 /* AgentTransport.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = AgentTransport.swift; sourceTree = "<group>"; };
 		7E790DB056785306E5A4E26C /* Components.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = Components.swift; sourceTree = "<group>"; };
 		836E5AF465B4B1929E2B5ED9 /* Info.sync-conflict-20261027-201221-GC6FYOE.plist */ = {isa = PBXFileReference; lastKnownFileType = text.plist; path = "Info.sync-conflict-20261027-201221-GC6FYOE.plist"; sourceTree = "<group>"; };
 		848E320738AD43BEA253A649 /* WatchBridge.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = WatchBridge.swift; sourceTree = "<group>"; };
@@ -204,7 +204,7 @@
 		99B37449F16667305BA65652 /* CoachModel.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = CoachModel.swift; sourceTree = "<group>"; };
 		A33029151A3D4E690D31DECA /* CoachPlanTests.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = CoachPlanTests.swift; sourceTree = "<group>"; };
 		A47CDCF90CDD3213B7A94C42 /* CalibrationView.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = CalibrationView.swift; sourceTree = "<group>"; };
-		A95212CDD7E03E99DE2060E5 /* MuseCoach.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = MuseCoach.swift; sourceTree = "<group>"; };
+		A95212CDD7E03E99DE2060E5 /* RacketAgent.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = RacketAgent.swift; sourceTree = "<group>"; };
 		A9C75A9CE4F4D5E84133CF54 /* ScoreAnnouncer.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = ScoreAnnouncer.swift; sourceTree = "<group>"; };
 		C4E19DEF515B2344BD174C3A /* RacketKit */ = {isa = PBXFileReference; lastKnownFileType = folder; name = RacketKit; path = RacketKit; sourceTree = SOURCE_ROOT; };
 		C7DB2287A7E04EB6397C1F1E /* TennisBuddy.entitlements */ = {isa = PBXFileReference; lastKnownFileType = text.plist.entitlements; path = TennisBuddy.entitlements; sourceTree = "<group>"; };
@@ -364,8 +364,8 @@
 				1EE34726185AA44404C5C313 /* CoachMemory.swift */,
 				99B37449F16667305BA65652 /* CoachModel.swift */,
 				47587C1A3ADFF8D79D0B943F /* CoachTools.swift */,
-				7E13B818CB23D8733395B203 /* MuseClient.swift */,
-				A95212CDD7E03E99DE2060E5 /* MuseCoach.swift */,
+				7E13B818CB23D8733395B203 /* AgentTransport.swift */,
+				A95212CDD7E03E99DE2060E5 /* RacketAgent.swift */,
 				0F79F1A7E3D3108B8075408F /* PracticePlan.swift */,
 				DC3B382A5B3D765E48B4CB77 /* SwingFilm.swift */,
 				54A828E7A08D24E4BBBC9A6A /* WhatIf.swift */,
@@ -641,8 +641,8 @@
 				679BC005B560A7AE4A5A91EF /* InsightsView.swift in Sources */,
 				0424191C89E90C4E2DFDBEBE /* LiveView.swift in Sources */,
 				29E2BC7EA9C31D4C0C78E366 /* MemoryView.swift in Sources */,
-				A29365338828346B2B9B6AD3 /* MuseClient.swift in Sources */,
-				65BA365DA7CAFE80010E4CBC /* MuseCoach.swift in Sources */,
+				A29365338828346B2B9B6AD3 /* AgentTransport.swift in Sources */,
+				65BA365DA7CAFE80010E4CBC /* RacketAgent.swift in Sources */,
 				12E9272F24196C1CEF07A0B4 /* MuseScreen.swift in Sources */,
 				73CA4B1944AB4883D0F9A303 /* PracticePlan.swift in Sources */,
 				809EEA561D2EB51752E49F6F /* PracticePlanView.swift in Sources */,
@@ -680,8 +680,8 @@
 				37629004E033DFB7367AD5D0 /* ConsumerFeatureTests.swift in Sources */,
 				069D00CB73F9C87CAE6F9FED /* InsightsModel.swift in Sources */,
 				F8F9E722AB61743137226BAD /* InsightsModelTests.swift in Sources */,
-				65A2D66B16AE3280C48695FD /* MuseClient.swift in Sources */,
-				2FFE390154509ACA2C095B92 /* MuseCoach.swift in Sources */,
+				65A2D66B16AE3280C48695FD /* AgentTransport.swift in Sources */,
+				2FFE390154509ACA2C095B92 /* RacketAgent.swift in Sources */,
 				F965474F079B3E4B289B0894 /* PracticePlan.swift in Sources */,
 				117FB391373D2548F66FB7C9 /* Records.swift in Sources */,
 				E087C594C150518A07848381 /* ScoreAnnouncer.swift in Sources */,
@@ -715,8 +715,8 @@
 				54D0A472AD32FB216A2612B9 /* InsightsView.swift in Sources */,
 				ECB995620E0135240B69EA6F /* LiveView.swift in Sources */,
 				4F30113C1078FA0BAD241D67 /* MemoryView.swift in Sources */,
-				E076ADEAA3E3106B85BC6181 /* MuseClient.swift in Sources */,
-				C57AA38341143B9C02A8AAD6 /* MuseCoach.swift in Sources */,
+				E076ADEAA3E3106B85BC6181 /* AgentTransport.swift in Sources */,
+				C57AA38341143B9C02A8AAD6 /* RacketAgent.swift in Sources */,
 				9ABDC6E52CFC9BE74BAAA8CF /* MuseScreen.swift in Sources */,
 				192CE25F0B9E6A8C346DB8CF /* PracticePlan.swift in Sources */,
 				CC1ED852598700B179A8D13E /* PracticePlanView.swift in Sources */,

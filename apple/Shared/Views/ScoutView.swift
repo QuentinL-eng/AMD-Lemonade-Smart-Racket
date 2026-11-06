@@ -14,7 +14,7 @@ extension SessionRecord {
 }
 
 extension View {
-    /// The Muse section's card: padded, dark, rounded.
+    /// The Racket agent section's card: padded, dark, rounded.
     func museCard() -> some View {
         padding(16)
             .frame(maxWidth: .infinity, alignment: .leading)
@@ -22,13 +22,13 @@ extension View {
     }
 }
 
-/// Which engine wrote an answer, shown under every Muse feature.
+/// Which engine wrote an answer, shown under every Racket agent feature.
 struct EngineLabel: View {
     var name: String
 
     var body: some View {
         HStack(spacing: 6) {
-            Circle().fill(name.hasPrefix("Muse") ? MuseStyle.good : MuseStyle.muted).frame(width: 6, height: 6)
+            Circle().fill(name.hasPrefix("Racket agent") ? MuseStyle.good : MuseStyle.muted).frame(width: 6, height: 6)
             Text(name).font(.caption2).foregroundStyle(MuseStyle.muted)
         }
         .accessibilityElement(children: .combine)
@@ -58,8 +58,8 @@ struct ScoutView: View {
             VStack(alignment: .leading, spacing: 12) {
                 Text(title).font(MuseStyle.display(30)).foregroundStyle(MuseStyle.text)
                 Text(isSelfScout
-                     ? "Muse reads your recent sessions the way an opponent would and predicts where they'd attack."
-                     : "Muse sets your session against \(opponentName)'s shared racket totals and predicts how the match plays out.")
+                     ? "Racket agent reads your recent sessions the way an opponent would and predicts where they'd attack."
+                     : "Racket agent sets your session against \(opponentName)'s shared racket totals and predicts how the match plays out.")
                     .font(.subheadline).foregroundStyle(MuseStyle.muted)
                 if let opponent { opponentCard(opponent) }
                 reportCard
@@ -92,7 +92,7 @@ struct ScoutView: View {
         VStack(alignment: .leading, spacing: 10) {
             Text("MATCH PLAN").font(MuseStyle.eyebrow).tracking(2).foregroundStyle(MuseStyle.muted)
             if report.isEmpty {
-                Text(source == nil ? "Play a session first, then scout." : "Muse writes a short plan: how you match up, what to lean on, what to avoid.")
+                Text(source == nil ? "Play a session first, then scout." : "Racket agent writes a short plan: how you match up, what to lean on, what to avoid.")
                     .foregroundStyle(MuseStyle.text)
             } else {
                 Text(report).foregroundStyle(MuseStyle.text).textSelection(.enabled)

@@ -18,7 +18,6 @@ final class AccountModel {
     var errorMessage: String?
     private(set) var lastSync: Date?
     @ObservationIgnored let client: SupabaseClient?
-    @ObservationIgnored private var museConfig: (url: URL, key: String)?
     private var refreshInProgress = false
     private var statsSyncInProgress = false
     private var generation = 0
@@ -31,7 +30,6 @@ final class AccountModel {
            let endpoint = URL(string: config.url), endpoint.scheme == "https", endpoint.host != nil,
            !config.publishableKey.isEmpty, !config.publishableKey.hasPrefix("sb_secret_") {
             client = SupabaseClient(supabaseURL: endpoint, supabaseKey: config.publishableKey)
-            museConfig = (endpoint.appendingPathComponent("functions/v1/muse"), config.publishableKey)
         } else { client = nil }
     }
 
@@ -39,12 +37,6 @@ final class AccountModel {
     var isConfigured: Bool { client != nil }
     var isSignedIn: Bool { userID != nil }
 
-    /// Transport for the online coach, authenticated as the signed-in user. nil when signed out.
-    func museTransport() async -> MuseTransport? {
-        guard let client, let museConfig, isSignedIn,
-              let token = try? await client.auth.session.accessToken else { return nil }
-        return MuseClient(endpoint: museConfig.url, publishableKey: museConfig.key, accessToken: token)
-    }
     var displayName: String? { dashboard?.profile.name }
 
     func observeAuthentication() async {
