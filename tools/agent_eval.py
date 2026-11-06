@@ -89,9 +89,10 @@ def grounded(answer, pool):
     return bad
 
 
-def load_data():
+def load_data(data_dir=None):
+    data_dir = data_dir or os.path.join(ROOT, "data", "whatif")
     shots = {}
-    for r in csv.DictReader(open(os.path.join(ROOT, "data/whatif/shots.csv"))):
+    for r in csv.DictReader(open(os.path.join(data_dir, "shots.csv"))):
         s = cs.Shot.from_mic(r["spin"] == "sweet", 0) if r["mic_only"] == "1" else cs.Shot(
             type=r["type"], swing_kmh=float(r["swing_kmh"]), ball_kmh=float(r["ball_kmh"]),
             spin_rpm=float(r["spin_rpm"]), spin=r["spin"], face_deg=float(r["face_deg"]),
@@ -100,7 +101,7 @@ def load_data():
         shots.setdefault(r["session_id"], []).append((int(r["index"]), s))
     sessions, players = {}, {}
     base = datetime.datetime(2026, 10, 28, 19, tzinfo=datetime.timezone.utc)
-    for i, r in enumerate(csv.DictReader(open(os.path.join(ROOT, "data/whatif/sessions.csv")))):
+    for i, r in enumerate(csv.DictReader(open(os.path.join(data_dir, "sessions.csv")))):
         sl = [s for _, s in sorted(shots.get(r["session_id"], []))]
         start = (base + datetime.timedelta(days=i)).isoformat().replace("+00:00", "Z")
         sessions[r["session_id"]] = cs.Session(
@@ -296,6 +297,7 @@ def main():
     ap.add_argument("--preset", choices=PRESETS, required=True)
     ap.add_argument("--sample", type=int, default=25)
     ap.add_argument("--seed", type=int, default=7)
+    ap.add_argument("--data-dir", default=os.path.join(ROOT, "data", "whatif"))
     a = ap.parse_args()
     p = PRESETS[a.preset]
     key_name = p["key"]
@@ -308,8 +310,8 @@ def main():
         sys.exit(f"No {key_name}")
     if not model:
         sys.exit(f"Set {prefix}_MODEL to the model id loaded by this endpoint")
-    sessions, players = load_data()
-    refs = [json.loads(l) for l in open(os.path.join(ROOT, "data/whatif/conversations_val.jsonl"))]
+    sessions, players = load_data(a.data_dir)
+    refs = [json.loads(l) for l in open(os.path.join(a.data_dir, "conversations_val.jsonl"))]
     rng = random.Random(a.seed)
     by_kind, sample = {}, []
     for r in refs:
