@@ -35,7 +35,7 @@ lemonade load TennisBuddee --ctx-size 8192
 
 ## 4. Train for what Lemonade delivers
 
-Lemonade re-serializes request JSON with sorted keys, so tool schemas reach the model in a different order than the app wrote them. Train with `--sort-tool-keys` (`tools/modal_train.py --sort-tools`). Details and the one-second check: [LEMONADE_SCHEMA_ORDER.md](LEMONADE_SCHEMA_ORDER.md).
+Lemonade re-serializes request JSON with sorted keys, so tool schemas reach the model in a different order than the app wrote them. Train with `--sort-tool-keys` (`tools/modal_train.py --sort-tools`), which also writes tool-call arguments alphabetically because llama.cpp forces them into the schema's order. Details and the one-second check: [LEMONADE_SCHEMA_ORDER.md](LEMONADE_SCHEMA_ORDER.md).
 
 ## 5. Score through Lemonade
 

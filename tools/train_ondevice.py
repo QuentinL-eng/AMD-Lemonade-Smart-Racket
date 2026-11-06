@@ -73,6 +73,27 @@ def sort_tool_parameters(tools):
     return out
 
 
+def sort_call_arguments(messages):
+    """Write every assistant tool call's arguments with alphabetically sorted keys.
+
+    llama.cpp builds a grammar from the tool schema and forces a call's argument keys into the
+    schema's property order. Lemonade delivers the schema with sorted keys, so a model that
+    writes `type` before `swing_percent` is cut off after `type` and loses every later key.
+    Training on sorted arguments makes the model's natural order the one the grammar allows."""
+    out = []
+    for m in messages:
+        if m.get("tool_calls"):
+            calls = []
+            for call in m["tool_calls"]:
+                fn = dict(call["function"])
+                if isinstance(fn.get("arguments"), dict):
+                    fn["arguments"] = {k: fn["arguments"][k] for k in sorted(fn["arguments"])}
+                calls.append({**call, "function": fn})
+            m = {**m, "tool_calls": calls}
+        out.append(m)
+    return out
+
+
 def sort_keys(value):
     """Recursively sort dict keys."""
     if isinstance(value, dict):
@@ -122,6 +143,8 @@ def main() -> None:
 
     def render(item):
         messages = template_messages(drop_empty_assistant_turns(item["messages"]))
+        if args.sort_tool_keys:
+            messages = sort_call_arguments(messages)
         tools = item.get("tools") or []
         if args.sort_tool_keys:
             tools = sort_tool_parameters(tools)
