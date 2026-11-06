@@ -1,5 +1,5 @@
-> **Historical.** This is the plan from the first build day. The hardware, AI model and protocol have changed
-> since (LSM6DSV320X IMU, Meta Muse Spark, on-racket shot analysis). Current state: [README](../README.md),
+> **Historical archive.** This is the plan from the first build day; its proposed hardware, AI model, architecture,
+> schedule, and demo are not a description of the current build. For current state, see [README](../README.md),
 > [wiring](WIRING.md), [firmware](../firmware/README.md), [BLE protocol](../firmware/include/protocol.h).
 
 # Tennis Buddy: Hackathon Plan

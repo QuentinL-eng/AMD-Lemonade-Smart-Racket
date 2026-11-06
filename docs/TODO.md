@@ -1,5 +1,5 @@
-> **Working list from the build (Oct 2026).** Checked items are done; unchecked items may be stale.
-> Current state: [README](../README.md), [judging guide](../JUDGING.md).
+> **Historical working list (Oct 2026).** Checked items describe that build snapshot; unchecked items may be stale.
+> Current state: [README](../README.md) and the [Lemonade challenge submission](../SUBMISSION.md).
 
 # To do once the racket is streaming real data
 
