@@ -6,12 +6,14 @@ Replays sampled val cases against a live model with REAL tool dispatch
 the app cares about: digest-first discipline, grounded numbers, estimate
 labels, and whether the chosen change reaches the case's target.
 
-    python3 tools/agent_eval.py --preset meta --sample 25 --seed 7
-    python3 tools/agent_eval.py --preset baseten --sample 25 --seed 7
+    python3 tools/agent_eval.py --preset meta --sample 243 --seed 7
+    python3 tools/agent_eval.py --preset baseten --sample 243 --seed 7
+    python3 tools/agent_eval.py --preset lemonade --sample 243 --seed 7
+    python3 tools/agent_eval.py --preset ondevice --sample 243 --seed 7
 
-Presets: meta (MUSE_API_KEY @ api.meta.ai, muse-spark-1.3) and baseten
-(BASETEN_API_KEY @ inference.baseten.co, meta-models/muse-spark-open-1026).
-MUSE_API_KEY/MUSE_BASE_URL/MUSE_MODEL/EFFORT env vars override the preset.
+The lemonade and ondevice presets use OpenAI-compatible local endpoints. Set
+LEMONADE_BASE_URL/LEMONADE_MODEL and ONDEVICE_BASE_URL/ONDEVICE_MODEL to select
+the serving endpoint and model/checkpoint under evaluation.
 Report: data/whatif/eval_<preset>_s<sample>.json (git-ignored).
 """
 import argparse
@@ -36,6 +38,10 @@ PRESETS = {
              "model": "muse-spark-1.3", "effort": "low"},
     "baseten": {"key": "BASETEN_API_KEY", "base": "https://inference.baseten.co/v1",
                 "model": "meta-models/muse-spark-open-1026", "effort": None},
+    "lemonade": {"key": None, "base": "http://localhost:8000/api/v1",
+                 "model": "", "effort": None},
+    "ondevice": {"key": None, "base": "http://localhost:8001/v1",
+                 "model": "", "effort": None},
 }
 MAX_REQUESTS, MAX_TOOLS = 5, 8  # the app's agent limits: 5 rounds, 8 calls per round
 KNOWN_TOOLS = {t["function"]["name"] for t in cs.tool_schemas()}
@@ -110,9 +116,10 @@ def call(base, key, model, effort, messages, tools):
     body = {k: v for k, v in body.items() if v is not None}
     if effort:
         body["reasoning_effort"] = effort
-    req = urllib.request.Request(
-        f"{base}/chat/completions", data=json.dumps(body).encode(),
-        headers={"Authorization": f"Bearer {key}", "Content-Type": "application/json"})
+    headers = {"Content-Type": "application/json"}
+    if key:
+        headers["Authorization"] = f"Bearer {key}"
+    req = urllib.request.Request(f"{base}/chat/completions", data=json.dumps(body).encode(), headers=headers)
     with urllib.request.urlopen(req, timeout=90) as r:
         return json.load(r)
 
@@ -263,6 +270,25 @@ def score(ref, messages, seq, pool):
     return out, answer
 
 
+def summarize(rows):
+    """Compute one strict all-pass table without dropping failed requests."""
+    kinds = {}
+    for kind in sorted({r.get("kind", "unknown") for r in rows}):
+        subset = [r for r in rows if r.get("kind") == kind]
+        ok = [r for r in subset if not r.get("error")]
+        simulated = [r for r in ok if r.get("simulated")]
+        strict = [r for r in subset if not r.get("error") and r.get("strict_all_pass")]
+        kinds[kind] = {
+            "cases": len(subset), "strict_all_pass": len(strict),
+            "digest_first": sum(bool(r.get("digest_first")) for r in ok),
+            "grounded": sum(not r.get("ungrounded_numbers", []) for r in ok),
+            "estimate_label": sum(bool(r.get("has_estimate")) for r in simulated),
+            "estimate_label_cases": len(simulated),
+            "errors": sum(bool(r.get("error")) for r in subset),
+        }
+    return kinds
+
+
 def main():
     ap = argparse.ArgumentParser()
     ap.add_argument("--preset", choices=PRESETS, required=True)
@@ -270,12 +296,16 @@ def main():
     ap.add_argument("--seed", type=int, default=7)
     a = ap.parse_args()
     p = PRESETS[a.preset]
-    key = secret("MUSE_API_KEY" if a.preset == "meta" else "BASETEN_API_KEY")
-    base = os.environ.get("MUSE_BASE_URL", p["base"])
-    model = os.environ.get("MUSE_MODEL", p["model"])
+    key_name = p["key"]
+    key = secret(key_name) if key_name else os.environ.get("LEMONADE_API_KEY" if a.preset == "lemonade" else "ONDEVICE_API_KEY", "")
+    prefix = {"meta": "MUSE", "baseten": "BASETEN", "lemonade": "LEMONADE", "ondevice": "ONDEVICE"}[a.preset]
+    base = os.environ.get(f"{prefix}_BASE_URL", p["base"])
+    model = os.environ.get(f"{prefix}_MODEL", p["model"])
     effort = os.environ.get("EFFORT", p["effort"] or "")
-    if not key:
-        sys.exit(f"No {'MUSE_API_KEY' if a.preset == 'meta' else 'BASETEN_API_KEY'}")
+    if key_name and not key:
+        sys.exit(f"No {key_name}")
+    if not model:
+        sys.exit(f"Set {prefix}_MODEL to the model id loaded by this endpoint")
     sessions, players = load_data()
     refs = [json.loads(l) for l in open(os.path.join(ROOT, "data/whatif/conversations_val.jsonl"))]
     rng = random.Random(a.seed)
@@ -301,6 +331,8 @@ def main():
             s, answer = score(ref, messages, seq, pool)
             s.update(kind=m["kind"], objective=m.get("objective"), flaw_found=m.get("flaw_found"),
                      session=m["session_id"][:8], error=None)
+            s["strict_all_pass"] = (s["digest_first"] and not s["ungrounded_numbers"] and s["estimate_ok"]
+                                    and not s["unknown_tools"] and s["target"] is not False)
         except Exception as e:  # noqa: BLE001 - one bad case must not kill the run
             u = getattr(e, "usage", None) or {}
             usage["prompt"] += u.get("prompt", 0)
@@ -314,19 +346,30 @@ def main():
               f" ungrounded={s.get('ungrounded_numbers', '-')}"
               f" target={s.get('target')} err={s.get('error')}", flush=True)
     ok = [r for r in rows if not r.get("error")]
+    per_kind = summarize(rows)
+    simulated = [r for r in ok if r.get("simulated")]
     agg = {"preset": a.preset, "model": model, "cases": len(rows), "errors": len(rows) - len(ok),
+           "strict_all_pass": sum(bool(r.get("strict_all_pass")) for r in rows),
            "digest_first": sum(r["digest_first"] for r in ok),
            "grounded": sum(not r["ungrounded_numbers"] for r in ok),
-           "estimate_label": sum(r["estimate_ok"] for r in ok),
+           "estimate_label": sum(r["has_estimate"] for r in simulated),
+           "estimate_label_cases": len(simulated),
            "simulated_cases": sum(r["simulated"] for r in ok),
            "target": [r["target"] for r in ok if r["target"] is not None],
-           "usage": usage, "rows": rows}
+           "per_kind": per_kind, "usage": usage, "rows": rows}
     out = os.path.join(ROOT, "data/whatif", f"eval_{a.preset}_s{a.sample}.json")
     json.dump(agg, open(out, "w"), indent=1)
     t = agg["target"]
-    print(f"digest-first {agg['digest_first']}/{len(ok)}, grounded {agg['grounded']}/{len(ok)}, "
-          f"estimate {agg['estimate_label']}/{len(ok)}, target {sum(t)}/{len(t)}, "
-          f"errors {agg['errors']}, tokens {usage['prompt']}+{usage['completion']}\nwrote {out}")
+    print("kind              strict  digest  grounded  estimate  errors")
+    for kind, values in per_kind.items():
+        print(f"{kind:17s} {values['strict_all_pass']:>3}/{values['cases']:<3}"
+              f" {values['digest_first']:>3}/{values['cases']:<3}"
+              f" {values['grounded']:>3}/{values['cases']:<3}"
+              f" {values['estimate_label']:>3}/{values['estimate_label_cases']:<3}"
+              f" {values['errors']:>3}")
+    print(f"strict {agg['strict_all_pass']}/{len(rows)}, digest-first {agg['digest_first']}/{len(ok)}, "
+          f"grounded {agg['grounded']}/{len(ok)}, estimate-label {agg['estimate_label']}/{agg['estimate_label_cases']}, "
+          f"target {sum(t)}/{len(t)}, errors {agg['errors']}, tokens {usage['prompt']}+{usage['completion']}\nwrote {out}")
 
 
 if __name__ == "__main__":
