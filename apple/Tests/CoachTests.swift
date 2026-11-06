@@ -363,6 +363,7 @@ final class LemonadeTransportTests: XCTestCase {
         let body = try JSONSerialization.jsonObject(with: MuseURLProtocol.capturedRequest!.httpBody!) as! [String: Any]
         XCTAssertEqual(body["model"] as? String, "test-model")
         XCTAssertEqual(body["tool_choice"] as? String, "auto")
+        XCTAssertEqual(body["enable_thinking"] as? Bool, false)
     }
 
     func testRateLimitMalformedTimeoutAndUnreachableHost() async {

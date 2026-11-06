@@ -75,7 +75,8 @@ struct LemonadeTransport: AgentTransport {
         var request = URLRequest(url: url, timeoutInterval: timeout)
         request.httpMethod = "POST"
         request.setValue("application/json", forHTTPHeaderField: "Content-Type")
-        var body: [String: Any] = ["model": model, "messages": messages, "max_completion_tokens": 4096]
+        var body: [String: Any] = ["model": model, "messages": messages,
+                                   "max_completion_tokens": 4096, "enable_thinking": false]
         if !tools.isEmpty { body["tools"] = tools; body["tool_choice"] = "auto" }
         request.httpBody = try JSONSerialization.data(withJSONObject: body)
         let (data, response) = try await session.data(for: request)

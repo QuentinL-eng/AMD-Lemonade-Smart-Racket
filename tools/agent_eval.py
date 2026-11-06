@@ -109,13 +109,15 @@ def load_data():
     return sessions, players
 
 
-def call(base, key, model, effort, messages, tools):
+def call(base, key, model, effort, messages, tools, think_off=False):
     body = {"model": model, "messages": messages, "tools": tools or None,
             "tool_choice": "auto" if tools else None,
             "max_completion_tokens": 4096}  # MuseClient.swift
     body = {k: v for k, v in body.items() if v is not None}
     if effort:
         body["reasoning_effort"] = effort
+    if think_off:
+        body["enable_thinking"] = False
     headers = {"Content-Type": "application/json"}
     if key:
         headers["Authorization"] = f"Bearer {key}"
@@ -165,7 +167,7 @@ def dispatch_tool(name, args, session, catalog, units, notes):
     return {"error": f"{name} is not available in this eval"}
 
 
-def run_case(ref, sessions, players, base, key, model, effort):
+def run_case(ref, sessions, players, base, key, model, effort, think_off=False):
     """MuseCoach.generate's loop: 5 rounds, last round nudged without tools. Empty finals and
     tool calls on the last round raise, mirroring the app's invalidResponse/roundLimit fallback."""
     meta = ref["metadata"]
@@ -179,7 +181,7 @@ def run_case(ref, sessions, players, base, key, model, effort):
         last = round == MAX_REQUESTS - 1
         if last:
             messages.append({"role": "user", "content": FINAL_NUDGE})
-        resp = call(base, key, model, effort, messages, None if last else tools)
+        resp = call(base, key, model, effort, messages, None if last else tools, think_off=think_off)
         u = resp.get("usage", {})
         usage["prompt"] += u.get("prompt_tokens", 0)
         usage["completion"] += u.get("completion_tokens", 0)
@@ -325,7 +327,8 @@ def main():
     for i, ref in enumerate(sample):
         m = ref["metadata"]
         try:
-            messages, seq, pool, u = run_case(ref, sessions, players, base, key, model, effort or None)
+            messages, seq, pool, u = run_case(ref, sessions, players, base, key, model, effort or None,
+                                              think_off=a.preset == "lemonade")
             usage["prompt"] += u["prompt"]
             usage["completion"] += u["completion"]
             s, answer = score(ref, messages, seq, pool)

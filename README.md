@@ -24,7 +24,7 @@ The simulator reports estimates. The agent is instructed to use tool results for
 
 The app has a Lemonade transport and connection controls for a local server. The transport targets the configured API base, requests the local model list, and sends OpenAI-compatible chat-completion requests with the registered tool schemas. It is designed to use a server on the same device or a laptop reachable over the local network.
 
-The Lemonade path has not been built or tested with Swift in this Windows environment. No full validation-set run has been completed against Lemonade here. See [docs/LEMONADE.md](docs/LEMONADE.md) for the connection workflow and [SUBMISSION.md](SUBMISSION.md) for the measurement status.
+The native app has not been built with Swift in this Windows environment. The full 243-case Python evaluation completed against Lemonade. A local browser replay can be launched with `node tools/emulator-server.mjs`; see [docs/LEMONADE.md](docs/LEMONADE.md) for setup and its verification limits.
 
 ## Evaluation
 
@@ -40,7 +40,7 @@ Run the same scorer against a local Lemonade server after selecting a model:
 LEMONADE_BASE_URL=http://localhost:8000/api/v1 LEMONADE_MODEL=<model-id> python3 tools/agent_eval.py --preset lemonade --sample 243 --seed 7
 ```
 
-The evaluator writes a JSON report in `data/whatif/`. It reports strict all-pass, digest-first behavior, number grounding, estimate labels, errors, and per-kind scores. Do not compare a local result until this command has actually completed.
+The evaluator writes a JSON report in `data/whatif/`. It reports strict all-pass, digest-first behavior, number grounding, estimate labels, errors, and per-kind scores. The first full local run is recorded in [docs/LEMONADE_EVAL.md](docs/LEMONADE_EVAL.md); it used Qwen3-1.7B-GGUF on an NVIDIA RTX 4070 Laptop GPU. It scored 51.0% strict all-pass against the historical hosted baseline of 87.7%, so the current local model is not an improvement yet. The principal gap was meeting objective targets (41/123 target cases passed).
 
 ## Firmware evidence
 
@@ -82,3 +82,16 @@ Shot history stays on the player's devices and private iCloud until the player c
 ## License
 
 MIT. See [LICENSE](LICENSE). The idea started from the MIT-licensed [Smart-Tennis-Racket repository](https://github.com/AahanPrajapati/Smart-Tennis-Racket).
+
+
+### Measured Lemonade validation breakdown
+
+| Validation kind | Strict all-pass | Digest-first | Grounded numbers | Estimate labels |
+|---|---:|---:|---:|---:|
+| objective | 31/127 | 127/127 | 117/127 | 68/98 |
+| player_whatif | 48/57 | 57/57 | 56/57 | 48/56 |
+| player_whatif_extreme | 11/18 | 14/18 | 18/18 | 12/18 |
+| unmodeled | 20/25 | 25/25 | 23/25 | 17/20 |
+| contact_spread | 12/14 | 14/14 | 13/14 | 7/8 |
+| no_motion | 1/1 | 1/1 | 1/1 | n/a |
+| player_whatif_error | 1/1 | 1/1 | 1/1 | n/a |
