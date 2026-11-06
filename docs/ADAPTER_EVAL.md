@@ -116,7 +116,7 @@ What changed from round 4 (87.2%, own server):
 - GGUF Q8_0 file SHA-256 `d9ca97fc…`; adapter SHA-256 `fd287bcf…`.
 
 Reading the result:
-- The 6.1-point drop from 87.2% is the price of the Lemonade path (merge to fp16, Q8 quantization, a tool grammar), not a different training objective. This is not an improvement over round 4; it is the first measurement through Lemonade.
+- Round 8 scores 6.1 points below round 4's 87.2%. We cannot say why: the serving path changed (merge to fp16, Q8 quantization, a tool grammar) and so did the recipe (600 steps, two kinds repeated, alphabetical arguments), and no run separates the two. Round 4 cannot be served through Lemonade, so this is not a like-for-like comparison. Round 8 is the best model that works through Lemonade, not the best model overall.
 - Remaining validation failures: 40 `objective` and 5 `player_whatif_extreme` cases. We have not analysed these as we did earlier rounds.
 - Rounds 5 to 7 were trained but only 6 and 7 were scored through Lemonade (113/243 and 120/243); they exposed the argument-order problem. Round 5 was never scored.
 - Validation was used to choose among eight rounds; the test split was run once, after the model was final. Modal spend reached about $13 against a $10 soft limit, so no further rounds were run.
