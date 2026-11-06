@@ -13,6 +13,7 @@ We fine-tuned Qwen2.5-1.5B-Instruct (QLoRA) to call tools for the smart-racket c
 | Lemonade, round 4 adapter (`temperature: 0`) | 118/243 (48.6%) | 0 | 6/127 | 2/123 |
 | Lemonade, round 6 (trained on fully sorted tool schemas) | 113/243 (46.5%) | 0 | 3/127 | 0/123 |
 | Lemonade, round 7 (trained on sorted `parameters` only) | 120/243 (49.4%) | 0 | 4/127 | 0/123 |
+| **Lemonade, round 8 (sorted `parameters` and alphabetical tool-call arguments)** | **197/243 (81.1%)** | 0 | 87/127 | 90/123 |
 
 Reports are in [`evaluation/`](../evaluation) (`lemonade-tuned-r4-*`, `lemonade-tuned-r6-*`, `lemonade-tuned-r7-*`).
 
@@ -47,7 +48,7 @@ It sends the same request with the schema in the application's order and in sort
 
 ## What to do
 
-1. **Make the model's argument order the order the grammar allows.** `tools/train_ondevice.py --sort-tool-keys` renders tool schemas with sorted `parameters` and writes every training tool call's arguments in alphabetical order (`type` last). Round 8 uses it. Result: see [ADAPTER_EVAL.md](ADAPTER_EVAL.md), recorded only after it was measured.
+1. **Make the model's argument order the order the grammar allows.** `tools/train_ondevice.py --sort-tool-keys` renders tool schemas with sorted `parameters` and writes every training tool call's arguments in alphabetical order (`type` last). Round 8 uses it and recovered the Lemonade path: 197/243 (81.1%) on validation and 136/166 (81.9%) on the untouched test split, both with 0 response errors. This confirms the mechanism, since changing only the order the model writes its arguments moved the score from 120 to 197.
 2. **Test through the server you will deploy on.** The 87.2% was real for the path it was measured on and said nothing about the Lemonade path.
 3. A small tool-calling model should not depend on argument order; training on shuffled orders would be more robust. We have not tried it.
 

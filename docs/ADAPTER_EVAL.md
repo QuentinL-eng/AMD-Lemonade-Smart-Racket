@@ -98,3 +98,25 @@ Trained on `conversations_train_target.jsonl` (1,598 of the 1,809 training conve
 | 4 | target-filtered, empty turns dropped | 400 | **212/243 (87.2%)** | 0 |
 
 The 90% goal was **not reached**. Remaining 31 failures, all `objective`: 12 `more_spin` and 11 `cleaner_contact` answers that miss the goal (down from 29 target misses in round 3), and 8 `cleaner_contact` answers quoting a number that is not in any tool result (up from 6). Filtering helped on target misses but did not remove them, and the grounded-number failures are now the clearest next lever. Four rounds were chosen by looking at the same 243 validation cases, so 87.2% is somewhat optimistic; the untouched test split has not been run. Ideas not yet tried: also filter ungrounded-number answers out of the training data, add training examples that copy the tool's exact offset into the move, a larger LoRA rank, or a larger base model.
+
+## Round 8: served by Lemonade (GGUF Q8_0)
+
+The first rounds were scored on our own Transformers/NF4 server. Round 8 was merged into the fp16 base (`tools/merge_adapter.py`), converted to GGUF, quantized to Q8_0 (1.5 GB), loaded into Lemonade Server 2026.45.3 as a custom model and scored through Lemonade's own endpoint with `temperature: 0` ([recipe](LEMONADE_ADAPTER.md)).
+
+| Split | Strict all-pass | Response errors | Goal reached | Digest-first | Grounded |
+|---|---:|---:|---:|---:|---:|
+| Validation (243 cases) | **197 (81.1%)** | 0 | 90/123 | 243/243 | 230/243 |
+| Test (166 cases, run once) | **136 (81.9%)** | 0 | 70/92 | 166/166 | 158/166 |
+
+Reports: [`evaluation/lemonade-tuned-r8-validation.json`](../evaluation/lemonade-tuned-r8-validation.json), [`evaluation/lemonade-tuned-r8-test.json`](../evaluation/lemonade-tuned-r8-test.json).
+
+What changed from round 4 (87.2%, own server):
+- Training data: the round-4 filtered set (goal conversations kept only if the last simulation reaches the goal), with the `cleaner_contact` and `more_spin` conversations repeated once (2,185 conversations, SHA-256 `66ce888e…`), 600 steps, seed 7, on a rented A100.
+- Tool schemas rendered with sorted `parameters` and tool-call arguments written alphabetically, because Lemonade/llama.cpp constrains argument order to the sorted schema ([LEMONADE_SCHEMA_ORDER.md](LEMONADE_SCHEMA_ORDER.md)).
+- GGUF Q8_0 file SHA-256 `d9ca97fc…`; adapter SHA-256 `fd287bcf…`.
+
+Reading the result:
+- The 6.1-point drop from 87.2% is the price of the Lemonade path (merge to fp16, Q8 quantization, a tool grammar), not a different training objective. This is not an improvement over round 4; it is the first measurement through Lemonade.
+- Remaining validation failures: 40 `objective` and 5 `player_whatif_extreme` cases. We have not analysed these as we did earlier rounds.
+- Rounds 5 to 7 were trained but only 6 and 7 were scored through Lemonade (113/243 and 120/243); they exposed the argument-order problem. Round 5 was never scored.
+- Validation was used to choose among eight rounds; the test split was run once, after the model was final. Modal spend reached about $13 against a $10 soft limit, so no further rounds were run.

@@ -16,6 +16,7 @@ The racket-side shot computation and physics simulator remain core. The agent us
 | Lemonade · Qwen3-1.7B-GGUF | 243 | 124 (51.0%) | 239 (98.4%) | 229 (94.2%) | 152/200 (76.0%) |
 | Trained Qwen2.5-1.5B · desktop CUDA (round 1) | 243 | 169 (69.5%) | 181/243 | 181/243 | 179/179 |
 | Trained Qwen2.5-1.5B · desktop CUDA (round 4, target-filtered training data) | 243 | 212 (87.2%) | 243/243 | 235/243 | 241/241 |
+| **Trained Qwen2.5-1.5B · served by Lemonade (round 8, GGUF Q8_0)** | 243 | 197 (81.1%) | 243/243 | 230/243 | 241/241 |
 
 Reproduce the baseline when its endpoint and credentials are available:
 
@@ -30,7 +31,7 @@ LEMONADE_BASE_URL=http://localhost:8000/api/v1 LEMONADE_MODEL=<model-id> python3
 ONDEVICE_BASE_URL=<openai-compatible-local-endpoint> ONDEVICE_MODEL=<checkpoint-id> python3 tools/agent_eval.py --preset ondevice --sample 243 --seed 7
 ```
 
-The local model is 36.7 percentage points below the historical baseline. It reached 41/123 objective targets, despite a 98.4% digest-first rate and 94.2% grounded-number rate. Full per-kind results and exact scorer are in [docs/LEMONADE_EVAL.md](docs/LEMONADE_EVAL.md). The first trained Qwen2.5 checkpoint scored 69.5% in desktop CUDA validation, with 62 response errors. After removing empty training turns and filtering the training data by the evaluator's goal rule, the fourth round scored 87.2% with no response errors (four rounds tuned on the same validation set; test split not yet run). Native iPhone execution is unverified; see [the full adapter report](docs/ADAPTER_EVAL.md).
+The local model is 36.7 percentage points below the historical baseline. It reached 41/123 objective targets, despite a 98.4% digest-first rate and 94.2% grounded-number rate. Full per-kind results and exact scorer are in [docs/LEMONADE_EVAL.md](docs/LEMONADE_EVAL.md). The first trained Qwen2.5 checkpoint scored 69.5% in desktop CUDA validation, with 62 response errors. After removing empty training turns and filtering the training data by the evaluator's goal rule, the fourth round scored 87.2% with no response errors (four rounds tuned on the same validation set). The tuned model was then converted to GGUF and served by Lemonade itself: 197/243 (81.1%) on validation with no response errors, and 136/166 (81.9%) on the untouched test split, run once ([docs/LEMONADE_ADAPTER.md](docs/LEMONADE_ADAPTER.md), [docs/LEMONADE_SCHEMA_ORDER.md](docs/LEMONADE_SCHEMA_ORDER.md)). That is 6.6 points below the historical hosted baseline's 87.7% and 30 points above the untuned Lemonade model's 51.0%. Native iPhone execution is unverified; see [the full adapter report](docs/ADAPTER_EVAL.md).
 
 ## Creativity
 

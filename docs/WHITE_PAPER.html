@@ -1,0 +1,1179 @@
+<title>Tennis Buddee White Paper</title>
+<meta name="claude:viewport-fit-sides" content="cover">
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=IBM+Plex+Mono:wght@400;500&family=IBM+Plex+Sans:wght@400;500;600&family=Source+Serif+4:ital,opsz,wght@0,8..60,400;0,8..60,600;1,8..60,400&display=swap">
+<style>
+/* Layout: a journal-style article, one reading column with a section rail on wide screens.
+   Palette follows the product's optic-yellow on carbon; figures reuse it for status. */
+:root {
+  --bg: #fcfcf8;
+  --fg: #151810;
+  --muted: #565c4a;
+  --rule: #d8dbc9;
+  --panel: #f3f5e7;
+  --accent: #4d6000;
+  --code-bg: #eff1e3;
+  --a: #b9d02a;
+  --a-soft: #eaf1b8;
+  --b: #4a6fb5;
+  --b-soft: #e1eaf7;
+  --c: #9aa08c;
+  --warn: #8a4b00;
+  --serif: "Source Serif 4", "Iowan Old Style", Georgia, serif;
+  --sans: "IBM Plex Sans", system-ui, -apple-system, "Segoe UI", sans-serif;
+  --mono: "IBM Plex Mono", ui-monospace, Consolas, monospace;
+}
+@media (prefers-color-scheme: dark) {
+  :root:not([data-theme="light"]) {
+    --bg: #0c0d09; --fg: #e9ecdc; --muted: #a0a68f; --rule: #2a2d20; --panel: #151710; --accent: #dde85b;
+    --code-bg: #171910; --a: #d6e556; --a-soft: #2b3210; --b: #8fb0ff; --b-soft: #182339; --c: #737b66; --warn: #f0b060;
+    color-scheme: dark;
+  }
+}
+:root[data-theme="dark"] {
+  --bg: #0c0d09; --fg: #e9ecdc; --muted: #a0a68f; --rule: #2a2d20; --panel: #151710; --accent: #dde85b;
+  --code-bg: #171910; --a: #d6e556; --a-soft: #2b3210; --b: #8fb0ff; --b-soft: #182339; --c: #737b66; --warn: #f0b060;
+  color-scheme: dark;
+}
+* { box-sizing: border-box; }
+body { background: var(--bg); color: var(--fg); font-family: var(--serif); font-size: 17px; line-height: 1.62; }
+.page { display: grid; grid-template-columns: minmax(0, 1fr); gap: 0 48px; max-width: 1180px; margin: 0 auto;
+  padding-block: 36px 80px; padding-left: max(16px, env(safe-area-inset-left, 0px)); padding-right: max(16px, env(safe-area-inset-right, 0px)); }
+@media (min-width: 1040px) { .page { grid-template-columns: 210px minmax(0, 760px); } }
+nav.toc { font-family: var(--sans); font-size: 13px; line-height: 1.35; min-width: 0; }
+nav.toc details { border-bottom: 1px solid var(--rule); padding-bottom: 12px; margin-bottom: 18px; }
+nav.toc summary { cursor: pointer; font-weight: 600; letter-spacing: .06em; text-transform: uppercase; font-size: 11px; color: var(--muted); padding: 4px 0; }
+nav.toc ol { list-style: none; margin: 10px 0 0; padding: 0; display: grid; gap: 6px; }
+nav.toc a { color: var(--muted); text-decoration: none; display: block; padding: 2px 0; }
+nav.toc a:hover, nav.toc a:focus-visible { color: var(--fg); text-decoration: underline; }
+nav.toc .n { font-family: var(--mono); font-size: 11px; display: inline-block; width: 2em; color: var(--accent); }
+@media (min-width: 1040px) { nav.toc { position: sticky; top: 24px; align-self: start; max-height: calc(100vh - 48px); overflow-y: auto; } nav.toc details { border: 0; } nav.toc summary { pointer-events: none; } nav.toc summary::marker, nav.toc summary::-webkit-details-marker { display: none; } }
+article { min-width: 0; }
+.kicker { font-family: var(--sans); font-size: 12px; letter-spacing: .14em; text-transform: uppercase; color: var(--accent); font-weight: 600; margin: 0 0 14px; }
+h1 { font-family: var(--sans); font-weight: 600; font-size: clamp(30px, 5vw, 44px); line-height: 1.08; letter-spacing: -.02em; margin: 0 0 16px; text-wrap: balance; }
+.sub { font-size: 20px; line-height: 1.4; color: var(--muted); margin: 0 0 20px; text-wrap: balance; }
+.byline { font-family: var(--sans); font-size: 13px; color: var(--muted); display: flex; flex-wrap: wrap; gap: 4px 18px; padding: 14px 0; border-block: 1px solid var(--rule); margin-bottom: 28px; }
+.byline b { color: var(--fg); font-weight: 500; }
+h2 { font-family: var(--sans); font-weight: 600; font-size: 24px; letter-spacing: -.01em; line-height: 1.2; margin: 56px 0 14px; padding-top: 18px; border-top: 1px solid var(--rule); text-wrap: balance; scroll-margin-top: 16px; }
+h2 .n { font-family: var(--mono); font-weight: 400; font-size: 15px; color: var(--accent); margin-right: 10px; }
+h3 { font-family: var(--sans); font-weight: 600; font-size: 17px; margin: 32px 0 8px; line-height: 1.3; text-wrap: balance; scroll-margin-top: 16px; }
+h3 .n { font-family: var(--mono); font-weight: 400; font-size: 13px; color: var(--accent); margin-right: 8px; }
+p { margin: 0 0 14px; }
+ul, ol.list { margin: 0 0 16px; padding-left: 1.3em; }
+li { margin-bottom: 6px; }
+a { color: var(--accent); text-underline-offset: 2px; }
+code { font-family: var(--mono); font-size: .84em; background: var(--code-bg); padding: 1px 5px; border-radius: 3px; }
+pre { font-family: var(--mono); font-size: 13px; line-height: 1.5; background: var(--code-bg); padding: 14px 16px; border-radius: 4px; overflow-x: auto; margin: 0 0 18px; }
+pre code { background: none; padding: 0; font-size: inherit; }
+.abstract { background: var(--panel); border-radius: 4px; padding: 20px 22px; margin-bottom: 18px; }
+.abstract h2 { all: unset; display: block; font-family: var(--sans); font-weight: 600; font-size: 12px; letter-spacing: .14em; text-transform: uppercase; color: var(--accent); margin-bottom: 8px; }
+.abstract p { margin: 0 0 10px; font-size: 16.5px; }
+.abstract p:last-child { margin: 0; }
+.keywords { font-family: var(--sans); font-size: 13px; color: var(--muted); margin-bottom: 8px; }
+.eq { font-family: var(--serif); font-style: italic; text-align: center; padding: 10px 8px; margin: 4px 0 16px; background: var(--panel); border-radius: 4px; overflow-x: auto; white-space: nowrap; font-size: 17px; }
+.eq .no { float: right; font-style: normal; font-family: var(--sans); font-size: 13px; color: var(--muted); }
+.eqs { display: grid; gap: 6px; margin: 4px 0 16px; }
+.eqs .eq { margin: 0; }
+figure { margin: 26px 0 30px; }
+.figwrap { border: 1px solid var(--rule); border-radius: 4px; padding: 14px 10px 8px; background: var(--bg); overflow-x: auto; }
+.fig-svg { display: block; width: 100%; min-width: 560px; height: auto; color: var(--fg); }
+figcaption { font-family: var(--sans); font-size: 13.5px; line-height: 1.5; color: var(--muted); margin-top: 10px; }
+figcaption b { color: var(--fg); font-weight: 600; }
+.svg-box { fill: var(--panel); stroke: var(--fg); stroke-width: 1; }
+.svg-box.dashed, .dashed { stroke-dasharray: 5 4; }
+.svg-box.st-dep, .st-dep { fill: var(--a-soft); }
+.svg-box.st-exp, .st-exp { fill: var(--b-soft); }
+.svg-box.st-ph { fill: none; stroke-dasharray: 5 4; }
+.svg-box.seg { fill: var(--a-soft); stroke: var(--fg); stroke-width: .75; }
+.svg-text { fill: var(--fg); font: 400 11.5px var(--sans); }
+.svg-title { fill: var(--fg); font: 600 12.5px var(--sans); }
+.svg-note { fill: var(--muted); font: 400 11px var(--sans); }
+.svg-lane { fill: var(--accent); font: 600 11px var(--sans); letter-spacing: .08em; }
+.svg-value { fill: var(--fg); font: 500 12px var(--mono); }
+.svg-arrow { stroke: var(--fg); stroke-width: 1.25; fill: none; }
+.svg-arrow.dashed { stroke-dasharray: 5 4; }
+.svg-head { fill: var(--fg); }
+.svg-wire { stroke: var(--fg); stroke-width: 1.5; }
+.svg-dim { stroke: var(--muted); stroke-width: 1; }
+.svg-grid { stroke: var(--rule); stroke-width: 1; }
+.svg-whisker { stroke: var(--fg); stroke-width: 1.5; }
+.bar-a { fill: var(--a); stroke: var(--fg); stroke-width: .75; }
+.bar-b { fill: var(--b); stroke: var(--fg); stroke-width: .75; }
+.bar-c { fill: var(--c); stroke: var(--fg); stroke-width: .75; }
+.scroll { overflow-x: auto; margin: 0 0 22px; }
+table { border-collapse: collapse; width: 100%; font-family: var(--sans); font-size: 13.5px; line-height: 1.4; font-variant-numeric: tabular-nums; }
+caption { text-align: left; font-size: 13.5px; color: var(--muted); padding: 0 0 8px; caption-side: top; }
+caption b { color: var(--fg); font-weight: 600; }
+th, td { text-align: left; padding: 7px 10px; border-bottom: 1px solid var(--rule); vertical-align: top; }
+thead th { font-weight: 600; font-size: 12px; letter-spacing: .04em; text-transform: uppercase; color: var(--muted); border-bottom: 1.5px solid var(--fg); white-space: nowrap; }
+td.num, th.num { text-align: right; white-space: nowrap; }
+tr.hl td { background: var(--a-soft); }
+tr.bad td { background: var(--b-soft); }
+.callout { border-left: 3px solid var(--accent); background: var(--panel); padding: 12px 16px; margin: 18px 0; font-size: 16px; border-radius: 0 4px 4px 0; }
+.callout.warn { border-color: var(--warn); }
+.callout p:last-child { margin: 0; }
+.callout b.t { font-family: var(--sans); font-size: 12px; letter-spacing: .08em; text-transform: uppercase; display: block; margin-bottom: 4px; color: var(--muted); }
+.tag { font-family: var(--sans); font-size: 11px; font-weight: 600; letter-spacing: .04em; padding: 1px 6px; border-radius: 3px; white-space: nowrap; border: 1px solid var(--fg); }
+.tag.m { background: var(--a-soft); }
+.tag.d { background: var(--panel); }
+.tag.p { background: none; border-style: dashed; }
+.refs { font-size: 14.5px; line-height: 1.5; padding-left: 1.6em; }
+.refs li { margin-bottom: 8px; }
+.foot { font-family: var(--sans); font-size: 13px; color: var(--muted); margin-top: 48px; padding-top: 16px; border-top: 1px solid var(--rule); }
+@media (max-width: 600px) { body { font-size: 16.5px; } h2 { font-size: 21px; } .sub { font-size: 18px; } }
+@media print { nav.toc { display: none; } }
+</style>
+
+<div class="page">
+<nav class="toc" aria-label="Sections">
+<details open>
+<summary>Contents</summary>
+<ol>
+<li><a href="#abstract"><span class="n"></span>Abstract</a></li>
+<li><a href="#intro"><span class="n">1</span>Introduction</a></li>
+<li><a href="#system"><span class="n">2</span>System overview</a></li>
+<li><a href="#hardware"><span class="n">3</span>Hardware</a></li>
+<li><a href="#firmware"><span class="n">4</span>Firmware</a></li>
+<li><a href="#metrics"><span class="n">5</span>Shot metrics</a></li>
+<li><a href="#sweetspot"><span class="n">6</span>Sweet-spot model</a></li>
+<li><a href="#simulator"><span class="n">7</span>What-if simulator</a></li>
+<li><a href="#agent"><span class="n">8</span>Racket agent</a></li>
+<li><a href="#training"><span class="n">9</span>Data and tuning</a></li>
+<li><a href="#lemonade"><span class="n">10</span>Lemonade evaluation</a></li>
+<li><a href="#field"><span class="n">11</span>Field findings</a></li>
+<li><a href="#apps"><span class="n">12</span>Apps and privacy</a></li>
+<li><a href="#robot"><span class="n">13</span>TennisRobot rig</a></li>
+<li><a href="#limits"><span class="n">14</span>Scope of evidence</a></li>
+<li><a href="#future"><span class="n">15</span>Future work</a></li>
+<li><a href="#repro"><span class="n">16</span>Reproduction</a></li>
+<li><a href="#refs"><span class="n"></span>References</a></li>
+</ol>
+</details>
+</nav>
+
+<article>
+<p class="kicker">Technical white paper</p>
+<h1>Tennis Buddee: a smart racket with a local, tool-calling coach</h1>
+<p class="sub">Sensing, on-racket computation, physics-based what-if analysis and a small language model served by AMD Lemonade</p>
+<div class="byline">
+<span><b>Project</b> Tennis Buddee</span>
+<span><b>Draft</b> 1.0, 6 November 2026</span>
+<span><b>Source state</b> repository at commit 15527c3 plus uncommitted work</span>
+</div>
+
+<section class="abstract" id="abstract">
+<h2>Abstract</h2>
+<p>Recreational tennis players receive no usable feedback about their own strokes. Tennis Buddee puts a sensor insert in the handle of an ordinary racket: a six-axis inertial unit with two accelerometer ranges, a microphone, and a Bluetooth LE microcontroller. The racket detects each hit, computes an 80-byte shot summary on board, and sends it to an iPhone, Mac or Apple Watch. The apps turn the summary into swing speed, face and path angles, stroke type, contact point, ball speed and spin, and run a bounded physics sensitivity model to estimate what a swing change would do. A tool-calling language model chooses which tools to call and explains the result, while application code supplies every number.</p>
+<p>This paper documents the hardware, firmware, signal processing, models and evaluation. On a 243-case validation sample, a QLoRA-tuned Qwen2.5-1.5B reached 212 strict passes (87.2%, 95% interval 82.5 to 90.9), within 0.5 points of a historical hosted baseline of 87.7% and 88 passes above the untuned Qwen3-1.7B served by Lemonade (124, 51.0%). Serving the tuned weights through Lemonade as GGUF led to a useful finding about grammar-constrained tool calling: Lemonade delivers tool schemas with sorted keys, and llama.cpp then forces call arguments into that order, so a model should be trained on the argument order the server allows. Field recordings on court drove the architecture: impact detection on the racket, 80-byte summaries computed on board, and an acknowledged window path with a flash backlog.</p>
+<p class="keywords"><b>Keywords</b> wearable sensing, impact detection, edge inference, tool-calling LLM, QLoRA, llama.cpp grammar, grounded generation, Lemonade</p>
+</section>
+
+<h2 id="intro"><span class="n">1</span>Introduction</h2>
+<p>A smart racket produces numbers that a recreational player cannot interpret: contact position, swing speed, face angle. The question a player asks is "what would happen if I changed my swing?" Answering it honestly needs two things that usually pull apart. One is a simulator whose outputs are trustworthy and bounded. The other is a language model small enough to run on hardware the player owns, that can choose the right tool and say the result in plain words.</p>
+<p>The design rule that holds the project together is that <em>the model never invents a number</em>. It selects tools. The application computes and returns every figure, and the evaluation scorer rejects any number in an answer that is not found in a tool result.</p>
+<p>This document makes five contributions.</p>
+<ol class="list">
+<li>A complete description of the sensing hardware and firmware: wiring, sensor ranges, impact detection, on-racket shot analysis, a Bluetooth protocol with acknowledgements and a flash backlog, and the on-racket acoustic model (sections 3 to 6).</li>
+<li>The physics and rules that convert a hit window into shot metrics, and the sensitivity model used for what-if questions (sections 5 and 7).</li>
+<li>The agent: ten tools, a bounded loop, and code-level number grounding (section 8).</li>
+<li>A reproducible tuning and evaluation record across six scored rounds and two serving paths (sections 9 and 10).</li>
+<li>A finding for anyone fine-tuning a tool-calling model for Lemonade: the property order of a tool schema is part of the model's output contract (section 10.4).</li>
+</ol>
+<div class="callout"><b class="t">How to read the evidence</b>
+<p>Statements are tagged where it matters. <span class="tag m">measured</span> means a file in the repository holds the result. <span class="tag d">design</span> means the code does this but no outcome was measured. <span class="tag p">planned</span> means it has not been done. Section 14 states the scope of the evidence.</p></div>
+
+<h2 id="system"><span class="n">2</span>System overview</h2>
+<p>The product has four parts: the instrumented racket, the apps, an agent that runs against a local model server, and a research side that produces training data and labels. Figure 1 shows how data moves at run time. The racket does the first stage of analysis itself because raw streaming delivered only part of the stream on court (section 11). The agent is the only component that talks to a language model, and it talks to a Lemonade server on the same device or the local network.</p>
+<figure id="fig-system"><div class="figwrap"><svg viewBox="0 0 760 350" role="img" aria-label="System architecture: the racket sends shot summaries over Bluetooth LE to the phone or Mac app, which talks to a local Lemonade server for the agent and optionally to the Watch and Supabase." class="fig-svg"><defs><marker id="ah1" viewBox="0 0 10 10" refX="9" refY="5" markerWidth="7" markerHeight="7" orient="auto-start-reverse"><path d="M0 0L10 5L0 10z" class="svg-head"/></marker></defs>
+<rect x="10" y="36" width="170" height="196" rx="4" class="svg-box"/>
+<text x="95.0" y="54" text-anchor="middle" class="svg-title">Racket handle insert</text>
+<text x="95.0" y="72" text-anchor="middle" class="svg-text">Seeed XIAO ESP32-C3</text>
+<text x="95.0" y="86" text-anchor="middle" class="svg-text">LSM6DSV320X IMU</text>
+<text x="95.0" y="100" text-anchor="middle" class="svg-text">INMP441 microphone</text>
+<text x="95.0" y="114" text-anchor="middle" class="svg-text">1S LiPo + power button</text>
+<text x="95.0" y="128" text-anchor="middle" class="svg-text">NimBLE, U.FL antenna</text>
+<rect x="300" y="36" width="190" height="196" rx="4" class="svg-box"/>
+<text x="395.0" y="54" text-anchor="middle" class="svg-title">iPhone / Mac app</text>
+<text x="395.0" y="72" text-anchor="middle" class="svg-text">RacketKit (Swift package)</text>
+<text x="395.0" y="86" text-anchor="middle" class="svg-text">ShotAnalyzer, ShotSimulator</text>
+<text x="395.0" y="100" text-anchor="middle" class="svg-text">Racket agent + CoachTools</text>
+<text x="395.0" y="114" text-anchor="middle" class="svg-text">SwiftData + private iCloud</text>
+<text x="395.0" y="128" text-anchor="middle" class="svg-text">Emulator mirrors this path</text>
+<rect x="610" y="36" width="140" height="196" rx="4" class="svg-box"/>
+<text x="680.0" y="54" text-anchor="middle" class="svg-title">Lemonade server</text>
+<text x="680.0" y="72" text-anchor="middle" class="svg-text">llama.cpp backend</text>
+<text x="680.0" y="86" text-anchor="middle" class="svg-text">OpenAI-style HTTP API</text>
+<text x="680.0" y="100" text-anchor="middle" class="svg-text">tool-calling model</text>
+<text x="680.0" y="114" text-anchor="middle" class="svg-text">same device or LAN</text>
+<rect x="300" y="280" width="190" height="56" rx="4" class="svg-box"/>
+<text x="395.0" y="298" text-anchor="middle" class="svg-title">Apple Watch</text>
+<text x="395.0" y="316" text-anchor="middle" class="svg-text">haptics, drills, workout</text>
+<rect x="610" y="280" width="140" height="56" rx="4" class="svg-box dashed"/>
+<text x="680.0" y="298" text-anchor="middle" class="svg-title">Supabase</text>
+<text x="680.0" y="316" text-anchor="middle" class="svg-text">friend totals only</text>
+<line x1="180" y1="100" x2="300" y2="100" class="svg-arrow" marker-end="url(#ah1)"/>
+<text x="240" y="92" text-anchor="middle" class="svg-note">hit, summary, window</text>
+<line x1="300" y1="150" x2="180" y2="150" class="svg-arrow" marker-end="url(#ah1)"/>
+<text x="240" y="142" text-anchor="middle" class="svg-note">config, acks, time</text>
+<line x1="490" y1="100" x2="610" y2="100" class="svg-arrow" marker-end="url(#ah1)"/>
+<text x="550" y="92" text-anchor="middle" class="svg-note">chat + tool schemas</text>
+<line x1="610" y1="150" x2="490" y2="150" class="svg-arrow" marker-end="url(#ah1)"/>
+<text x="550" y="142" text-anchor="middle" class="svg-note">tool calls, answer</text>
+<line x1="395" y1="232" x2="395" y2="280" class="svg-arrow" marker-end="url(#ah1)"/>
+<text x="402" y="262" text-anchor="start" class="svg-note">WatchConnectivity</text>
+<line x1="490" y1="308" x2="610" y2="308" class="svg-arrow dashed" marker-end="url(#ah1)"/>
+<text x="550" y="300" text-anchor="middle" class="svg-note">session totals</text>
+<text x="95" y="258" text-anchor="middle" class="svg-note">computes the shot on board</text>
+<text x="680" y="258" text-anchor="middle" class="svg-note">no account needed</text>
+</svg></div>
+<figcaption><b>Figure 1.</b> Run-time architecture. The racket sends a hit notice, an on-board summary and the raw window. The app computes shot metrics and sessions, and the agent calls a Lemonade server for tool-calling chat. Supabase carries only session totals a player chooses to share.</figcaption></figure>
+
+<p>Learning appears in more places than the language model, and several components that look learned are not. Figure 2 is an inventory, coloured by maturity.</p>
+<figure id="fig-mlmap"><div class="figwrap"><svg viewBox="0 0 760 384" role="img" aria-label="Inventory of every learned or rule-based component: on the racket, in the apps, and off device, coloured by maturity." class="fig-svg"><defs><marker id="ah20" viewBox="0 0 10 10" refX="9" refY="5" markerWidth="7" markerHeight="7" orient="auto-start-reverse"><path d="M0 0L10 5L0 10z" class="svg-head"/></marker></defs>
+<text x="10" y="16" text-anchor="start" class="svg-lane">ON THE RACKET  ·  ESP32-C3, integer-friendly, no FPU</text>
+<rect x="10" y="24" width="236" height="80" rx="4" class="svg-box st-dep"/>
+<text x="128.0" y="42" text-anchor="middle" class="svg-title">Ridge sweet-spot regressor</text>
+<text x="128.0" y="60" text-anchor="middle" class="svg-text">156 audio features → distance (cm)</text>
+<text x="128.0" y="74" text-anchor="middle" class="svg-text">67.2% sweet/off, 1.83 cm error</text>
+<rect x="262" y="24" width="236" height="80" rx="4" class="svg-box"/>
+<text x="380.0" y="42" text-anchor="middle" class="svg-title">Tap-gesture detector</text>
+<text x="380.0" y="60" text-anchor="middle" class="svg-text">single, double, triple taps</text>
+<text x="380.0" y="74" text-anchor="middle" class="svg-text">strength and direction</text>
+<rect x="514" y="24" width="236" height="80" rx="4" class="svg-box"/>
+<text x="632.0" y="42" text-anchor="middle" class="svg-title">Hit detector and orientation</text>
+<text x="632.0" y="60" text-anchor="middle" class="svg-text">thresholds and a Mahony filter</text>
+<text x="632.0" y="74" text-anchor="middle" class="svg-text">no learned weights</text>
+<text x="10" y="130" text-anchor="start" class="svg-lane">IN THE APPS  ·  Swift, iPhone, Mac, Watch, browser emulator</text>
+<rect x="10.0" y="138" width="175" height="80" rx="4" class="svg-box st-exp"/>
+<text x="97.5" y="156" text-anchor="middle" class="svg-title">Racket agent</text>
+<text x="97.5" y="174" text-anchor="middle" class="svg-text">tool-calling LLM via Lemonade</text>
+<text x="97.5" y="188" text-anchor="middle" class="svg-text">Qwen2.5-1.5B tuned, Qwen3</text>
+<rect x="198.33333333333334" y="138" width="175" height="80" rx="4" class="svg-box st-exp"/>
+<text x="285.83333333333337" y="156" text-anchor="middle" class="svg-title">Swing film director</text>
+<text x="285.83333333333337" y="174" text-anchor="middle" class="svg-text">LLM picks at most two levers;</text>
+<text x="285.83333333333337" y="188" text-anchor="middle" class="svg-text">validator and fixed renderer</text>
+<rect x="386.6666666666667" y="138" width="175" height="80" rx="4" class="svg-box st-dep"/>
+<text x="474.1666666666667" y="156" text-anchor="middle" class="svg-title">Forehand-sign learner</text>
+<text x="474.1666666666667" y="174" text-anchor="middle" class="svg-text">5 clean swings set the side</text>
+<text x="474.1666666666667" y="188" text-anchor="middle" class="svg-text">plain statistics</text>
+<rect x="575.0" y="138" width="175" height="80" rx="4" class="svg-box"/>
+<text x="662.5" y="156" text-anchor="middle" class="svg-title">Analyzer, simulator</text>
+<text x="662.5" y="174" text-anchor="middle" class="svg-text">physics and rules</text>
+<text x="662.5" y="188" text-anchor="middle" class="svg-text">constants tuned by hand</text>
+<text x="10" y="244" text-anchor="start" class="svg-lane">OFF DEVICE  ·  training, labelling, research</text>
+<rect x="10" y="252" width="140" height="80" rx="4" class="svg-box st-dep"/>
+<text x="80.0" y="270" text-anchor="middle" class="svg-title">QLoRA tuning</text>
+<text x="80.0" y="288" text-anchor="middle" class="svg-text">1.5B model, NF4, rank 16</text>
+<text x="80.0" y="302" text-anchor="middle" class="svg-text">Modal A100, 4 rounds</text>
+<rect x="160" y="252" width="140" height="80" rx="4" class="svg-box st-dep"/>
+<text x="230.0" y="270" text-anchor="middle" class="svg-title">Synthetic data</text>
+<text x="230.0" y="288" text-anchor="middle" class="svg-text">2,263 tool-use chats</text>
+<text x="230.0" y="302" text-anchor="middle" class="svg-text">from the Python mirror</text>
+<rect x="310" y="252" width="140" height="80" rx="4" class="svg-box st-exp"/>
+<text x="380.0" y="270" text-anchor="middle" class="svg-title">SAM 3.1 labelling</text>
+<text x="380.0" y="288" text-anchor="middle" class="svg-text">racket tracks for review</text>
+<text x="380.0" y="302" text-anchor="middle" class="svg-text">hosted API, human check</text>
+<rect x="460" y="252" width="140" height="80" rx="4" class="svg-box st-exp"/>
+<text x="530.0" y="270" text-anchor="middle" class="svg-title">F3Tennis model</text>
+<text x="530.0" y="288" text-anchor="middle" class="svg-text">labels for the emulator</text>
+<text x="530.0" y="302" text-anchor="middle" class="svg-text">58/60 on its own match</text>
+<rect x="610" y="252" width="140" height="80" rx="4" class="svg-box st-ph"/>
+<text x="680.0" y="270" text-anchor="middle" class="svg-title">Stroke study</text>
+<text x="680.0" y="288" text-anchor="middle" class="svg-text">shot-type research</text>
+<text x="680.0" y="302" text-anchor="middle" class="svg-text">not deployed</text>
+<rect x="10" y="356" width="14" height="14" rx="2" class="svg-box st-dep"/>
+<text x="30" y="367" text-anchor="start" class="svg-note">in use or used to build the product</text>
+<rect x="254.5" y="356" width="14" height="14" rx="2" class="svg-box st-exp"/>
+<text x="274.5" y="367" text-anchor="start" class="svg-note">working, evidence growing</text>
+<rect x="440.0" y="356" width="14" height="14" rx="2" class="svg-box st-ph"/>
+<text x="460.0" y="367" text-anchor="start" class="svg-note">placeholder or research only</text>
+<rect x="643.2" y="356" width="14" height="14" rx="2" class="svg-box"/>
+<text x="663.2" y="367" text-anchor="start" class="svg-note">no learned weights</text>
+</svg></div>
+<figcaption><b>Figure 2.</b> Every learned or rule-based decision component. One small model runs on the racket for sweet-spot estimation, alongside a tap-gesture detector. Shot analysis, stroke typing and the simulator are physics and hand-set rules.</figcaption></figure>
+
+<div class="scroll"><table>
+<caption><b>Table 1.</b> Learned components, where they run, and their evidence.</caption>
+<thead><tr><th>Component</th><th>Runs on</th><th>Model type</th><th>Evidence</th></tr></thead>
+<tbody>
+<tr><td>Sweet-spot distance</td><td>Racket (C++)</td><td>Ridge regression, 156 features</td><td>67.2% accuracy, 1.83 cm error, 274 clips <span class="tag m">measured</span></td></tr>
+<tr><td>Tap zone</td><td>Racket (C++)</td><td>Nearest centroid, 10 features</td><td>Fitted from taps at known positions with the provided tools <span class="tag p">planned</span></td></tr>
+<tr><td>Forehand side</td><td>App</td><td>Consistent sign over 5 swings</td><td>Unit-tested <span class="tag d">design</span></td></tr>
+<tr><td>Racket agent</td><td>Lemonade server</td><td>Qwen2.5-1.5B, QLoRA; or Qwen3-1.7B</td><td>212/243 and 118/243, by serving path <span class="tag m">measured</span></td></tr>
+<tr><td>Swing film director</td><td>Server, then validator</td><td>LLM script, fixed renderer</td><td>Built with an earlier hosted engine <span class="tag d">design</span></td></tr>
+<tr><td>Stroke labels for the emulator</td><td>Offline</td><td>F3Tennis <code>tsm_e2espot</code></td><td>58/60 stroke types on the model's own match <span class="tag m">measured</span></td></tr>
+<tr><td>Racket tracks for review</td><td>Hosted API</td><td>SAM 3.1</td><td>Proposals, not labels <span class="tag d">design</span></td></tr>
+</tbody></table></div>
+
+<h2 id="hardware"><span class="n">3</span>Hardware</h2>
+<h3><span class="n">3.1</span>Components and wiring</h3>
+<p>The insert is built around a Seeed XIAO ESP32-C3, a single-core RISC-V microcontroller with Bluetooth 5 and no floating-point unit. The inertial sensor is an ST LSM6DSV320X on the STEVAL-MKI251A adapter board. It contains a gyroscope, a ±16 g accelerometer and a ±320 g high-g accelerometer in one package. An INMP441 digital MEMS microphone gives audio of the impact. A single-cell LiPo with a power button supplies the board. An earlier build used an MPU6050 and an H3LIS331DL as two separate chips; the single package replaced both, and the firmware converts its output into the older units so the apps and recordings stay compatible.</p>
+<figure id="fig-wiring"><div class="figwrap"><svg viewBox="0 0 760 420" role="img" aria-label="Wiring schematic: the XIAO ESP32-C3 talks I2C to the LSM6DSV320X on pins D4 and D5, and I2S to the INMP441 on D1, D2 and D3, powered from a 1S LiPo." class="fig-svg"><defs><marker id="ah21" viewBox="0 0 10 10" refX="9" refY="5" markerWidth="7" markerHeight="7" orient="auto-start-reverse"><path d="M0 0L10 5L0 10z" class="svg-head"/></marker></defs>
+<rect x="300" y="20" width="160" height="316" rx="4" class="svg-box"/>
+<text x="380.0" y="38" text-anchor="middle" class="svg-title">XIAO ESP32-C3</text>
+<text x="380.0" y="56" text-anchor="middle" class="svg-text">single-core RISC-V, BLE 5</text>
+<text x="380.0" y="70" text-anchor="middle" class="svg-text">USB-C: flash and serial</text>
+<text x="380.0" y="84" text-anchor="middle" class="svg-text">U.FL antenna at butt flange</text>
+<rect x="10" y="40" width="190" height="196" rx="4" class="svg-box"/>
+<text x="105.0" y="58" text-anchor="middle" class="svg-title">STEVAL-MKI251A</text>
+<text x="105.0" y="76" text-anchor="middle" class="svg-text">I2C address 0x6A (SDO low)</text>
+<text x="105.0" y="90" text-anchor="middle" class="svg-text">CS high selects I2C</text>
+<text x="105.0" y="104" text-anchor="middle" class="svg-text">gyro, ±16 g, ±320 g</text>
+<text x="105.0" y="118" text-anchor="middle" class="svg-text">VDD, VDDIO, OCS, CS → 3V3</text>
+<text x="105.0" y="132" text-anchor="middle" class="svg-text">GND, SDO → GND</text>
+<rect x="560" y="40" width="190" height="196" rx="4" class="svg-box"/>
+<text x="655.0" y="58" text-anchor="middle" class="svg-title">INMP441 mic</text>
+<text x="655.0" y="76" text-anchor="middle" class="svg-text">I2S, 24-bit, 16 kHz</text>
+<text x="655.0" y="90" text-anchor="middle" class="svg-text">L/R tied to GND (left slot)</text>
+<text x="655.0" y="104" text-anchor="middle" class="svg-text">VDD → 3V3</text>
+<text x="655.0" y="118" text-anchor="middle" class="svg-text">GND → GND</text>
+<line x1="200" y1="86" x2="300" y2="86" class="svg-wire"/>
+<text x="250" y="81" text-anchor="middle" class="svg-note">D4 · GPIO6 · SDA</text>
+<line x1="200" y1="122" x2="300" y2="122" class="svg-wire"/>
+<text x="250" y="117" text-anchor="middle" class="svg-note">D5 · GPIO7 · SCL</text>
+<line x1="200" y1="166" x2="300" y2="166" class="svg-wire"/>
+<text x="250" y="161" text-anchor="middle" class="svg-note">3V3</text>
+<line x1="200" y1="206" x2="300" y2="206" class="svg-wire"/>
+<text x="250" y="201" text-anchor="middle" class="svg-note">GND</text>
+<line x1="460" y1="86" x2="560" y2="86" class="svg-wire"/>
+<text x="510" y="81" text-anchor="middle" class="svg-note">D1 · GPIO3 · SCK</text>
+<line x1="460" y1="122" x2="560" y2="122" class="svg-wire"/>
+<text x="510" y="117" text-anchor="middle" class="svg-note">D2 · GPIO4 · WS</text>
+<line x1="460" y1="158" x2="560" y2="158" class="svg-wire"/>
+<text x="510" y="153" text-anchor="middle" class="svg-note">D3 · GPIO5 · SD</text>
+<line x1="460" y1="196" x2="560" y2="196" class="svg-wire"/>
+<text x="510" y="191" text-anchor="middle" class="svg-note">3V3</text>
+<line x1="460" y1="222" x2="560" y2="222" class="svg-wire"/>
+<text x="510" y="217" text-anchor="middle" class="svg-note">GND</text>
+<rect x="18" y="256" width="174" height="52" rx="4" class="svg-box dashed"/>
+<text x="105.0" y="279.0" text-anchor="middle" class="svg-text">SDA and SCL are each</text>
+<text x="105.0" y="293.0" text-anchor="middle" class="svg-text">pulled to 3V3 by 4.7 kΩ</text>
+<rect x="568" y="256" width="174" height="52" rx="4" class="svg-box dashed"/>
+<text x="655.0" y="279.0" text-anchor="middle" class="svg-text">Do not power sensors</text>
+<text x="655.0" y="293.0" text-anchor="middle" class="svg-text">from the 5 V pin</text>
+<rect x="190" y="366" width="380" height="40" rx="4" class="svg-box"/>
+<text x="380.0" y="383.0" text-anchor="middle" class="svg-text">BAT+ / BAT− pads</text>
+<text x="380.0" y="397.0" text-anchor="middle" class="svg-text">power button cuts the battery: it charges only while ON</text>
+<text x="200" y="360" text-anchor="start" class="svg-title">1S LiPo</text>
+<line x1="380" y1="366" x2="380" y2="336" class="svg-arrow" marker-end="url(#ah21)"/>
+</svg></div>
+<figcaption><b>Figure 3.</b> Wiring as built. The sensor shares one I2C bus at 400 kHz on D4 and D5 with 4.7 kΩ pull-ups. The microphone uses three I2S lines. The power button breaks the battery path, so the cell only charges while the button is on.</figcaption></figure>
+
+<div class="scroll"><table>
+<caption><b>Table 2.</b> Sensing and radio configuration.</caption>
+<thead><tr><th>Quantity</th><th>Setting</th><th>Note</th></tr></thead>
+<tbody>
+<tr><td>IMU output rate</td><td>1.92 kHz configured; read at 1 kHz</td><td>Samples are 1 ms apart in every packet</td></tr>
+<tr><td>Gyroscope</td><td>±2000 dps, pinned since firmware 1.8</td><td>Range is switched with the gyro powered down and verified by readback</td></tr>
+<tr><td>Low-g accelerometer</td><td>±16 g, 2048 LSB/g on the wire</td><td>Gives orientation and gentle motion</td></tr>
+<tr><td>High-g accelerometer</td><td>±320 g sensor range</td><td>Sent as legacy 12-bit counts at a ±400 g scale, about 0.2 g per step</td></tr>
+<tr><td>Microphone</td><td>16 kHz, 24-bit slot kept as int16</td><td>The first 32 ms of each hit feeds the sweet-spot model</td></tr>
+<tr><td>BLE</td><td>NimBLE, +9 dBm, MTU 185, 32 stack buffers</td><td>External U.FL antenna at the butt flange</td></tr>
+<tr><td>Wire sample</td><td>18 bytes: 3 accel, 3 gyro, 3 high-g int16</td><td>A raw 1 kHz stream is 18 kB/s</td></tr>
+</tbody></table></div>
+
+<h3><span class="n">3.2</span>Mechanical placement</h3>
+<p>The insert sits in the butt end of the handle. The CAD plan from the first build put the board at 0 to 30 mm from the butt flange, the inertial sensors at 18 to 39 mm and the microphone near 55 mm, facing into the handle, with the battery beyond the insert wrapped in foam so it cannot rattle. The racket profile defaults are 325 g, 686 mm long, balance near 320 mm and a string-bed centre 520 mm from the butt. The motion analysis uses an effective radius of 1.15 m, a single calibration scalar that folds the arm into the lever, not a physical length. Figure 4 shows these positions and the contact-point axes the software reports.</p>
+<figure id="fig-frame"><div class="figwrap"><svg viewBox="0 0 760 332" role="img" aria-label="Racket schematic: 686 mm long, sensor insert in the butt end, tap zones along the handle, and the contact-point axes on the string bed." class="fig-svg"><defs><marker id="ah22" viewBox="0 0 10 10" refX="9" refY="5" markerWidth="7" markerHeight="7" orient="auto-start-reverse"><path d="M0 0L10 5L0 10z" class="svg-head"/></marker></defs>
+<line x1="36.0" y1="26" x2="708.28" y2="26" class="svg-dim"/>
+<line x1="36.0" y1="20" x2="36.0" y2="32" class="svg-dim"/>
+<text x="36.0" y="14" text-anchor="start" class="svg-note">butt</text>
+<line x1="349.6" y1="20" x2="349.6" y2="32" class="svg-dim"/>
+<text x="349.6" y="14" text-anchor="middle" class="svg-note">balance ≈ 320 mm</text>
+<line x1="545.5999999999999" y1="20" x2="545.5999999999999" y2="32" class="svg-dim"/>
+<text x="545.5999999999999" y="14" text-anchor="middle" class="svg-note">string-bed centre 520 mm</text>
+<line x1="708.28" y1="20" x2="708.28" y2="32" class="svg-dim"/>
+<text x="708.28" y="14" text-anchor="end" class="svg-note">tip 686 mm</text>
+<rect x="36.0" y="148" width="225.4" height="24" rx="3" class="svg-box"/>
+<polygon points="261.4,148 388.8,90 388.8,230 261.4,172" class="svg-box"/>
+<ellipse cx="550.5" cy="160" rx="161.7" ry="122.5" class="svg-box"/>
+<ellipse cx="550.5" cy="160" rx="135.24" ry="101.92" class="svg-box dashed"/>
+<rect x="36.0" y="148" width="68.6" height="24" class="st-dep" stroke="currentColor"/>
+<line x1="28.0" y1="144" x2="28.0" y2="176" class="svg-wire"/>
+<line x1="94.8" y1="148" x2="94.8" y2="138" class="svg-dim"/>
+<text x="94.8" y="133" text-anchor="middle" class="svg-note">grip_60</text>
+<line x1="153.6" y1="148" x2="153.6" y2="138" class="svg-dim"/>
+<text x="153.6" y="133" text-anchor="middle" class="svg-note">grip_120</text>
+<line x1="212.4" y1="148" x2="212.4" y2="138" class="svg-dim"/>
+<text x="212.4" y="133" text-anchor="middle" class="svg-note">grip_180</text>
+<line x1="261.4" y1="148" x2="261.4" y2="138" class="svg-dim"/>
+<text x="261.4" y="133" text-anchor="middle" class="svg-note">throat</text>
+<text x="40.0" y="133" text-anchor="start" class="svg-note">butt</text>
+<circle cx="545.5999999999999" cy="160" r="39.2" class="st-dep" stroke="currentColor"/>
+<text x="545.5999999999999" y="164" text-anchor="middle" class="svg-note">≤ 4 cm</text>
+<line x1="584.8" y1="160" x2="677.9" y2="160" class="svg-arrow" marker-end="url(#ah22)"/>
+<text x="677.9" y="152" text-anchor="end" class="svg-note">contact_y +</text>
+<text x="677.9" y="180" text-anchor="end" class="svg-note">toward tip, ±14 cm</text>
+<line x1="545.5999999999999" y1="120.8" x2="545.5999999999999" y2="63.96000000000001" class="svg-arrow" marker-end="url(#ah22)"/>
+<text x="553.5999999999999" y="95.32000000000001" text-anchor="start" class="svg-note">contact_x, ±12 cm</text>
+<text x="553.5999999999999" y="108.32000000000001" text-anchor="start" class="svg-note">across strings</text>
+<rect x="24" y="214" width="290" height="84" rx="4" class="svg-box dashed"/>
+<text x="169.0" y="232" text-anchor="middle" class="svg-title">Sensor insert</text>
+<text x="169.0" y="250" text-anchor="middle" class="svg-text">XIAO board 0–30 mm from the butt flange,</text>
+<text x="169.0" y="264" text-anchor="middle" class="svg-text">IMU 18–39 mm, microphone near 55 mm</text>
+<text x="169.0" y="278" text-anchor="middle" class="svg-text">(CAD plan); battery beyond the insert, in foam</text>
+<line x1="70.3" y1="172" x2="70.3" y2="214" class="svg-dim"/>
+<text x="550.5" y="320" text-anchor="middle" class="svg-note">z: face normal, out of the page. Head outline is schematic; lengths on the dimension line are the profile defaults.</text>
+</svg></div>
+<figcaption><b>Figure 4.</b> Racket schematic. Zone names are the tap-gesture zones the firmware reports; their distances from the butt are read from the names. The sweet-spot circle is the 4 cm threshold used by the acoustic model. Positions inside the insert come from the CAD plan.</figcaption></figure>
+
+<h3><span class="n">3.3</span>Why two accelerometers and a microphone</h3>
+<p>A ball impact is a short, large jolt, while a swing is slow and rotational. No single range covers both. The low-g channel reads gravity and gentle motion, so it gives orientation. The high-g channel survives the impact itself: on the club recordings the median event peaked at 21 g, the 90th percentile at 85 g and the maximum at 233 g. The gyroscope gives swing speed and the rotation changes that locate the contact. The microphone adds a second, independent view of the same impact, and its first 32 ms carries information about where on the strings the ball landed. The firmware therefore has two ways to declare a hit (section 4.2) and one model that reads the sound.</p>
+
+<h2 id="firmware"><span class="n">4</span>Firmware</h2>
+<p>The firmware runs a sampler, a microphone task, a shot task and the BLE loop on the ESP32-C3. Figure 5 shows the data path. Two design choices shaped it. The first is that the racket detects hits itself and sends only the samples around them, because the radio could not carry the raw stream. The second is that the racket computes the shot, so the phone can show it from 80 bytes without waiting for 9 kB of window data.</p>
+<figure id="fig-pipe"><div class="figwrap"><svg viewBox="0 0 760 366" role="img" aria-label="On-racket data path: the motion path detects an impact, captures a 448-sample window and computes an 80-byte summary; the microphone path estimates distance from the sweet spot; both go through a backlog to Bluetooth LE." class="fig-svg"><defs><marker id="ah2" viewBox="0 0 10 10" refX="9" refY="5" markerWidth="7" markerHeight="7" orient="auto-start-reverse"><path d="M0 0L10 5L0 10z" class="svg-head"/></marker></defs>
+<rect x="10" y="24" width="122" height="80" rx="4" class="svg-box"/>
+<text x="71.0" y="42" text-anchor="middle" class="svg-title">IMU</text>
+<text x="71.0" y="60" text-anchor="middle" class="svg-text">1 kHz, 18 B/sample</text>
+<text x="71.0" y="74" text-anchor="middle" class="svg-text">±16 g, ±320 g,</text>
+<text x="71.0" y="88" text-anchor="middle" class="svg-text">±2000 dps</text>
+<rect x="160" y="24" width="122" height="80" rx="4" class="svg-box"/>
+<text x="221.0" y="42" text-anchor="middle" class="svg-title">Ring + filter</text>
+<text x="221.0" y="60" text-anchor="middle" class="svg-text">512-slot ring</text>
+<text x="221.0" y="74" text-anchor="middle" class="svg-text">Mahony orientation</text>
+<rect x="310" y="24" width="122" height="80" rx="4" class="svg-box"/>
+<text x="371.0" y="42" text-anchor="middle" class="svg-title">Impact rule</text>
+<text x="371.0" y="60" text-anchor="middle" class="svg-text">&gt;10 g in 3 ms and</text>
+<text x="371.0" y="74" text-anchor="middle" class="svg-text">swing &gt;5 rad/s</text>
+<rect x="460" y="24" width="122" height="80" rx="4" class="svg-box"/>
+<text x="521.0" y="42" text-anchor="middle" class="svg-title">Window</text>
+<text x="521.0" y="60" text-anchor="middle" class="svg-text">384 before, 64 after</text>
+<text x="521.0" y="74" text-anchor="middle" class="svg-text">448 samples</text>
+<rect x="610" y="24" width="122" height="80" rx="4" class="svg-box"/>
+<text x="671.0" y="42" text-anchor="middle" class="svg-title">Analyzer</text>
+<text x="671.0" y="60" text-anchor="middle" class="svg-text">same math as the</text>
+<text x="671.0" y="74" text-anchor="middle" class="svg-text">Swift ShotAnalyzer</text>
+<line x1="132" y1="64.0" x2="160" y2="64.0" class="svg-arrow" marker-end="url(#ah2)"/>
+<line x1="282" y1="64.0" x2="310" y2="64.0" class="svg-arrow" marker-end="url(#ah2)"/>
+<line x1="432" y1="64.0" x2="460" y2="64.0" class="svg-arrow" marker-end="url(#ah2)"/>
+<line x1="582" y1="64.0" x2="610" y2="64.0" class="svg-arrow" marker-end="url(#ah2)"/>
+<rect x="10" y="150" width="122" height="80" rx="4" class="svg-box"/>
+<text x="71.0" y="168" text-anchor="middle" class="svg-title">INMP441</text>
+<text x="71.0" y="186" text-anchor="middle" class="svg-text">16 kHz I2S, 24-bit</text>
+<text x="71.0" y="200" text-anchor="middle" class="svg-text">kept as int16</text>
+<rect x="160" y="150" width="122" height="80" rx="4" class="svg-box"/>
+<text x="221.0" y="168" text-anchor="middle" class="svg-title">Mic trigger</text>
+<text x="221.0" y="186" text-anchor="middle" class="svg-text">max(1500, 8× floor)</text>
+<text x="221.0" y="200" text-anchor="middle" class="svg-text">250 ms refractory</text>
+<rect x="310" y="150" width="122" height="80" rx="4" class="svg-box"/>
+<text x="371.0" y="168" text-anchor="middle" class="svg-title">Features</text>
+<text x="371.0" y="186" text-anchor="middle" class="svg-text">512 samples = 32 ms</text>
+<text x="371.0" y="200" text-anchor="middle" class="svg-text">156 spectral features</text>
+<rect x="460" y="150" width="122" height="80" rx="4" class="svg-box"/>
+<text x="521.0" y="168" text-anchor="middle" class="svg-title">Distance</text>
+<text x="521.0" y="186" text-anchor="middle" class="svg-text">ridge regression</text>
+<text x="521.0" y="200" text-anchor="middle" class="svg-text">sweet if ≤ 4 cm</text>
+<rect x="610" y="150" width="122" height="80" rx="4" class="svg-box"/>
+<text x="671.0" y="168" text-anchor="middle" class="svg-title">Backlog</text>
+<text x="671.0" y="186" text-anchor="middle" class="svg-text">6 RAM slots</text>
+<text x="671.0" y="200" text-anchor="middle" class="svg-text">117 flash records</text>
+<line x1="132" y1="190.0" x2="160" y2="190.0" class="svg-arrow" marker-end="url(#ah2)"/>
+<line x1="282" y1="190.0" x2="310" y2="190.0" class="svg-arrow" marker-end="url(#ah2)"/>
+<line x1="432" y1="190.0" x2="460" y2="190.0" class="svg-arrow" marker-end="url(#ah2)"/>
+<line x1="221.0" y1="150" x2="320" y2="104" class="svg-arrow dashed" marker-end="url(#ah2)"/>
+<text x="215.0" y="136" text-anchor="end" class="svg-note">soft-hit confirm</text>
+<line x1="671.0" y1="104" x2="671.0" y2="150" class="svg-arrow" marker-end="url(#ah2)"/>
+<text x="677.0" y="138" text-anchor="start" class="svg-note">summary + window</text>
+<rect x="460" y="276" width="122" height="80" rx="4" class="svg-box"/>
+<text x="521.0" y="294" text-anchor="middle" class="svg-title">TBShot</text>
+<text x="521.0" y="312" text-anchor="middle" class="svg-text">6 B: sweet, off %,</text>
+<text x="521.0" y="326" text-anchor="middle" class="svg-text">level</text>
+<rect x="590" y="276" width="142" height="80" rx="4" class="svg-box"/>
+<text x="661.0" y="294" text-anchor="middle" class="svg-title">BLE, MTU 185</text>
+<text x="661.0" y="312" text-anchor="middle" class="svg-text">TBHit, TBShotSummary,</text>
+<text x="661.0" y="326" text-anchor="middle" class="svg-text">56 acked chunks</text>
+<line x1="521.0" y1="230" x2="521.0" y2="276" class="svg-arrow" marker-end="url(#ah2)"/>
+<line x1="671.0" y1="230" x2="661.0" y2="276" class="svg-arrow" marker-end="url(#ah2)"/>
+<text x="675.0" y="266" text-anchor="start" class="svg-note">oldest first</text>
+<line x1="582" y1="316.0" x2="590" y2="316.0" class="svg-arrow" marker-end="url(#ah2)"/>
+</svg></div>
+<figcaption><b>Figure 5.</b> On-racket data path. The motion path finds a hit, captures 448 samples and computes a summary. The microphone path confirms soft hits and estimates distance from the sweet spot. A backlog holds windows when the link is busy or absent.</figcaption></figure>
+
+<h3><span class="n">4.1</span>Impact detection</h3>
+<p>A hit is declared by either of two rules, both over the high-g channel. The motion rule needs a large jump during a fast swing. The microphone rule handles blocks, soft volleys and drop shots, which are too gentle or too still for the first rule: the microphone must have triggered, a smaller high-g jump must confirm the racket was struck, and there must have been some racket movement in the previous 300 ms, so a tap on a still racket is not counted.</p>
+<div class="scroll"><table>
+<caption><b>Table 3.</b> Detection thresholds in <code>firmware/src/impact.cpp</code> and <code>mic.cpp</code>.</caption>
+<thead><tr><th>Rule</th><th>Condition</th></tr></thead>
+<tbody>
+<tr><td>Motion hit</td><td>high-g change over 3 ms &gt; 10 g, and gyro magnitude &gt; 5 rad/s (about 286 dps) at some point in the previous 150 ms</td></tr>
+<tr><td>Microphone hit</td><td>mic trigger within 50 ms, high-g change &gt; 3 g within a 40 ms lookback, and gyro &gt; 2 rad/s in the previous 300 ms</td></tr>
+<tr><td>Mic trigger level</td><td>|sample| &gt; max(1500, 8 × running noise floor); 250 ms refractory; first 1.5 s ignored</td></tr>
+<tr><td>Hit spacing</td><td>400 samples refractory; impact placed on the largest jump within ±6 samples</td></tr>
+<tr><td>Window</td><td>384 samples before and 64 after the impact sample, 448 in total</td></tr>
+</tbody></table></div>
+
+<h3><span class="n">4.2</span>Orientation</h3>
+<p>The racket runs a Mahony complementary filter <a href="#r1">[1]</a> on a 512-slot ring buffer, with proportional gain 2.0 and integral gain 0.05. The accelerometer corrects the gyro integration only when the sensed acceleration is within 0.85 to 1.15 g and the rotation is below 3 rad/s, that is, when the racket is nearly still and gravity dominates. The orientation at the window start is sent with every chunk so the app can continue integrating without a gap. The same filter exists in Swift and in the shot analyzer, so a window analysed on the racket and on the phone follow the same arithmetic.</p>
+
+<h3><span class="n">4.3</span>Shot analysis on board</h3>
+<p>The racket's <code>shot.cpp</code> is a step-by-step port of the Swift <code>ShotAnalyzer</code>, using a calibration and racket profile that the app sends once (command <code>SHOT_CONFIG</code>, 36 floats plus a handedness flag). It returns one 80-byte <code>TBShotSummary</code>. Because the C3 has no floating-point unit, this is emulated in software; the firmware logs the worst-case microseconds per summary in its status line. A parity test builds the C++ and runs it against the Swift on the same windows to hold the two within tight tolerances.</p>
+
+<h3><span class="n">4.4</span>Protocol, acknowledgements and backlog</h3>
+<p>Firmware 1.6 added a reliable window path. The protocol header carries a firmware minor version of 9 at the time of writing. Each hit produces three messages in order: a hit notice, a summary, and 56 window chunks of 8 samples each. The app acknowledges a window by boot number and sequence, and asks for specific chunks again if some are missing. A window not acknowledged within 5 seconds is sent again. Figure 6 shows the exchange and the exact byte layouts. The summary is about 1% of the window by size (80 against 9,296 bytes), which is why the app can show a shot almost at once.</p>
+<figure id="fig-ble"><div class="figwrap"><svg viewBox="0 0 760 396" role="img" aria-label="Bluetooth protocol: the app configures the racket, the racket sends a hit notice, an 80-byte summary and 56 acknowledged window chunks; byte layouts of the summary and a chunk are shown to scale." class="fig-svg"><defs><marker id="ah23" viewBox="0 0 10 10" refX="9" refY="5" markerWidth="7" markerHeight="7" orient="auto-start-reverse"><path d="M0 0L10 5L0 10z" class="svg-head"/></marker></defs>
+<text x="150" y="16" text-anchor="middle" class="svg-title">Racket</text>
+<text x="610" y="16" text-anchor="middle" class="svg-title">Phone or Mac app</text>
+<line x1="150" y1="24" x2="150" y2="236" class="svg-wire"/>
+<line x1="610" y1="24" x2="610" y2="236" class="svg-wire"/>
+<line x1="610" y1="48" x2="150" y2="48" class="svg-arrow" marker-end="url(#ah23)"/>
+<text x="380.0" y="42" text-anchor="middle" class="svg-note">STREAM_MODE 2, SHOT_CONFIG, SET_TIME</text>
+<line x1="150" y1="82" x2="610" y2="82" class="svg-arrow" marker-end="url(#ah23)"/>
+<text x="380.0" y="76" text-anchor="middle" class="svg-note">TBHit, 18 B, the moment a hit is seen</text>
+<line x1="150" y1="112" x2="610" y2="112" class="svg-arrow" marker-end="url(#ah23)"/>
+<text x="380.0" y="106" text-anchor="middle" class="svg-note">TBShotSummary, 80 B, computed on board</text>
+<line x1="150" y1="146" x2="610" y2="146" class="svg-arrow" marker-end="url(#ah23)"/>
+<text x="380.0" y="140" text-anchor="middle" class="svg-note">56 × TBWindowChunkAcked, 166 B each</text>
+<line x1="610" y1="180" x2="150" y2="180" class="svg-arrow" marker-end="url(#ah23)"/>
+<text x="380.0" y="174" text-anchor="middle" class="svg-note">WINDOW_ACK (boot, seq): racket frees the slot</text>
+<line x1="610" y1="210" x2="150" y2="210" class="svg-arrow dashed" marker-end="url(#ah23)"/>
+<text x="380.0" y="204" text-anchor="middle" class="svg-note">WINDOW_RESEND (missing chunk list)</text>
+<text x="14" y="112" text-anchor="start" class="svg-note">no phone nearby:</text>
+<text x="14" y="126" text-anchor="start" class="svg-note">RAM, then flash</text>
+<text x="14" y="146" text-anchor="start" class="svg-note">unacked after 5 s:</text>
+<text x="14" y="160" text-anchor="start" class="svg-note">sent again</text>
+<text x="10" y="262" text-anchor="start" class="svg-lane">TBShotSummary, 80 bytes</text>
+<rect x="10.0" y="270" width="74.0" height="38" class="svg-box seg"/>
+<text x="47.0" y="287" text-anchor="middle" class="svg-note">ids, type</text>
+<text x="47.0" y="301" text-anchor="middle" class="svg-note">8 B</text>
+<rect x="84.0" y="270" width="37.0" height="38" class="svg-box seg"/>
+<text x="102.5" y="287" text-anchor="middle" class="svg-note">age</text>
+<text x="102.5" y="301" text-anchor="middle" class="svg-note">4 B</text>
+<rect x="121.0" y="270" width="74.0" height="38" class="svg-box seg"/>
+<text x="158.0" y="287" text-anchor="middle" class="svg-note">unix ms</text>
+<text x="158.0" y="301" text-anchor="middle" class="svg-note">8 B</text>
+<rect x="195.0" y="270" width="296.0" height="38" class="svg-box seg"/>
+<text x="343.0" y="287" text-anchor="middle" class="svg-text">8 × float32</text>
+<text x="343.0" y="301" text-anchor="middle" class="svg-note">swing, ball, spin, face, path, x, y, peak g  (32 B)</text>
+<rect x="491.0" y="270" width="259.0" height="38" class="svg-box seg"/>
+<text x="620.5" y="287" text-anchor="middle" class="svg-text">7 × float32</text>
+<text x="620.5" y="301" text-anchor="middle" class="svg-note">roll, ring, jolt …  (28 B)</text>
+<text x="10" y="332" text-anchor="start" class="svg-lane">TBWindowChunkAcked, 166 bytes (fits one 185-byte MTU)</text>
+<rect x="10.0" y="340" width="98.1" height="38" class="svg-box seg"/>
+<text x="59.036144578313255" y="357" text-anchor="middle" class="svg-note">header</text>
+<text x="59.036144578313255" y="371" text-anchor="middle" class="svg-note">22 B</text>
+<rect x="108.1" y="340" width="641.9" height="38" class="svg-box seg"/>
+<text x="429.03614457831327" y="357" text-anchor="middle" class="svg-text">8 samples × 18 B</text>
+<text x="429.03614457831327" y="371" text-anchor="middle" class="svg-note">accel 6 B, gyro 6 B, high-g 6 B per 1 ms sample: 144 B</text>
+</svg></div>
+<figcaption><b>Figure 6.</b> Message sequence and byte layouts, drawn to scale. Each window chunk fits a single 185-byte MTU, enforced with a <code>static_assert</code>. Boot numbers keep acknowledgements unambiguous across reboots, since sequence numbers restart at zero.</figcaption></figure>
+<p>Six windows are held in RAM. When all six are taken, or when no phone is connected and the racket has been still for 3 seconds, windows are written to a spare 1.375 MB flash partition in 12 KB records, up to 117, and sent oldest first once the link is free, across reboots. Erasing flash stalls the CPU for tens of milliseconds, so erases only happen while the racket is idle, and writes go one 256-byte page per loop pass. Once an app has requested this mode, the racket keeps capturing even with no phone connected, and that flag survives reboots in non-volatile storage.</p>
+
+<h3><span class="n">4.5</span>Tap gestures</h3>
+<p>A knock on the handle is a sharp jolt on the low-g channel with a short ring-down and almost no gyro or high-g signature, which separates it from a ball impact. The detector tracks a running baseline of the acceleration vector, triggers when the vector moves 300 mg from it, keeps a 256-sample window, and reports one gesture (single, double, triple) once taps stop. It also outputs a push direction. A zone classifier reports where along the handle a tap landed; its ten-feature nearest-centroid model is fitted from taps at known positions with the capture and fit tools in the repository, and until then the zone field reads "unknown".</p>
+
+<h3><span class="n">4.6</span>Verification of the firmware</h3>
+<ul>
+<li>The backlog runs on a laptop against a fake flash that, like the real one, can only clear bits between erases, under address and undefined-behaviour sanitizers.</li>
+<li>The C++ shot analyzer is checked against Swift by <code>ShotParityTests</code>, which builds the C++ itself.</li>
+<li>The C++ acoustic model matches Python on all 296 clips (274 reviewed and 22 synthetic), with a maximum feature error of 5×10<sup>−7</sup> and identical decisions <span class="tag m">measured</span>.</li>
+</ul>
+
+<h2 id="metrics"><span class="n">5</span>Shot metrics</h2>
+<p>From one window the analyzer computes the quantities in Figure 7. Everything is geometry on the gyro, the orientation and the high-g channel; nothing is learned, and the constants are set by hand or from small sessions.</p>
+<figure id="fig-analyzer"><div class="figwrap"><svg viewBox="0 0 760 300" role="img" aria-label="Shot analyzer: one 448-sample window yields a handful of per-hit features, from which swing speed, angles, stroke type, contact point, ball speed and spin are computed." class="fig-svg"><defs><marker id="ah24" viewBox="0 0 10 10" refX="9" refY="5" markerWidth="7" markerHeight="7" orient="auto-start-reverse"><path d="M0 0L10 5L0 10z" class="svg-head"/></marker></defs>
+<rect x="10" y="100" width="130" height="100" rx="4" class="svg-box"/>
+<text x="75.0" y="118" text-anchor="middle" class="svg-title">Hit window</text>
+<text x="75.0" y="136" text-anchor="middle" class="svg-text">448 samples at 1 kHz</text>
+<text x="75.0" y="150" text-anchor="middle" class="svg-text">accel, gyro, high-g</text>
+<text x="75.0" y="164" text-anchor="middle" class="svg-text">orientation q0</text>
+<text x="75.0" y="178" text-anchor="middle" class="svg-text">calibration</text>
+<rect x="190" y="20" width="200" height="270" rx="4" class="svg-box"/>
+<text x="290.0" y="38" text-anchor="middle" class="svg-title">Per-hit features</text>
+<text x="290.0" y="56" text-anchor="middle" class="svg-text">impact refined to the largest</text>
+<text x="290.0" y="70" text-anchor="middle" class="svg-text">3 ms high-g jump (±6 samples)</text>
+<text x="290.0" y="84" text-anchor="middle" class="svg-text"></text>
+<text x="290.0" y="98" text-anchor="middle" class="svg-text">ω before: mean gyro,</text>
+<text x="290.0" y="112" text-anchor="middle" class="svg-text">10 to 2 ms before</text>
+<text x="290.0" y="126" text-anchor="middle" class="svg-text">ω after: 12 to 30 ms after</text>
+<text x="290.0" y="140" text-anchor="middle" class="svg-text"></text>
+<text x="290.0" y="154" text-anchor="middle" class="svg-text">orientation at impact</text>
+<text x="290.0" y="168" text-anchor="middle" class="svg-text">(Mahony, from q0)</text>
+<text x="290.0" y="182" text-anchor="middle" class="svg-text"></text>
+<text x="290.0" y="196" text-anchor="middle" class="svg-text">ring energy: high-g z,</text>
+<text x="290.0" y="210" text-anchor="middle" class="svg-text">fast minus slow average</text>
+<text x="290.0" y="224" text-anchor="middle" class="svg-text">jolt: handle kick, ΔV</text>
+<text x="290.0" y="238" text-anchor="middle" class="svg-text">roll ratio: ΔωX / |ΔωY|</text>
+<line x1="140" y1="150" x2="190" y2="150" class="svg-arrow" marker-end="url(#ah24)"/>
+<rect x="470" y="20" width="280" height="48" rx="4" class="svg-box"/>
+<text x="610.0" y="38" text-anchor="middle" class="svg-title">Swing speed</text>
+<text x="610.0" y="56" text-anchor="middle" class="svg-text">v = r · √(ωy² + ωz²), r = 1.15 m</text>
+<line x1="390" y1="44" x2="470" y2="44" class="svg-arrow" marker-end="url(#ah24)"/>
+<rect x="470" y="76" width="280" height="48" rx="4" class="svg-box"/>
+<text x="610.0" y="94" text-anchor="middle" class="svg-title">Face and path angle</text>
+<text x="610.0" y="112" text-anchor="middle" class="svg-text">asin of face normal, velocity · up</text>
+<line x1="390" y1="100" x2="470" y2="100" class="svg-arrow" marker-end="url(#ah24)"/>
+<rect x="470" y="132" width="280" height="48" rx="4" class="svg-box"/>
+<text x="610.0" y="150" text-anchor="middle" class="svg-title">Stroke type</text>
+<text x="610.0" y="168" text-anchor="middle" class="svg-text">turn &lt; 45°: volley; tip up: serve</text>
+<line x1="390" y1="156" x2="470" y2="156" class="svg-arrow" marker-end="url(#ah24)"/>
+<rect x="470" y="188" width="280" height="48" rx="4" class="svg-box"/>
+<text x="610.0" y="206" text-anchor="middle" class="svg-title">Contact point</text>
+<text x="610.0" y="224" text-anchor="middle" class="svg-text">x = −1.65 · roll ratio; y from ring, jolt</text>
+<line x1="390" y1="212" x2="470" y2="212" class="svg-arrow" marker-end="url(#ah24)"/>
+<rect x="470" y="244" width="280" height="48" rx="4" class="svg-box"/>
+<text x="610.0" y="262" text-anchor="middle" class="svg-title">Ball speed and spin</text>
+<text x="610.0" y="280" text-anchor="middle" class="svg-text">(1+e)·v, e ≤ 0.42; rpm from brush</text>
+<line x1="390" y1="268" x2="470" y2="268" class="svg-arrow" marker-end="url(#ah24)"/>
+</svg></div>
+<figcaption><b>Figure 7.</b> From a hit window to metrics. The same code exists in C++ on the racket and in Swift in the app.</figcaption></figure>
+
+<h3><span class="n">5.1</span>Speed, angles and spin</h3>
+<p>Rotation about the shaft only spins the head in place, so only the components across it move the sweet spot. With ω the mean gyro vector over the 8 ms before contact and <em>r</em> the effective radius:</p>
+<div class="eqs">
+<div class="eq">v<sub>R</sub> = r · √(ω<sub>y</sub>² + ω<sub>z</sub>²)<span class="no">(1)</span></div>
+<div class="eq">e = e<sub>0</sub> · max(0.55, 1 − 0.035 d),   v<sub>ball</sub> = (1 + e) v<sub>R</sub> + e u<span class="no">(2)</span></div>
+<div class="eq">rpm = k · v<sub>brush</sub> / r<sub>ball</sub> · 60 / 2π,   v<sub>brush</sub> = v<sub>R</sub> · |v̂ − (v̂·n̂) n̂|<span class="no">(3)</span></div>
+</div>
+<p>Here <em>d</em> is the distance of the contact from the sweet spot in centimetres, <em>e</em><sub>0</sub> = 0.42 is the apparent coefficient of restitution at the sweet spot <a href="#r9">[9]</a>, <em>u</em> is the incoming ball speed, which the racket cannot measure and sets to zero, <em>k</em> = 0.7 is the fraction of brushing speed that becomes ball surface speed, <em>r</em><sub>ball</sub> = 33.5 mm, and <em>n̂</em> and <em>v̂</em> are the face normal and the sweet-spot velocity direction in the world frame. With <em>r</em> = 1.15 m, equation (1) and (2) predict ball speed of 1.633 × |ω<sub>yz</sub>| for a centred hit on a still ball. Face and path angles are the arcsine of the dot product of the face normal and of the velocity with world up. Spin is labelled flat below 600 rpm, topspin when the brushing component points up, and slice otherwise.</p>
+
+<h3><span class="n">5.2</span>Contact point</h3>
+<p>Two measurements locate the ball on the strings. A hit off to one side of the sweet spot twists the racket, so the change in rotation about the shaft relative to the change across it, the <em>roll ratio</em>, gives the lateral offset: x = −1.65 × roll ratio, clamped to ±12 cm. Along the strings, a hit toward the tip excites the frame's ring-down more strongly. The analyzer takes the high-g face-normal signal from 4 to 60 ms after contact, forms the difference of a two-sample and a four-sample moving average (a band-pass near 120 to 250 Hz), and normalises its RMS by the impulse. That gives |y| = min(14, 10 × ring). The sign comes from the <em>jolt</em>, the velocity change of the handle along the face normal over 6 ms: a positive jolt means the handle was pushed back with the ball, so the contact was toward the throat. Below a jolt of 0.02 the sign is unknown and |y| is scaled by 0.3.</p>
+
+<h3><span class="n">5.3</span>Stroke type</h3>
+<div class="scroll"><table>
+<caption><b>Table 4.</b> Stroke-type rules, in the order they are applied.</caption>
+<thead><tr><th>Test</th><th>Result</th></tr></thead>
+<tbody>
+<tr><td>Racket turned less than 45° in the 350 ms before contact</td><td>Volley</td></tr>
+<tr><td>Shaft within about 53° of vertical (|tip · up| &gt; 0.6) and |ω| &gt; 4 rad/s</td><td>Serve</td></tr>
+<tr><td>Player's forehand side taught or learned, and the forehand face did not meet the ball</td><td>Backhand</td></tr>
+<tr><td>Forehand face met the ball and the turn about the vertical is clearly reversed</td><td>Serve</td></tr>
+<tr><td>Otherwise, turn direction against handedness</td><td>Forehand or backhand</td></tr>
+</tbody></table></div>
+<p>The thresholds were fitted on one indoor session of 22 labelled hits. With the gyro at its true scale, volleys turned the racket 32 to 42° before contact, backhands 47 to 60°, forehands 52 to 67° and serves 61 to 71°; harder groundstrokes in other data turn 140 to 250°. These thresholds are a starting point for refinement with court data. The app learns the player's forehand side from five clean swings if it has not been taught.</p>
+
+<h2 id="sweetspot"><span class="n">6</span>Sweet-spot model</h2>
+<p>The one model that runs on the racket predicts how far from the sweet spot the ball hit, from the first 32 ms of the impact sound. It is a ridge regression, chosen because it is small, deterministic and can be evaluated with integer-friendly arithmetic. Figure 8 shows the features and the decision.</p>
+<figure id="fig-features"><div class="figwrap"><svg viewBox="0 0 760 340" role="img" aria-label="Sweet-spot model: a 32 ms audio clip becomes 156 spectral and envelope features, and a ridge regression turns them into a distance from the sweet spot in centimetres." class="fig-svg"><defs><marker id="ah25" viewBox="0 0 10 10" refX="9" refY="5" markerWidth="7" markerHeight="7" orient="auto-start-reverse"><path d="M0 0L10 5L0 10z" class="svg-head"/></marker></defs>
+<rect x="10" y="14" width="170" height="62" rx="4" class="svg-box"/>
+<text x="95.0" y="32" text-anchor="middle" class="svg-title">Clip</text>
+<text x="95.0" y="50" text-anchor="middle" class="svg-text">512 × int16, 16 kHz</text>
+<text x="95.0" y="64" text-anchor="middle" class="svg-text">= 32 ms from the hit</text>
+<rect x="212" y="14" width="170" height="62" rx="4" class="svg-box"/>
+<text x="297.0" y="32" text-anchor="middle" class="svg-title">Normalise</text>
+<text x="297.0" y="50" text-anchor="middle" class="svg-text">subtract mean,</text>
+<text x="297.0" y="64" text-anchor="middle" class="svg-text">divide by RMS</text>
+<rect x="414" y="14" width="170" height="62" rx="4" class="svg-box"/>
+<text x="499.0" y="32" text-anchor="middle" class="svg-title">Spectra</text>
+<text x="499.0" y="50" text-anchor="middle" class="svg-text">Hann, FFT 512 and 256,</text>
+<text x="499.0" y="64" text-anchor="middle" class="svg-text">log band energies</text>
+<rect x="616" y="14" width="134" height="62" rx="4" class="svg-box"/>
+<text x="683.0" y="32" text-anchor="middle" class="svg-title">Ridge</text>
+<text x="683.0" y="50" text-anchor="middle" class="svg-text">d = b + Σ wᵢ xᵢ</text>
+<text x="683.0" y="64" text-anchor="middle" class="svg-text">156 weights</text>
+<line x1="180" y1="45" x2="212" y2="45" class="svg-arrow" marker-end="url(#ah25)"/>
+<line x1="382" y1="45" x2="414" y2="45" class="svg-arrow" marker-end="url(#ah25)"/>
+<line x1="584" y1="45" x2="616" y2="45" class="svg-arrow" marker-end="url(#ah25)"/>
+<text x="10" y="108" text-anchor="start" class="svg-lane">The 156 features, drawn to scale</text>
+<rect x="10.0" y="118" width="303.6" height="38" class="svg-box seg"/>
+<text x="161.7948717948718" y="141" text-anchor="middle" class="svg-note">64 log-band energies, 512-point FFT</text>
+<rect x="313.6" y="118" width="151.8" height="38" class="svg-box seg"/>
+<text x="389.4871794871795" y="141" text-anchor="middle" class="svg-note">32, last 256 samples</text>
+<rect x="465.4" y="118" width="75.9" height="38" class="svg-box seg"/>
+<text x="503.3333333333333" y="141" text-anchor="middle" class="svg-note">16 DCT</text>
+<rect x="541.3" y="118" width="47.4" height="38" class="svg-box seg"/>
+<rect x="588.7" y="118" width="151.8" height="38" class="svg-box seg"/>
+<text x="664.6153846153846" y="141" text-anchor="middle" class="svg-note">32 amplitude envelope</text>
+<rect x="740.5" y="118" width="9.5" height="38" class="svg-box seg"/>
+<line x1="565.0" y1="156" x2="565.0" y2="176" class="svg-dim"/>
+<text x="565.0" y="190" text-anchor="middle" class="svg-note">10 scalars: centroid, bandwidth, three roll-offs,</text>
+<text x="565.0" y="203" text-anchor="middle" class="svg-note">concentration, variation, 4th moment, clipping, log RMS</text>
+<line x1="745.3" y1="156" x2="745.3" y2="206" class="svg-dim"/>
+<text x="751.2564102564103" y="218" text-anchor="end" class="svg-note">2 autocorrelations</text>
+<text x="751.2564102564103" y="231" text-anchor="end" class="svg-note">(lag 1, lag 16)</text>
+<text x="380" y="258" text-anchor="middle" class="svg-note">Training uses grouped cross-validation over 274 reviewed clips from two sessions; the labels are distances read off video.</text>
+<rect x="10" y="270" width="220" height="58" rx="4" class="svg-box"/>
+<text x="120.0" y="288" text-anchor="middle" class="svg-title">distance d</text>
+<text x="120.0" y="306" text-anchor="middle" class="svg-text">clamp at 0 cm</text>
+<rect x="270" y="270" width="220" height="58" rx="4" class="svg-box"/>
+<text x="380.0" y="288" text-anchor="middle" class="svg-title">verdict</text>
+<text x="380.0" y="306" text-anchor="middle" class="svg-text">sweet if d ≤ 4 cm</text>
+<text x="380.0" y="320" text-anchor="middle" class="svg-text">off % = min(100, d / 12 × 100)</text>
+<rect x="530" y="270" width="220" height="58" rx="4" class="svg-box"/>
+<text x="640.0" y="288" text-anchor="middle" class="svg-title">TBShot, 6 B</text>
+<text x="640.0" y="306" text-anchor="middle" class="svg-text">sweet, off %, level</text>
+<text x="640.0" y="320" text-anchor="middle" class="svg-text">confidence left at 0: no calibration</text>
+<line x1="230" y1="299" x2="270" y2="299" class="svg-arrow" marker-end="url(#ah25)"/>
+<line x1="490" y1="299" x2="530" y2="299" class="svg-arrow" marker-end="url(#ah25)"/>
+</svg></div>
+<figcaption><b>Figure 8.</b> The acoustic model. 156 features come from two spectra, a cosine transform of the log spectrum, ten scalars, a 32-bin amplitude envelope and two autocorrelations. The ridge weights are in <code>distance_model.h</code> and the same feature code runs on the racket and in Python.</figcaption></figure>
+
+<h3><span class="n">6.1</span>Results</h3>
+<p>On 274 reviewed clips from two sessions, with 5-fold cross-validation that holds out whole 8-trigger blocks, the ridge model reaches 67.2% accuracy on the sweet/off-centre call against 60.6% for always answering off-centre, and a mean radial error of 1.83 cm against 2.41 cm for predicting the training median. A group bootstrap over the 37 blocks gives an accuracy interval of 59.6 to 74.8%. Five other approaches were compared (nested selection, a multi-task network, scattering features with classical models and others) and none beat the ridge by more than noise, so the small, deterministic model is the one deployed on the racket. Parity tests confirm that the C++ matches Python on every clip.</p>
+<figure id="fig-sweetres"><div class="figwrap"><svg viewBox="0 0 760 134" role="img" aria-label="Sweet-spot accuracy: ridge 67.2 percent with an interval of 59.6 to 74.8, against a 60.6 percent baseline." class="fig-svg"><line x1="262.0" y1="12" x2="262.0" y2="88" class="svg-grid"/>
+<text x="262.0" y="104" text-anchor="middle" class="svg-note">40%</text>
+<line x1="376.5" y1="12" x2="376.5" y2="88" class="svg-grid"/>
+<text x="376.5" y="104" text-anchor="middle" class="svg-note">50%</text>
+<line x1="491.0" y1="12" x2="491.0" y2="88" class="svg-grid"/>
+<text x="491.0" y="104" text-anchor="middle" class="svg-note">60%</text>
+<line x1="605.5" y1="12" x2="605.5" y2="88" class="svg-grid"/>
+<text x="605.5" y="104" text-anchor="middle" class="svg-note">70%</text>
+<line x1="720.0" y1="12" x2="720.0" y2="88" class="svg-grid"/>
+<text x="720.0" y="104" text-anchor="middle" class="svg-note">80%</text>
+<line x1="497.87" y1="12" x2="497.87" y2="88" class="svg-arrow dashed"/>
+<text x="252" y="38" text-anchor="end" class="svg-text">Always call it off-centre</text>
+<circle cx="497.9" cy="34" r="6" class="bar-c"/>
+<text x="508.87" y="38" text-anchor="start" class="svg-value">60.6%</text>
+<text x="252" y="72" text-anchor="end" class="svg-text">Ridge, grouped 5-fold, 274 clips</text>
+<line x1="486.4" y1="68" x2="660.5" y2="68" class="svg-whisker"/>
+<line x1="486.4" y1="62" x2="486.4" y2="74" class="svg-whisker"/>
+<line x1="660.5" y1="62" x2="660.5" y2="74" class="svg-whisker"/>
+<circle cx="573.4" cy="68" r="6" class="bar-a"/>
+<text x="584.44" y="72" text-anchor="start" class="svg-value">67.2%</text>
+<text x="262" y="124" text-anchor="start" class="svg-note">Interval: group bootstrap over 37 blocks, 2000 resamples. Dashed line: the always-off-centre rate.</text></svg></div>
+<figcaption><b>Figure 9.</b> Accuracy of the deployed ridge recipe with its bootstrap interval, against the always-off-centre rate.</figcaption></figure>
+<p>The model's strength is the distance estimate: outside the 3 to 5 cm band its call is right 73% of the time. The recorded next steps are to record a third session on another day with the microphone, to show 3 to 5 cm as "close" instead of forcing a yes/no call, to confirm the label scale between sessions, and to refit on all 274 clips.</p>
+
+<h2 id="simulator"><span class="n">7</span>What-if simulator</h2>
+<p>The <code>ShotSimulator</code> is a bounded sensitivity model, not a ball-flight predictor. It takes six parameters (swing speed, path angle, face angle, contact x and y, incoming speed), clamps them to physical ranges, and applies equations (2) and (3) with the face-minus-path angle setting the brushing component:</p>
+<div class="eq">v<sub>brush</sub> = v<sub>R</sub> · sin(path − face),   v<sub>ball</sub> = e u + (1 + e) v<sub>R</sub><span class="no">(4)</span></div>
+<p>The tool applies a change to the player's mean motion-enabled shot of a chosen stroke. Mic-only and gyro-saturated shots are excluded because they carry no swing. Inputs are clamped (swing ±30%, angles ±15°, contact ±5 cm), and incoming speed is assumed: 43.2 km/h for groundstrokes, 54 for volleys and 0 for serves. The tool returns a verdict on each effect rather than leaving the model to judge size:</p>
+<ul>
+<li><b>Spin gain is decisive</b> if the new spin is at least max(1.3 × before, before + 400 rpm, 1200 rpm).</li>
+<li><b>Pace gain is decisive</b> if the new ball speed is at least 1.05 × before.</li>
+<li><b>Contact is centred</b> if its distance from the sweet spot is at most 2.0 cm.</li>
+</ul>
+<p>These bars are shared by the Swift code, the Python mirror and the evaluator's goal rule. The model is a sensitivity model: it ranks and sizes changes on the player's own average shot rather than predicting absolute ball speed, and the dataset teaches the agent to call every result an estimate. A wall drill (self-fed hits at 4 m, ball speed from the timing of racket pop and wall thud) is specified to fit the effective radius and restitution against measured ball speed <span class="tag p">planned</span>.</p>
+
+<h2 id="agent"><span class="n">8</span>Racket agent</h2>
+<h3><span class="n">8.1</span>Loop and tools</h3>
+<p>The agent sends the player's question and ten tool schemas to an OpenAI-compatible chat endpoint and executes any tool calls on the device. Figure 10 shows the loop. The first user message is exactly what the app sends, and the model's first move is to call <code>get_session_digest</code>. The loop is bounded to five rounds with at most eight calls per round, and the last round sends no tools and asks for the final answer. If the reply is empty, calls tools on the last round, or fans out beyond eight calls, the app raises an error and falls back to a built-in engine.</p>
+<figure id="fig-agent"><div class="figwrap"><svg viewBox="0 0 760 400" role="img" aria-label="Agent loop: the app sends the question and ten tool schemas to the Lemonade server, executes any tool calls itself, appends the results, and repeats for at most five rounds." class="fig-svg"><defs><marker id="ah26" viewBox="0 0 10 10" refX="9" refY="5" markerWidth="7" markerHeight="7" orient="auto-start-reverse"><path d="M0 0L10 5L0 10z" class="svg-head"/></marker></defs>
+<rect x="20" y="14" width="280" height="44" rx="4" class="svg-box"/>
+<text x="160.0" y="32" text-anchor="middle" class="svg-title">Player question</text>
+<text x="160.0" y="50" text-anchor="middle" class="svg-text">“How do I get more spin?”</text>
+<rect x="20" y="84" width="280" height="56" rx="4" class="svg-box"/>
+<text x="160.0" y="102" text-anchor="middle" class="svg-title">Messages</text>
+<text x="160.0" y="120" text-anchor="middle" class="svg-text">system prompt with the rules, then the question;</text>
+<text x="160.0" y="134" text-anchor="middle" class="svg-text">the first move is get_session_digest</text>
+<rect x="20" y="166" width="280" height="70" rx="4" class="svg-box"/>
+<text x="160.0" y="184" text-anchor="middle" class="svg-title">Lemonade server</text>
+<text x="160.0" y="202" text-anchor="middle" class="svg-text">POST /chat/completions, 10 tool schemas,</text>
+<text x="160.0" y="216" text-anchor="middle" class="svg-text">tool_choice auto, enable_thinking false,</text>
+<text x="160.0" y="230" text-anchor="middle" class="svg-text">4096 tokens, 45 s timeout</text>
+<rect x="20" y="262" width="280" height="44" rx="4" class="svg-box"/>
+<text x="160.0" y="280" text-anchor="middle" class="svg-title">Decision</text>
+<text x="160.0" y="298" text-anchor="middle" class="svg-text">did the reply contain tool_calls?</text>
+<rect x="20" y="336" width="280" height="44" rx="4" class="svg-box"/>
+<text x="160.0" y="354" text-anchor="middle" class="svg-title">Answer</text>
+<text x="160.0" y="372" text-anchor="middle" class="svg-text">text with estimates, shown to the player</text>
+<line x1="160" y1="58" x2="160" y2="84" class="svg-arrow" marker-end="url(#ah26)"/>
+<line x1="160" y1="140" x2="160" y2="166" class="svg-arrow" marker-end="url(#ah26)"/>
+<line x1="160" y1="236" x2="160" y2="262" class="svg-arrow" marker-end="url(#ah26)"/>
+<line x1="160" y1="306" x2="160" y2="336" class="svg-arrow" marker-end="url(#ah26)"/>
+<text x="168" y="326" text-anchor="start" class="svg-note">no</text>
+<rect x="350" y="240" width="190" height="80" rx="4" class="svg-box"/>
+<text x="445.0" y="258" text-anchor="middle" class="svg-title">CoachTools.execute</text>
+<text x="445.0" y="276" text-anchor="middle" class="svg-text">name, keys, enums, finite</text>
+<text x="445.0" y="290" text-anchor="middle" class="svg-text">numbers checked, then run;</text>
+<text x="445.0" y="304" text-anchor="middle" class="svg-text">results as sorted-key JSON</text>
+<line x1="300" y1="284" x2="350" y2="284" class="svg-arrow" marker-end="url(#ah26)"/>
+<text x="325" y="276" text-anchor="middle" class="svg-note">yes</text>
+<path d="M445 240 V201 H300" fill="none" class="svg-arrow" marker-end="url(#ah26)"/>
+<text x="372" y="194" text-anchor="start" class="svg-note">tool results appended</text>
+<text x="330" y="352" text-anchor="start" class="svg-note">at most 5 rounds, 8 calls per round;</text>
+<text x="330" y="366" text-anchor="start" class="svg-note">round 5: no tools, answer now</text>
+<rect x="580" y="14" width="170" height="352" rx="4" class="svg-box"/>
+<text x="665.0" y="32" text-anchor="middle" class="svg-title">Ten tools</text>
+<text x="665.0" y="50" text-anchor="middle" class="svg-text">get_session_digest</text>
+<text x="665.0" y="64" text-anchor="middle" class="svg-text">query_shots</text>
+<text x="665.0" y="78" text-anchor="middle" class="svg-text">list_shots</text>
+<text x="665.0" y="92" text-anchor="middle" class="svg-text">compare_sessions</text>
+<text x="665.0" y="106" text-anchor="middle" class="svg-text"></text>
+<text x="665.0" y="120" text-anchor="middle" class="svg-text">get_live_state</text>
+<text x="665.0" y="134" text-anchor="middle" class="svg-text">read_live_sensors</text>
+<text x="665.0" y="148" text-anchor="middle" class="svg-text">get_racket_status</text>
+<text x="665.0" y="162" text-anchor="middle" class="svg-text"></text>
+<text x="665.0" y="176" text-anchor="middle" class="svg-text">simulate_change</text>
+<text x="665.0" y="190" text-anchor="middle" class="svg-text">→ ShotSimulator</text>
+<text x="665.0" y="204" text-anchor="middle" class="svg-text"></text>
+<text x="665.0" y="218" text-anchor="middle" class="svg-text">recall_notes</text>
+<text x="665.0" y="232" text-anchor="middle" class="svg-text">remember_note</text>
+<line x1="540" y1="280" x2="580" y2="280" class="svg-arrow" marker-end="url(#ah26)" marker-start="url(#ah26)"/>
+</svg></div>
+<figcaption><b>Figure 10.</b> The agent loop. The model never touches data directly. Every argument is validated against the schema before a tool runs, and results are serialised with sorted keys.</figcaption></figure>
+<p>The tools split into four groups: session data (<code>get_session_digest</code>, <code>query_shots</code>, <code>list_shots</code>, <code>compare_sessions</code>), live racket state (<code>get_live_state</code>, <code>read_live_sensors</code>, <code>get_racket_status</code>), the simulator (<code>simulate_change</code>), and notes (<code>recall_notes</code>, <code>remember_note</code>). Validation rejects unknown tools and keys, missing required arguments, strings outside an enum, and non-finite numbers. Notes are capped at 240 characters, two per answer and a fixed total per player, and the tool description tells the model to treat their text as information, never as instructions.</p>
+
+<h3><span class="n">8.2</span>Keeping numbers honest</h3>
+<p>The system prompt requires that only numbers returned by tools be cited, that every sentence stating a simulation number contain the word "estimated", that net clearance, landing depth and trajectory are never claimed, and that the model quote numbers as given and never do arithmetic on them. A prompt cannot guarantee any of this, so two code-level checks back it up. The evaluator rejects any number in an answer that is not in a tool result, within a small tolerance. In the browser path, the model finishes with a <code>present_answer</code> call whose parts are either short prose or a reference (tool-call id and a JSON pointer) into a tool result; a dependency-free renderer resolves each reference to the original finite number and rejects any digit or common number word in prose. This prevents invented numeric strings and complements the strict score. The browser path uses it today, and the native app is the next adopter <span class="tag d">design</span>.</p>
+
+<h3><span class="n">8.3</span>Swing film</h3>
+<p>A second use of the same loop produces a short animation of the player's swing and the recommended change. The model may emit only a small script (stroke, up to two levers within fixed ranges that equal a simulation it ran, and short titles with no digits). A validator rejects anything else and returns the reasons to the model at most twice. A fixed renderer draws the result, so the model never produces pixels and cannot invent a body, a court or a ball flight.</p>
+
+<h2 id="training"><span class="n">9</span>Data and tuning</h2>
+<h3><span class="n">9.1</span>Synthetic what-if conversations</h3>
+<p>No public dataset exists of tool-use conversations about racket data, so we generate them (Figure 11). A Python mirror of the Swift tools produces exactly the tool results the app would return, checked against Swift output in tests. Priors come from real data: racket speed at contact from 45 camera-confirmed hits (median 120 km/h, coefficient of variation 0.14), the shape of the contact cloud from 274 reviewed contacts, and link conditions from the club session. A club-like link makes 21% of shots mic-only because a shot that arrives before the previous window has finished sending loses its motion data, against 7% on a phone-like link. Swing path, face angle, stroke mix and injected technique flaws are assumed, not measured.</p>
+<figure id="fig-train"><div class="figwrap"><svg viewBox="0 0 760 388" role="img" aria-label="Training and evaluation pipeline: synthetic tool-use conversations from real-data priors are filtered, used for QLoRA tuning, and the adapter is scored through two serving paths with the same scorer." class="fig-svg"><defs><marker id="ah27" viewBox="0 0 10 10" refX="9" refY="5" markerWidth="7" markerHeight="7" orient="auto-start-reverse"><path d="M0 0L10 5L0 10z" class="svg-head"/></marker></defs>
+<rect x="10" y="12" width="160" height="62" rx="4" class="svg-box"/>
+<text x="90.0" y="30" text-anchor="middle" class="svg-title">Real recordings</text>
+<text x="90.0" y="48" text-anchor="middle" class="svg-text">45 camera-confirmed hits,</text>
+<text x="90.0" y="62" text-anchor="middle" class="svg-text">274 reviewed contacts</text>
+<rect x="200" y="12" width="160" height="62" rx="4" class="svg-box"/>
+<text x="280.0" y="30" text-anchor="middle" class="svg-title">Priors</text>
+<text x="280.0" y="48" text-anchor="middle" class="svg-text">swing speed, contact</text>
+<text x="280.0" y="62" text-anchor="middle" class="svg-text">spread, link loss (8 KB)</text>
+<line x1="170" y1="43" x2="200" y2="43" class="svg-arrow" marker-end="url(#ah27)"/>
+<rect x="390" y="12" width="160" height="62" rx="4" class="svg-box"/>
+<text x="470.0" y="30" text-anchor="middle" class="svg-title">whatif_synth</text>
+<text x="470.0" y="48" text-anchor="middle" class="svg-text">400 players, seed 7,</text>
+<text x="470.0" y="62" text-anchor="middle" class="svg-text">Python mirror of Swift</text>
+<line x1="360" y1="43" x2="390" y2="43" class="svg-arrow" marker-end="url(#ah27)"/>
+<rect x="580" y="12" width="160" height="62" rx="4" class="svg-box"/>
+<text x="660.0" y="30" text-anchor="middle" class="svg-title">2,263 chats</text>
+<text x="660.0" y="48" text-anchor="middle" class="svg-text">split by player 80/10/10</text>
+<text x="660.0" y="62" text-anchor="middle" class="svg-text">tools = app's schemas</text>
+<line x1="550" y1="43" x2="580" y2="43" class="svg-arrow" marker-end="url(#ah27)"/>
+<rect x="10" y="112" width="136" height="62" rx="4" class="svg-box"/>
+<text x="78.0" y="130" text-anchor="middle" class="svg-title">Train: 1,809</text>
+<text x="78.0" y="148" text-anchor="middle" class="svg-text">only this file leaves</text>
+<text x="78.0" y="162" text-anchor="middle" class="svg-text">the laptop</text>
+<rect x="161" y="112" width="136" height="62" rx="4" class="svg-box"/>
+<text x="229.0" y="130" text-anchor="middle" class="svg-title">Drop empty turns</text>
+<text x="229.0" y="148" text-anchor="middle" class="svg-text">264 removed in the</text>
+<text x="229.0" y="162" text-anchor="middle" class="svg-text">final recipe</text>
+<line x1="146" y1="143" x2="161" y2="143" class="svg-arrow" marker-end="url(#ah27)"/>
+<rect x="312" y="112" width="136" height="62" rx="4" class="svg-box"/>
+<text x="380.0" y="130" text-anchor="middle" class="svg-title">Keep goal wins</text>
+<text x="380.0" y="148" text-anchor="middle" class="svg-text">last simulation must</text>
+<text x="380.0" y="162" text-anchor="middle" class="svg-text">reach target: 1,598</text>
+<line x1="297" y1="143" x2="312" y2="143" class="svg-arrow" marker-end="url(#ah27)"/>
+<rect x="463" y="112" width="136" height="62" rx="4" class="svg-box"/>
+<text x="531.0" y="130" text-anchor="middle" class="svg-title">QLoRA</text>
+<text x="531.0" y="148" text-anchor="middle" class="svg-text">Qwen2.5-1.5B, NF4,</text>
+<text x="531.0" y="162" text-anchor="middle" class="svg-text">rank 16, 400 steps</text>
+<line x1="448" y1="143" x2="463" y2="143" class="svg-arrow" marker-end="url(#ah27)"/>
+<rect x="614" y="112" width="136" height="62" rx="4" class="svg-box"/>
+<text x="682.0" y="130" text-anchor="middle" class="svg-title">Adapter</text>
+<text x="682.0" y="148" text-anchor="middle" class="svg-text">SHA-256 recorded</text>
+<text x="682.0" y="162" text-anchor="middle" class="svg-text">A100, about 29 min*</text>
+<line x1="599" y1="143" x2="614" y2="143" class="svg-arrow" marker-end="url(#ah27)"/>
+<path d="M660 74 V93 H78 V112" fill="none" class="svg-arrow" marker-end="url(#ah27)"/>
+<rect x="10" y="220" width="340" height="76" rx="4" class="svg-box"/>
+<text x="180.0" y="238" text-anchor="middle" class="svg-title">Path A: Transformers</text>
+<text x="180.0" y="256" text-anchor="middle" class="svg-text">NF4 base + adapter, own server,</text>
+<text x="180.0" y="270" text-anchor="middle" class="svg-text">no grammar, greedy decoding</text>
+<text x="180.0" y="284" text-anchor="middle" class="svg-text">about 2.5 h for 243 cases</text>
+<rect x="410" y="220" width="340" height="76" rx="4" class="svg-box"/>
+<text x="580.0" y="238" text-anchor="middle" class="svg-title">Path B: Lemonade</text>
+<text x="580.0" y="256" text-anchor="middle" class="svg-text">merge to fp16, GGUF Q8_0, load in Lemonade,</text>
+<text x="580.0" y="270" text-anchor="middle" class="svg-text">llama.cpp grammar from tool schemas</text>
+<text x="580.0" y="284" text-anchor="middle" class="svg-text">about 6 min for 243 cases</text>
+<line x1="682" y1="174" x2="682" y2="220" class="svg-arrow" marker-end="url(#ah27)"/>
+<path d="M682 174 V196 H180 V220" fill="none" class="svg-arrow" marker-end="url(#ah27)"/>
+<rect x="10" y="326" width="740" height="48" rx="4" class="svg-box"/>
+<text x="380.0" y="344" text-anchor="middle" class="svg-title">Same strict scorer on both paths, 243 validation cases, seed 7</text>
+<text x="380.0" y="362" text-anchor="middle" class="svg-text">digest first, numbers grounded in tool output, estimate labels, known tools, goal reached</text>
+<line x1="180" y1="296" x2="180" y2="326" class="svg-arrow" marker-end="url(#ah27)"/>
+<text x="188" y="316" text-anchor="start" class="svg-note">212 pass</text>
+<line x1="580" y1="296" x2="580" y2="326" class="svg-arrow" marker-end="url(#ah27)"/>
+<text x="588" y="316" text-anchor="start" class="svg-note">118 pass</text>
+</svg></div>
+<figcaption><b>Figure 11.</b> From real-data priors to a scored adapter. Only the training file is uploaded to the rented GPU. The same scorer judges both serving paths. *Training time for 300 steps; the first run on the laptop GPU took 7,885 s.</figcaption></figure>
+<div class="scroll"><table>
+<caption><b>Table 5.</b> Conversation kinds in the dataset (2,263 in total, 400 simulated players, split by player 80/10/10).</caption>
+<thead><tr><th>Kind</th><th class="num">Count</th><th>What the model learns</th></tr></thead>
+<tbody>
+<tr><td>objective</td><td class="num">1,326</td><td>Given a goal (more spin, more pace, cleaner contact, slice to topspin), test two sizes of the best change in parallel and recommend the smallest that reaches it</td></tr>
+<tr><td>player_whatif</td><td class="num">465</td><td>Run the change the player proposes and say whether it is worth it</td></tr>
+<tr><td>player_whatif_extreme</td><td class="num">122</td><td>Report that a request was clamped and suggest a smaller step</td></tr>
+<tr><td>unmodeled</td><td class="num">222</td><td>Report speed and spin, and say flight is not modelled</td></tr>
+<tr><td>contact_spread</td><td class="num">83</td><td>Say the average is centred and the problem is scatter</td></tr>
+<tr><td>no_motion, error</td><td class="num">45</td><td>Say it cannot simulate, with no invented numbers</td></tr>
+</tbody></table></div>
+
+<h3><span class="n">9.2</span>Fine-tuning recipe</h3>
+<p>The base model is Qwen2.5-1.5B-Instruct <a href="#r4">[4]</a> (1,562,179,072 parameters, Apache-2.0, a documented tool-call template). We apply QLoRA <a href="#r2">[2]</a>, <a href="#r3">[3]</a> with a 4-bit NF4 base with double quantization, rank 16, alpha 32, dropout 0.05 on all seven attention and MLP projection matrices, learning rate 2×10<sup>−4</sup>, AdamW, fp16 with gradient checkpointing, batch size 1 with 8 accumulation steps, seed 7 and a 4,608-token limit. Loss is taken on assistant messages only, with selective vocabulary logits to reduce memory; a CPU comparison against the full masked loss agreed within 10<sup>−6</sup>. Every one of the 1,809 training conversations fits within the limit (longest 4,509 tokens) and none is truncated. The adapter weights are not in the repository, and each run records the SHA-256 of its adapter and training file.</p>
+
+<h2 id="lemonade"><span class="n">10</span>Lemonade evaluation</h2>
+<h3><span class="n">10.1</span>Method</h3>
+<p>Every engine is scored by one script, <code>tools/agent_eval.py</code>, on the same stratified sample of 243 player-split validation conversations (seed 7), with real tool dispatch from the Python mirror and the app's own limits (five rounds, eight calls). A case passes only if all of these hold: the first tool call is <code>get_session_digest</code>; every number in the answer appears in a tool result or the question; any simulation is labelled as an estimate; no unknown tool was called; and, for goal cases, the final simulation reaches the goal under the same rule the dataset uses. A request error counts as a failure. Intervals below are 95% Wilson intervals <a href="#r7">[7]</a> over the 243 cases; they capture sampling uncertainty on this sample only, not variation across training seeds, since each configuration was trained once.</p>
+
+<h3><span class="n">10.2</span>Tuning rounds on our own server</h3>
+<div class="scroll"><table>
+<caption><b>Table 6.</b> Tuning rounds, served by our Transformers/NF4 server without a grammar.</caption>
+<thead><tr><th>Round</th><th>Change</th><th class="num">Steps</th><th class="num">Strict pass</th><th class="num">Errors</th></tr></thead>
+<tbody>
+<tr><td>1</td><td>Full data, empty assistant turns kept</td><td class="num">300</td><td class="num">169 (69.5%)</td><td class="num">62</td></tr>
+<tr><td>2</td><td>Drop 377 empty intermediate turns</td><td class="num">300</td><td class="num">204 (84.0%)</td><td class="num">0</td></tr>
+<tr><td>3</td><td>Same data, more steps</td><td class="num">700</td><td class="num">207 (85.2%)</td><td class="num">0</td></tr>
+<tr class="hl"><td>4</td><td>Keep goal chats only if their last simulation reaches the goal</td><td class="num">400</td><td class="num">212 (87.2%)</td><td class="num">0</td></tr>
+</tbody></table></div>
+<p>Round 1 produced 62 errors, all from empty answers. An audit found 377 training conversations with an empty intermediate assistant turn, so the loader had been supervising an end-of-turn token with no content. Removing them took errors to zero and contact-spread cases from 0 of 14 to 14 of 14. More steps barely helped. Scoring each training conversation with the evaluator's own goal rule showed that 113 of 436 cleaner-contact and 74 of 338 more-spin conversations ended on a change that does not reach the goal, so the model's miss rate matched the data it imitated; filtering to goal-reaching conversations (dropping 211 of 1,809) gave round 4. That filter is rejection sampling with the evaluator's rule and must be disclosed with any resulting score. Rounds 2 to 4 were selected on these validation cases, and the test split is reserved for one final scoring.</p>
+
+<h3><span class="n">10.3</span>Serving the same weights through Lemonade</h3>
+<p>Lemonade Server 2026.45.3 on Windows served an untuned Qwen3-1.7B (Q4_0) with 124 strict passes (51.0%), the starting point that motivated tuning. We then merged the round 4 adapter into fp16 weights, converted to GGUF with llama.cpp's converter, quantised to Q8_0 (1.5 GB) and loaded it as a normal Lemonade model. A 243-case run takes about six minutes this way, against about 2.5 hours on the Transformers/NF4 server. The score was 118, which led to the finding in section 10.4.</p>
+<figure id="fig-results"><div class="figwrap"><svg viewBox="0 0 760 338" role="img" aria-label="Strict all-pass on 243 validation cases with 95 percent Wilson intervals. Transformers-served rounds climb from 69.5 to 87.2 percent; the same round 4 weights served by Lemonade score 48.6 percent." class="fig-svg"><line x1="236.0" y1="16" x2="236.0" y2="292" class="svg-grid"/>
+<text x="236.0" y="308" text-anchor="middle" class="svg-note">0%</text>
+<line x1="332.0" y1="16" x2="332.0" y2="292" class="svg-grid"/>
+<text x="332.0" y="308" text-anchor="middle" class="svg-note">20%</text>
+<line x1="428.0" y1="16" x2="428.0" y2="292" class="svg-grid"/>
+<text x="428.0" y="308" text-anchor="middle" class="svg-note">40%</text>
+<line x1="524.0" y1="16" x2="524.0" y2="292" class="svg-grid"/>
+<text x="524.0" y="308" text-anchor="middle" class="svg-note">60%</text>
+<line x1="620.0" y1="16" x2="620.0" y2="292" class="svg-grid"/>
+<text x="620.0" y="308" text-anchor="middle" class="svg-note">80%</text>
+<line x1="716.0" y1="16" x2="716.0" y2="292" class="svg-grid"/>
+<text x="716.0" y="308" text-anchor="middle" class="svg-note">100%</text>
+<text x="226" y="37" text-anchor="end" class="svg-text">Hosted model (historical aggregate)</text>
+<rect x="236" y="26" width="420.7" height="16" class="bar-c"/>
+<line x1="634.0" y1="34" x2="673.8" y2="34" class="svg-whisker"/>
+<line x1="634.0" y1="29" x2="634.0" y2="39" class="svg-whisker"/>
+<line x1="673.8" y1="29" x2="673.8" y2="39" class="svg-whisker"/>
+<text x="679.8" y="38" class="svg-value">87.7%</text>
+<text x="226" y="67" text-anchor="end" class="svg-text">Qwen3-1.7B untuned, Lemonade</text>
+<rect x="236" y="56" width="244.9" height="16" class="bar-b"/>
+<line x1="450.9" y1="64" x2="510.8" y2="64" class="svg-whisker"/>
+<line x1="450.9" y1="59" x2="450.9" y2="69" class="svg-whisker"/>
+<line x1="510.8" y1="59" x2="510.8" y2="69" class="svg-whisker"/>
+<text x="516.8" y="68" class="svg-value">51.0%</text>
+<text x="226" y="97" text-anchor="end" class="svg-text">Round 1, Transformers</text>
+<rect x="236" y="86" width="333.8" height="16" class="bar-a"/>
+<line x1="540.8" y1="94" x2="596.0" y2="94" class="svg-whisker"/>
+<line x1="540.8" y1="89" x2="540.8" y2="99" class="svg-whisker"/>
+<line x1="596.0" y1="89" x2="596.0" y2="99" class="svg-whisker"/>
+<text x="602.0" y="98" class="svg-value">69.5%</text>
+<text x="226" y="127" text-anchor="end" class="svg-text">Round 2, Transformers</text>
+<rect x="236" y="116" width="403.0" height="16" class="bar-a"/>
+<line x1="614.3" y1="124" x2="658.6" y2="124" class="svg-whisker"/>
+<line x1="614.3" y1="119" x2="614.3" y2="129" class="svg-whisker"/>
+<line x1="658.6" y1="119" x2="658.6" y2="129" class="svg-whisker"/>
+<text x="664.6" y="128" class="svg-value">84.0%</text>
+<text x="226" y="157" text-anchor="end" class="svg-text">Round 3, Transformers</text>
+<rect x="236" y="146" width="408.9" height="16" class="bar-a"/>
+<line x1="620.8" y1="154" x2="663.7" y2="154" class="svg-whisker"/>
+<line x1="620.8" y1="149" x2="620.8" y2="159" class="svg-whisker"/>
+<line x1="663.7" y1="149" x2="663.7" y2="159" class="svg-whisker"/>
+<text x="669.7" y="158" class="svg-value">85.2%</text>
+<text x="226" y="187" text-anchor="end" class="svg-text">Round 4, Transformers</text>
+<rect x="236" y="176" width="418.8" height="16" class="bar-a"/>
+<line x1="631.8" y1="184" x2="672.2" y2="184" class="svg-whisker"/>
+<line x1="631.8" y1="179" x2="631.8" y2="189" class="svg-whisker"/>
+<line x1="672.2" y1="179" x2="672.2" y2="189" class="svg-whisker"/>
+<text x="678.2" y="188" class="svg-value">87.2%</text>
+<text x="226" y="217" text-anchor="end" class="svg-text">Round 4 weights, Lemonade</text>
+<rect x="236" y="206" width="233.1" height="16" class="bar-b"/>
+<line x1="439.3" y1="214" x2="499.1" y2="214" class="svg-whisker"/>
+<line x1="439.3" y1="209" x2="439.3" y2="219" class="svg-whisker"/>
+<line x1="499.1" y1="209" x2="499.1" y2="219" class="svg-whisker"/>
+<text x="505.1" y="218" class="svg-value">48.6%</text>
+<text x="226" y="247" text-anchor="end" class="svg-text">Round 6, Lemonade</text>
+<rect x="236" y="236" width="223.2" height="16" class="bar-b"/>
+<line x1="429.6" y1="244" x2="489.3" y2="244" class="svg-whisker"/>
+<line x1="429.6" y1="239" x2="429.6" y2="249" class="svg-whisker"/>
+<line x1="489.3" y1="239" x2="489.3" y2="249" class="svg-whisker"/>
+<text x="495.3" y="248" class="svg-value">46.5%</text>
+<text x="226" y="277" text-anchor="end" class="svg-text">Round 7, Lemonade</text>
+<rect x="236" y="266" width="237.0" height="16" class="bar-b"/>
+<line x1="443.1" y1="274" x2="503.0" y2="274" class="svg-whisker"/>
+<line x1="443.1" y1="269" x2="443.1" y2="279" class="svg-whisker"/>
+<line x1="503.0" y1="269" x2="503.0" y2="279" class="svg-whisker"/>
+<text x="509.0" y="278" class="svg-value">49.4%</text>
+<rect x="236" y="319" width="12" height="12" class="bar-c"/>
+<text x="254" y="329" class="svg-note" text-anchor="start">hosted baseline</text>
+<rect x="369.0" y="319" width="12" height="12" class="bar-a"/>
+<text x="387.0" y="329" class="svg-note" text-anchor="start">own Transformers server, no grammar</text>
+<rect x="626.0" y="319" width="12" height="12" class="bar-b"/>
+<text x="644.0" y="329" class="svg-note" text-anchor="start">served by Lemonade (llama.cpp, grammar)</text></svg></div>
+<figcaption><b>Figure 12.</b> Strict all-pass on 243 cases with 95% Wilson intervals. The Transformers rounds climb from 69.5% to 87.2%. The same round 4 weights score 48.6% when served by Lemonade, where tool calls are grammar-constrained, and rounds 6 and 7 tested training on the order Lemonade delivers. The hosted baseline is a single retained aggregate (87.7%, which is 213 of 243 if exact).</figcaption></figure>
+<div class="scroll"><table>
+<caption><b>Table 7.</b> Strict passes by kind for four configurations (243 cases).</caption>
+<thead><tr><th>Kind</th><th class="num">Cases</th><th class="num">Qwen3 untuned, Lemonade</th><th class="num">Round 4, Transformers</th><th class="num">Round 4, Lemonade</th><th class="num">Round 7, Lemonade</th></tr></thead>
+<tbody>
+<tr class="bad"><td>objective</td><td class="num">127</td><td class="num">31</td><td class="num">96</td><td class="num">6</td><td class="num">4</td></tr>
+<tr><td>player_whatif</td><td class="num">57</td><td class="num">48</td><td class="num">57</td><td class="num">57</td><td class="num">57</td></tr>
+<tr><td>player_whatif_extreme</td><td class="num">18</td><td class="num">11</td><td class="num">18</td><td class="num">16</td><td class="num">18</td></tr>
+<tr><td>unmodeled</td><td class="num">25</td><td class="num">20</td><td class="num">25</td><td class="num">24</td><td class="num">25</td></tr>
+<tr><td>contact_spread</td><td class="num">14</td><td class="num">12</td><td class="num">14</td><td class="num">13</td><td class="num">14</td></tr>
+<tr><td>no_motion, error</td><td class="num">2</td><td class="num">2</td><td class="num">2</td><td class="num">2</td><td class="num">2</td></tr>
+<tr><th>Total</th><th class="num">243</th><th class="num">124</th><th class="num">212</th><th class="num">118</th><th class="num">120</th></tr>
+</tbody></table></div>
+<p>Round 4 on Lemonade used temperature 0. Nearly all of the loss sits in one kind: the 116 non-goal cases pass at nearly the same rate on both servers, and the objective cases fall from 96 of 127 to 6.</p>
+
+<h3><span class="n">10.4</span>Finding: Lemonade sorts schema keys, and the grammar enforces that order</h3>
+<p>On goal cases the effect was narrow. The model's call to <code>simulate_change</code> was <code>{"type":"forehand"}</code> with no change, so the tool reported "no change" and the model concluded the contact was already centred. Across the four Lemonade runs, the last simulation in a goal case applied no change in 111, 119, 123 and 123 of 123 goal cases, against 0 of 123 on the Transformers server (Figure 14). A paired comparison of round 4 on the two servers has 94 cases that pass only on the Transformers server and none that pass only on Lemonade (McNemar χ² = 92.0 with continuity correction <a href="#r8">[8]</a>).</p>
+<figure id="fig-mech"><div class="figwrap"><svg viewBox="0 0 760 190" role="img" aria-label="Mechanism: Lemonade sorts tool schema keys alphabetically, the grammar forces call arguments into that order, and a model that writes type first can add no further arguments." class="fig-svg"><defs><marker id="ah4" viewBox="0 0 10 10" refX="9" refY="5" markerWidth="7" markerHeight="7" orient="auto-start-reverse"><path d="M0 0L10 5L0 10z" class="svg-head"/></marker></defs>
+<rect x="6" y="18" width="150" height="150" rx="4" class="svg-box"/>
+<text x="81.0" y="36" text-anchor="middle" class="svg-title">App schema order</text>
+<text x="81.0" y="54" text-anchor="middle" class="svg-text">session</text>
+<text x="81.0" y="68" text-anchor="middle" class="svg-text">type</text>
+<text x="81.0" y="82" text-anchor="middle" class="svg-text">swing_percent</text>
+<text x="81.0" y="96" text-anchor="middle" class="svg-text">face_deg …</text>
+<rect x="198" y="18" width="150" height="150" rx="4" class="svg-box"/>
+<text x="273.0" y="36" text-anchor="middle" class="svg-title">Lemonade delivers</text>
+<text x="273.0" y="54" text-anchor="middle" class="svg-text">face_deg</text>
+<text x="273.0" y="68" text-anchor="middle" class="svg-text">path_deg</text>
+<text x="273.0" y="82" text-anchor="middle" class="svg-text">session</text>
+<text x="273.0" y="96" text-anchor="middle" class="svg-text">swing_percent</text>
+<text x="273.0" y="110" text-anchor="middle" class="svg-text">type</text>
+<rect x="390" y="18" width="150" height="150" rx="4" class="svg-box"/>
+<text x="465.0" y="36" text-anchor="middle" class="svg-title">Server constrains</text>
+<text x="465.0" y="54" text-anchor="middle" class="svg-text">keys of a call must</text>
+<text x="465.0" y="68" text-anchor="middle" class="svg-text">follow property order</text>
+<text x="465.0" y="82" text-anchor="middle" class="svg-text">(llama.cpp grammar)</text>
+<rect x="582" y="18" width="150" height="150" rx="4" class="svg-box"/>
+<text x="657.0" y="36" text-anchor="middle" class="svg-title">Tuned model writes</text>
+<text x="657.0" y="54" text-anchor="middle" class="svg-text">{"type":"forehand"}</text>
+<text x="657.0" y="68" text-anchor="middle" class="svg-text">then the grammar</text>
+<text x="657.0" y="82" text-anchor="middle" class="svg-text">has no key left</text>
+<text x="657.0" y="96" text-anchor="middle" class="svg-text">→ no change tested</text>
+<line x1="156" y1="93.0" x2="198" y2="93.0" class="svg-arrow" marker-end="url(#ah4)"/>
+<text x="177.0" y="85.0" text-anchor="middle" class="svg-note">sorts keys</text>
+<line x1="348" y1="93.0" x2="390" y2="93.0" class="svg-arrow" marker-end="url(#ah4)"/>
+<text x="369.0" y="85.0" text-anchor="middle" class="svg-note">builds grammar</text>
+<line x1="540" y1="93.0" x2="582" y2="93.0" class="svg-arrow" marker-end="url(#ah4)"/>
+<text x="561.0" y="85.0" text-anchor="middle" class="svg-note">type comes first</text>
+</svg></div>
+<figcaption><b>Figure 13.</b> The mechanism. The app writes <code>type</code> before the numeric fields, Lemonade re-serialises the request with sorted keys, and llama.cpp's grammar <a href="#r5">[5]</a> forces a call's keys into the schema's property order. A model that writes <code>type</code> first, as ours always did, has nothing it is allowed to add after it.</figcaption></figure>
+<figure id="fig-empty"><div class="figwrap"><svg viewBox="0 0 760 202" role="img" aria-label="Of 123 goal cases, the final simulate_change call applied no change in 0 cases on the Transformers server and in 111 to 123 cases through Lemonade." class="fig-svg"><line x1="236.0" y1="12" x2="236.0" y2="168" class="svg-grid"/>
+<text x="236.0" y="184" text-anchor="middle" class="svg-note">0</text>
+<line x1="390.7" y1="12" x2="390.7" y2="168" class="svg-grid"/>
+<text x="390.7" y="184" text-anchor="middle" class="svg-note">41</text>
+<line x1="545.3" y1="12" x2="545.3" y2="168" class="svg-grid"/>
+<text x="545.3" y="184" text-anchor="middle" class="svg-note">82</text>
+<line x1="700.0" y1="12" x2="700.0" y2="168" class="svg-grid"/>
+<text x="700.0" y="184" text-anchor="middle" class="svg-note">123</text>
+<text x="226" y="33" text-anchor="end" class="svg-text">Round 4, Transformers</text>
+<line x1="236" y1="22" x2="236" y2="38" class="svg-whisker"/>
+<text x="242.0" y="34" class="svg-value">0</text>
+<text x="226" y="63" text-anchor="end" class="svg-text">Round 4, Lemonade, default sampling</text>
+<rect x="236" y="52" width="418.7" height="16" class="bar-b"/>
+<text x="660.7" y="64" class="svg-value">111</text>
+<text x="226" y="93" text-anchor="end" class="svg-text">Round 4, Lemonade, temperature 0</text>
+<rect x="236" y="82" width="448.9" height="16" class="bar-b"/>
+<text x="690.9" y="94" class="svg-value">119</text>
+<text x="226" y="123" text-anchor="end" class="svg-text">Round 6, Lemonade</text>
+<rect x="236" y="112" width="464.0" height="16" class="bar-b"/>
+<text x="706.0" y="124" class="svg-value">123</text>
+<text x="226" y="153" text-anchor="end" class="svg-text">Round 7, Lemonade</text>
+<rect x="236" y="142" width="464.0" height="16" class="bar-b"/>
+<text x="706.0" y="154" class="svg-value">123</text>
+<text x="236" y="200" class="svg-note" text-anchor="start">goal cases whose last simulate_change tested no change (of 123)</text></svg></div>
+<figcaption><b>Figure 14.</b> Goal cases whose final simulation tested no change, out of 123. The Transformers server applies no grammar, so the order constraint does not arise there.</figcaption></figure>
+<p>Two explanations were tested and ruled out, each costing a training run. First, the prompt text does differ: the same request is 3,009 tokens through Lemonade and 3,022 sent straight to the llama.cpp backend, and sorting the tool schemas by hand reproduces 3,009 exactly. Training rounds 6 and 7 used that sorted text (round 7's training prompt matched what llama.cpp renders, character for character) and did not fix the problem. Second, the weights and the conversion are not broken: given the rendered prompt, the fp16 merge in Transformers and the Q8_0 GGUF in llama.cpp's completion endpoint both produced the correct call, <code>{"type":"forehand","swing_percent":10}</code>, for both key orders. The grammar was shown directly by changing only the order of <code>properties</code> for <code>simulate_change</code> and sending the same request to the backend:</p>
+<div class="scroll"><table>
+<caption><b>Table 8.</b> Arguments the model produced under each schema property order (llama.cpp backend).</caption>
+<thead><tr><th>Property order</th><th>Arguments produced</th></tr></thead>
+<tbody>
+<tr><td>session, type, swing_percent, … (the app's order)</td><td><code>type</code>, <code>swing_percent</code> (correct)</td></tr>
+<tr><td>session, swing_percent, …, type (type last)</td><td><code>session</code>, <code>swing_percent</code> (type lost)</td></tr>
+<tr><td>alphabetical (what Lemonade delivers)</td><td><code>type</code> only (swing_percent lost)</td></tr>
+</tbody></table></div>
+<p>The recommendations are practical. Test a tuned model through the server it will be deployed on, because a no-grammar serving path can overstate quality. Make the model's argument order the order the grammar allows: <code>--sort-tool-keys</code> in the training script renders sorted <code>parameters</code> and writes every training call's arguments alphabetically, with <code>type</code> last. Round 8 is trained with it and is the next evaluation <span class="tag p">planned</span>. Training on shuffled orders is a natural way to make a small model independent of argument order. A one-command check, <code>tools/lemonade_schema_order_check.py</code>, shows whether a server normalises key order by comparing prompt-token counts for the two orders (204 and 204 through Lemonade, 205 and 204 straight to llama.cpp). A draft upstream compatibility report is prepared.</p>
+
+<h3><span class="n">10.5</span>AMD hardware evidence</h3>
+<p>The full evaluations ran on a Windows laptop with an NVIDIA RTX 4070 through Lemonade's llama.cpp CUDA backend. On AMD hardware, the official Lemonade container loaded Qwen3-1.7B (Q4_0) on a 4 GiB RX 580 under Vulkan, using about 1.59 GB of VRAM, and answered a bounded 16-token request in about 0.27 s end to end through an SSH tunnel. Tests on that machine run under a watchdog that stops the container at 75 °C or low memory. A full evaluation on AMD hardware, and a larger tuned model on a machine with more unified memory, are the next steps.</p>
+
+<h2 id="field"><span class="n">11</span>Field findings</h2>
+<p>These results come from the real racket and shaped the design more than any benchmark.</p>
+<ul>
+<li><b>On-court streaming drove impact mode.</b> Fifteen raw-stream exports from a club session (about 86 minutes) show about 17% of the 1 kHz stream delivered (13 to 30% per recording; median 214 samples/s), in runs of one or two packets about one connection interval apart. A 448-sample window then takes about 2.1 s to send. This evidence led to impact mode, on-board summaries and the backlog, which make delivery independent of link throughput.</li>
+<li><b>The gyro range is now set by readback.</b> Eight of twelve recordings flatten at 34.87 rad/s, the int16 limit at 16.4 LSB/dps. ST's driver changes full scale only with the gyro powered down; firmware 1.6 switches the range that way and checks the readback, and from 1.8 the racket is pinned to ±2000 dps.</li>
+<li><b>High-g range.</b> One sample reached 200.7 g, so the wire range was widened to ±400 g in firmware 1.6, at about 0.2 g per step against 0.35 g RMS sensor noise at rest.</li>
+<li><b>Stroke typing.</b> On a separate reviewed session of 29 forehands, the analyzer typed 28 correctly (interval 82.8 to 99.4%). Validation on backhands, serves and volleys over more sessions and players is the next step.</li>
+<li><b>Replay finds the hits.</b> On the club data the detector found 124 hits against 151 high-g events in the received samples, which shows the rule fires on court motion.</li>
+</ul>
+
+<h2 id="apps"><span class="n">12</span>Apps, emulator and privacy</h2>
+<p>One SwiftUI codebase serves iPhone and Mac, with a Watch companion for workouts and haptic feedback, and an optional glasses display. <code>RacketKit</code> is a Swift package holding decoding, the filter, the analyzer, calibration flows (hold still, tip up, flat, a drop grid with tap-to-label, a 3×3 sweet-spot check), recording and replay, tennis score keeping and a simulated racket, so the apps can be built and demonstrated with no hardware. Sessions live in SwiftData and sync through the player's private iCloud. A browser emulator replays labelled professional matches through the same data path, with racket tracks from SAM 3.1 and stroke types from the F3Tennis model, and always shows a provenance banner stating what is measured and what is illustrative; a local Node server routes its agent calls to Lemonade on loopback.</p>
+<p>Shot history stays on the player's devices until the player shares a session total with a friend. The agent sends the question and the tool inputs needed for an answer to the server the player configured, which may be the same device. The friend-sharing backend is a Supabase Postgres schema with row-level security enabled and all direct table access revoked; every operation is a security-definer function that checks the caller. It stores only profiles, friendships, shared matches and points, and per-match totals (shots, sweet-spot percentage, average and top ball speed). For phone-to-laptop use, the setup guide has the laptop's Lemonade server listen on a trusted private network.</p>
+<p>The repository holds roughly 144 Swift test functions and 175 Python test definitions by a simple count. The Python suites and the evaluator run on Windows, and the Swift package tests run with <code>swift test</code> on macOS.</p>
+
+<h2 id="robot"><span class="n">13</span>TennisRobot: a rig for repeatable ground truth</h2>
+<p>Ground truth for ball speed and spin is the main gap in the racket's validation, and a robot arm swinging the racket at a point on the strings would supply repeatable hits. The <code>TennisRobot</code> framework pairs a camera with an Epson C8 arm and an RC700-E controller. The Linux side detects the ball with an HSV colour threshold (not a learned detector), fits a six-state flight model with quadratic drag and optional Magnus lift by damped Gauss–Newton, finds where the path crosses a strike plane, and sends the controller three poses, a speed and a lead time. All real-time motion stays on the controller, and the Linux side never streams servo targets.</p>
+<figure id="fig-robot"><div class="figwrap"><svg viewBox="0 0 760 196" role="img" aria-label="TennisRobot pipeline from camera to arm: detect the ball, fit its flight, find where it crosses the strike plane, plan a sweep, check safety gates and send it to the Epson controller." class="fig-svg"><defs><marker id="ah28" viewBox="0 0 10 10" refX="9" refY="5" markerWidth="7" markerHeight="7" orient="auto-start-reverse"><path d="M0 0L10 5L0 10z" class="svg-head"/></marker></defs>
+<rect x="10" y="30" width="112" height="70" rx="4" class="svg-box"/>
+<text x="66.0" y="48" text-anchor="middle" class="svg-title">Camera</text>
+<text x="66.0" y="66" text-anchor="middle" class="svg-text">iPhone 16 at 240 fps</text>
+<text x="66.0" y="80" text-anchor="middle" class="svg-text">or UVC on UNO Q</text>
+<rect x="136" y="30" width="112" height="70" rx="4" class="svg-box"/>
+<text x="192.0" y="48" text-anchor="middle" class="svg-title">Detector</text>
+<text x="192.0" y="66" text-anchor="middle" class="svg-text">HSV colour blob:</text>
+<text x="192.0" y="80" text-anchor="middle" class="svg-text">u, v, radius</text>
+<line x1="122" y1="65" x2="136" y2="65" class="svg-arrow" marker-end="url(#ah28)"/>
+<rect x="262" y="30" width="112" height="70" rx="4" class="svg-box"/>
+<text x="318.0" y="48" text-anchor="middle" class="svg-title">Flight fit</text>
+<text x="318.0" y="66" text-anchor="middle" class="svg-text">drag and Magnus,</text>
+<text x="318.0" y="80" text-anchor="middle" class="svg-text">6-state fit</text>
+<line x1="248" y1="65" x2="262" y2="65" class="svg-arrow" marker-end="url(#ah28)"/>
+<rect x="388" y="30" width="112" height="70" rx="4" class="svg-box"/>
+<text x="444.0" y="48" text-anchor="middle" class="svg-title">Intercept</text>
+<text x="444.0" y="66" text-anchor="middle" class="svg-text">crossing of the</text>
+<text x="444.0" y="80" text-anchor="middle" class="svg-text">strike plane</text>
+<line x1="374" y1="65" x2="388" y2="65" class="svg-arrow" marker-end="url(#ah28)"/>
+<rect x="514" y="30" width="112" height="70" rx="4" class="svg-box"/>
+<text x="570.0" y="48" text-anchor="middle" class="svg-title">Plan and gates</text>
+<text x="570.0" y="66" text-anchor="middle" class="svg-text">3 poses, lead</text>
+<text x="570.0" y="80" text-anchor="middle" class="svg-text">280–400 ms</text>
+<line x1="500" y1="65" x2="514" y2="65" class="svg-arrow" marker-end="url(#ah28)"/>
+<rect x="640" y="30" width="112" height="70" rx="4" class="svg-box"/>
+<text x="696.0" y="48" text-anchor="middle" class="svg-title">Epson C8</text>
+<text x="696.0" y="66" text-anchor="middle" class="svg-text">RC700-E runs the</text>
+<text x="696.0" y="80" text-anchor="middle" class="svg-text">sweep; E-stop</text>
+<line x1="626" y1="65" x2="640" y2="65" class="svg-arrow" marker-end="url(#ah28)"/>
+<text x="10" y="140" text-anchor="start" class="svg-note">Simulation, 240 fps slow feed: 4 of 4 balls, median total error 6.0 cm</text>
+<text x="10" y="156" text-anchor="start" class="svg-note">(2.7 cm perception + 3.8 cm execution), simulated.</text>
+<text x="10" y="180" text-anchor="start" class="svg-note">A 48-observation flight fit takes about 12 ms on a laptop.</text>
+</svg></div>
+<figcaption><b>Figure 15.</b> TennisRobot pipeline. A strike is committed only if the plan's deadline lies within a 280 to 400 ms window, which forces the swing to use a fresh prediction.</figcaption></figure>
+<p>The pipeline and its 49 tests run in simulation: on a slow feed it hit 4 of 4 balls with a median total error of 6.0 cm, and across five seeds 18 of 19 strikes hit with no faults. Bring-up is staged, from camera only, to a read-only controller, to strike commands, and the Epson RC+ simulator project already holds the racket mounted on the arm with its payload set. Real-time motion and the emergency stop stay on the controller; the software checks are not safety-rated.</p>
+
+<h2 id="limits"><span class="n">14</span>Scope of the evidence</h2>
+<p>The results reflect what each experiment was designed to show.</p>
+<ul>
+<li><b>Synthetic evaluation.</b> The 243 cases use simulated players and a Python mirror of the tools, so they test tool choice, grounding and goal-reaching, not tennis improvement.</li>
+<li><b>Validation and test.</b> Rounds 2 to 4 were selected on the validation cases and the training data was filtered with the evaluator's goal rule; the test split is reserved for one final run. Each configuration was trained once.</li>
+<li><b>Serving path.</b> The 87.2% was measured on our Transformers server. The Lemonade results use the merged fp16 weights quantised to Q8_0, which are close to, not identical to, the NF4 model on the other path.</li>
+<li><b>Comparisons.</b> The hosted baseline is a single retained aggregate, and Qwen3-1.7B differs from the tuned model in base model, quantisation and runtime.</li>
+<li><b>Sensing.</b> The acoustic model is trained on two sessions, ball-speed constants await the wall drill, and stroke typing is validated on forehands from one reviewed session.</li>
+<li><b>Players.</b> A small player-trial protocol is prepared for usability feedback.</li>
+<li><b>Platforms.</b> Most development ran on Windows; the native apps and Swift tests run on a Mac.</li>
+</ul>
+
+<h2 id="future"><span class="n">15</span>Future work</h2>
+<ol class="list">
+<li>Score a model trained on alphabetical argument order through Lemonade, then try shuffled orders, and run the untouched test split once on the final model.</li>
+<li>Fit the ball-speed radius from the wall drill and the simulator's restitution from completed what-if trials, then regenerate the dataset.</li>
+<li>Record a third sweet-spot session on court with the microphone, audit label scales between sessions, and send distance or a "close" state on the wire.</li>
+<li>Fit the tap-zone model from taps at known positions.</li>
+<li>Run the native app against Lemonade on a device and move the browser's number renderer into Swift.</li>
+<li>Compare a tuned 7B-class model with the 1.5B model on a machine with more unified memory, using the same scorer.</li>
+<li>Send the schema-order compatibility report upstream after rerunning it on the latest Lemonade release.</li>
+</ol>
+
+<h2 id="repro"><span class="n">16</span>Reproduction</h2>
+<p>Commands are taken from the repository documentation. Model weights are not in the repository.</p>
+<pre><code># Evaluate against a local Lemonade server
+LEMONADE_BASE_URL=http://localhost:8000/api/v1 LEMONADE_MODEL=&lt;model-id&gt; \
+EVAL_TEMPERATURE=0 python tools/agent_eval.py --preset lemonade --sample 243 --seed 7
+
+# Generate the dataset and train
+python ml/whatif_synth.py generate
+python -m modal run tools/modal_train.py   # trains on a rented A100
+
+# Check whether a Lemonade server reorders schema keys
+python tools/lemonade_schema_order_check.py --base http://localhost:8000/api/v1
+
+# Firmware parity and Swift checks
+python ml/test_parity.py
+swift test --package-path apple/RacketKit</code></pre>
+<p>Per-case reports for every serving configuration are in <code>evaluation/</code>, and the adapter's training manifests record its hyperparameters and checksums.</p>
+
+<h2 id="refs"><span class="n"></span>References</h2>
+<ol class="refs">
+<li id="r1">R. Mahony, T. Hamel and J.-M. Pflimlin, "Nonlinear complementary filters on the special orthogonal group," <i>IEEE Transactions on Automatic Control</i> 53(5), 2008.</li>
+<li id="r2">T. Dettmers, A. Pagnoni, A. Holtzman and L. Zettlemoyer, "QLoRA: Efficient finetuning of quantized LLMs," <i>NeurIPS</i>, 2023.</li>
+<li id="r3">E. J. Hu et al., "LoRA: Low-rank adaptation of large language models," <i>ICLR</i>, 2022.</li>
+<li id="r4">Qwen Team, "Qwen2.5 technical report," arXiv:2412.15115, 2024.</li>
+<li id="r5">G. Gerganov and contributors, llama.cpp, <a href="https://github.com/ggml-org/llama.cpp">github.com/ggml-org/llama.cpp</a>.</li>
+<li id="r6">AMD, Lemonade Server documentation, <a href="https://lemonade-server.ai/docs/">lemonade-server.ai/docs</a>.</li>
+<li id="r7">E. B. Wilson, "Probable inference, the law of succession, and statistical inference," <i>Journal of the American Statistical Association</i> 22(158), 1927.</li>
+<li id="r8">Q. McNemar, "Note on the sampling error of the difference between correlated proportions or percentages," <i>Psychometrika</i> 12, 1947.</li>
+<li id="r9">H. Brody, "Physics of the tennis racket," <i>American Journal of Physics</i> 47(6), 1979.</li>
+<li id="r10">STMicroelectronics, LSM6DSV320X datasheet; Espressif Systems, ESP32-C3 datasheet; TDK InvenSense, INMP441 datasheet.</li>
+</ol>
+
+<p class="foot">Source: the Tennis Buddee repository at commit 15527c3 and its uncommitted working tree on 6 November 2026. Figures were drawn from the code and the evaluation reports in <code>evaluation/</code>; interval and paired statistics were computed from those reports. The challenge that motivated the Lemonade work is the AMD Lemonade Developer Challenge; entry requirements are on AMD's challenge page.</p>
+</article>
+</div>

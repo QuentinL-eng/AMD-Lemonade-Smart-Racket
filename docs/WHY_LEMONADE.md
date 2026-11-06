@@ -33,7 +33,7 @@ The hosted engine in this project is Muse Spark served by Baseten ([SWING_FILM.m
 | | Large hosted model | Local model through Lemonade |
 |---|---|---|
 | Accuracy on our 243 cases, untuned | **87.7%** (single retained aggregate) | 51.0% (`Qwen3-1.7B-GGUF`) |
-| Accuracy after our fine-tune | not tunable by us | 87.2% (round 4, 0 errors; Transformers/CUDA, not yet served by Lemonade) |
+| Accuracy after our fine-tune | not tunable by us | **81.1% on validation, 81.9% on the untouched test split, 0 errors, served by Lemonade** (87.2% on our own Transformers server, which has no tool grammar) |
 | Account or sign-in needed | yes, for the hosted path | no |
 | Where player data goes | the provider | the server the player chose |
 | Works with no internet | no | yes |
@@ -41,12 +41,13 @@ The hosted engine in this project is Muse Spark served by Baseten ([SWING_FILM.m
 | Can the failures be fixed by us | no | yes: the empty-turn bug and target-miss rate were traced to training data and removed |
 | Setup effort | an API key | install, pull a model, load it |
 
-The fair reading is **parity, not victory**: after fine-tuning, the 1.5B local model scores 0.5 points below the hosted baseline's retained aggregate. What the local route adds is the ability to find a failure, fix it in the data, retrain for a few dollars, and re-measure. A hosted model offers none of those steps.
+The fair reading is **close, not equal**: served by Lemonade, the tuned 1.5B model scores 6.6 points below the hosted baseline's retained aggregate (81.1% against 87.7%) and 30 points above the untuned Lemonade model (51.0%). The test-split result (81.9%) agrees with validation, so the number is not an artifact of repeated tuning. What the local route adds is the ability to find a failure, fix it in the data, retrain for a few dollars, and re-measure. A hosted model offers none of those steps. It also surfaced a Lemonade behaviour worth documenting for other fine-tuners: [LEMONADE_SCHEMA_ORDER.md](LEMONADE_SCHEMA_ORDER.md).
 
 ## Limits you should know before relying on this page
 
-- The fine-tuned adapter was **served with our own Transformers server** (`tools/serve_adapter.py`), not through Lemonade. Lemonade ran the untuned model. Converting the adapter to a GGUF that Lemonade can load is planned and not done, so no number here is "our tuned model on Lemonade".
-- 87.2% was chosen across rounds by looking at the same validation cases, so it is optimistic. The untouched test split has not been scored.
-- The hosted baseline has no per-kind breakdown, so we cannot compare it kind by kind.
-- Training data was filtered with the evaluator's own goal rule, which is disclosed in [ADAPTER_EVAL.md](ADAPTER_EVAL.md).
-- The RX 580 test was 45 seconds, one request, and is not a benchmark.
+- The Lemonade-served numbers use `temperature: 0` (greedy), set by `EVAL_TEMPERATURE=0` in the evaluator. Lemonade's own default sampling scored lower in an earlier run of an older adapter (47.3% against 48.6%, similar), so the choice is small here, but it is a choice.
+- Validation was reused across eight training rounds, so 81.1% is somewhat optimistic; the test split, run once on the final model, gave 81.9%, which does not suggest overfitting.
+- Training data was filtered with the evaluator's own goal rule, two kinds were repeated once, and tool-call arguments were written alphabetically. All of it is disclosed in [ADAPTER_EVAL.md](ADAPTER_EVAL.md).
+- The hosted baseline has no per-kind breakdown, so we cannot compare it kind by kind. It was also measured at a different time and by a different route.
+- The RX 580 test was 45 seconds, one request, and is not a benchmark. The Lemonade-served numbers were measured on an RTX 4070 laptop GPU through Lemonade's CUDA llama.cpp backend, not on AMD hardware.
+- Remaining failures on the validation split: 40 of 127 `objective` cases and 5 of 18 `player_whatif_extreme` cases.
