@@ -15,7 +15,7 @@ The evaluator writes the per-case JSON report to the ignored `data/whatif/eval_l
 |---|---:|---:|---:|---:|---:|---:|---:|
 | Historical hosted baseline | 243 | 87.7% | Not available | Not available | Not available | Not available | Not available |
 | Lemonade · Qwen3-1.7B-GGUF | 243 | 124 (51.0%) | 239 (98.4%) | 229 (94.2%) | 152/200 (76.0%) | 41/123 (33.3%) | 0 |
-| Fine-tuned on-device model | — | Not trained | — | — | — | — | — |
+| Trained Qwen2.5-1.5B · desktop CUDA | 243 | 169 (69.5%) | 181/243 | 181/243 | 179/179 | 63/75 | 62 |
 
 The historical baseline’s only retained aggregate is 87.7%; its per-kind report was not available during this run. The Lemonade result is 36.7 percentage points below that baseline. Tool calls and grounded numbers are generally strong; the dominant failure is whether an objective is actually reached, plus a smaller set of ungrounded-number and estimate-label failures. Do not present this result as an improvement over the hosted baseline.
 
@@ -30,3 +30,5 @@ The historical baseline’s only retained aggregate is 87.7%; its per-kind repor
 | player_whatif_error | 1/1 | 1/1 | 1/1 | n/a |
 
 Target reached was 41/123 for cases with a defined target. Overall strict all-pass requires digest-first behavior, grounded numbers, estimate labels for simulations, known tools, and any applicable target to pass. See [`tools/agent_eval.py`](../tools/agent_eval.py) for the exact scorer. No validation or test data was modified.
+
+The trained checkpoint comparison is documented in [ADAPTER_EVAL.md](ADAPTER_EVAL.md); it used a different base model and Transformers/CUDA runtime. Conditional metric denominators exclude failed requests; strict all-pass includes all attempts.

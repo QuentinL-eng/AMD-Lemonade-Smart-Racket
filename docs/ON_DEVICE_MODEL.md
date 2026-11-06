@@ -14,9 +14,9 @@ The candidate's license and documented tool-call template are described by [Qwen
 
 ## Current status
 
-No weights are checked into this repository. A one-step QLoRA diagnostic completed and saved an adapter and manifest under the user's cache; it proves training execution only. The full 300-step run is in progress and has no evaluation yet. No weights have been converted or run on an iPhone. The app does not yet download, checksum, report progress for, or delete model weights, and has no on-device model transport or constrained decoder.
+No weights are checked into this repository. A one-step QLoRA diagnostic completed and saved an adapter and manifest under the user's cache; it proves training execution only. The full 300-step run completed in 7,885 seconds and saved its adapter and manifest. Full validation completed on the laptop with Transformers/CUDA: 169/243 strict passes (69.5%), 62 response errors, and 12 target failures. This is not an iPhone runtime run. No weights have been converted or run on an iPhone. The app does not yet download, checksum, report progress for, or delete model weights, and has no on-device model transport or constrained decoder.
 
-The Windows training environment now has CUDA PyTorch 2.11.0+cu128, Transformers 5.22.1, PEFT 0.21.2, and bitsandbytes 0.50.2 installed. CUDA recognizes the NVIDIA RTX 4070 Laptop GPU. The first install attempt failed its hash check; the pinned official CUDA wheel subsequently installed successfully with integrity checks enabled. The current 300-step, rank-16, seed-7 attempt has not yet produced a completed checkpoint. Swift, Xcode, Core ML, and MLX are unavailable on this host.
+The Windows training environment now has CUDA PyTorch 2.11.0+cu128, Transformers 5.22.1, PEFT 0.21.2, and bitsandbytes 0.50.2 installed. CUDA recognizes the NVIDIA RTX 4070 Laptop GPU. The first install attempt failed its hash check; the pinned official CUDA wheel subsequently installed successfully with integrity checks enabled. The 300-step, rank-16, seed-7 run produced a completed checkpoint. Its adapter SHA-256 is `6a136595521b188b7c70a918155750ff183366a6e22456d50b7b83fc37966c82`. Swift, Xcode, Core ML, and MLX are unavailable on this host.
 
 The diagnostic completed one optimizer update in 5.26 seconds with gradient accumulation one; its training loss was 1.496. This is not a validation result. The full run uses gradient accumulation eight and checkpoints every 25 steps, retaining two checkpoints. Its output is `C:\Users\qslma\.cache\tennis-buddee-qlora\output\qwen2.5-1.5b`; stdout and stderr logs are in that cache directory as `full-training.log` and `full-training.err`. Reproduce the diagnostic with `python tools/train_ondevice.py --steps 1 --gradient-accumulation 1 --output <diagnostic-directory>`. Resume a saved full-run checkpoint with `--resume <checkpoint-directory>`.
 
@@ -42,3 +42,8 @@ Before describing this model as part of the working product, run the recipe, eva
 | contact_spread | 12/14 | 14/14 | 13/14 | 7/8 |
 | no_motion | 1/1 | 1/1 | 1/1 | n/a |
 | player_whatif_error | 1/1 | 1/1 | 1/1 | n/a |
+
+
+## Completed trained-checkpoint validation
+
+See [ADAPTER_EVAL.md](ADAPTER_EVAL.md) for the full comparison, per-kind breakdown, runtime, checksums, reproduction commands, and empty-turn training-data finding. All 181 usable answers passed number grounding, but 62 attempts failed to produce a usable answer. The checkpoint is not ready as a general default agent.

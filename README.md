@@ -46,6 +46,10 @@ LEMONADE_BASE_URL=http://localhost:8000/api/v1 LEMONADE_MODEL=<model-id> python3
 
 The evaluator writes a JSON report in `data/whatif/`. It reports strict all-pass, digest-first behavior, number grounding, estimate labels, errors, and per-kind scores. The first full local run is recorded in [docs/LEMONADE_EVAL.md](docs/LEMONADE_EVAL.md); it used Qwen3-1.7B-GGUF on an NVIDIA RTX 4070 Laptop GPU. It scored 51.0% strict all-pass against the historical hosted baseline of 87.7%, so the current local model is not an improvement yet. The principal gap was meeting objective targets (41/123 target cases passed).
 
+## Trained checkpoint validation
+
+The completed Qwen2.5-1.5B adapter scored **169/243 (69.5%) strict all-pass** on the same validation sample using desktop Transformers/CUDA. It returned 181 usable answers, all of which passed number grounding; 62 cases returned no usable answer, and 12 completed answers missed their objective target. It remains below the historical 87.7% baseline. This is not an iPhone runtime test. See the [full report and per-kind table](docs/ADAPTER_EVAL.md).
+
 ## Firmware evidence
 
 Raw streaming failed on court: only about 17% of the 1 kHz stream arrived. Firmware 1.6 computes each shot on the racket. The racket sends an 80-byte summary first, then the raw 448-sample window with acks and resends. With no phone nearby, windows go to flash (up to 117) and are sent later, even after a reboot.
