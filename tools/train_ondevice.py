@@ -43,6 +43,20 @@ def template_messages(messages):
     return result
 
 
+def drop_empty_assistant_turns(messages):
+    """Remove assistant turns with no content and no tool calls.
+
+    377 training conversations contain such a turn between a tool result and the
+    next tool call. Supervising it teaches the model to emit end-of-turn with
+    nothing, which the serving layer rejects as an empty response. The source
+    data file is never modified; this only filters what is rendered for training.
+    """
+    return [m for m in messages
+            if not (m.get("role") == "assistant"
+                    and not (m.get("content") or "").strip()
+                    and not m.get("tool_calls"))]
+
+
 def main() -> None:
     ap = argparse.ArgumentParser()
     ap.add_argument("--model", default=DEFAULT_MODEL)
@@ -76,7 +90,7 @@ def main() -> None:
         tokenizer.pad_token = tokenizer.eos_token
 
     def render(item):
-        messages = template_messages(item["messages"])
+        messages = template_messages(drop_empty_assistant_turns(item["messages"]))
         tools = item.get("tools") or []
         text = tokenizer.apply_chat_template(messages, tools=tools, tokenize=False,
                                              add_generation_prompt=False)
@@ -158,6 +172,7 @@ def main() -> None:
         "gradient_accumulation": args.gradient_accumulation,
         "supervision": "assistant messages only; selective vocabulary logits",
         "training_examples": len(raw),
+        "empty_assistant_turns_dropped": sum(len(i["messages"]) - len(drop_empty_assistant_turns(i["messages"])) for i in raw),
         "training_data": "data/whatif/conversations_train.jsonl",
         "training_data_sha256": digest(TRAIN),
         "hardware": torch.cuda.get_device_name(0),
