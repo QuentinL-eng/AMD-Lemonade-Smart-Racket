@@ -23,6 +23,10 @@ from whatif_synth import reaches_target  # noqa: E402
 
 SRC = ROOT / "data" / "whatif" / "conversations_train.jsonl"
 DST = ROOT / "data" / "whatif" / "conversations_train_target.jsonl"
+DST_HARD = ROOT / "data" / "whatif" / "conversations_train_target_hard.jsonl"
+# Kinds that still fail most often in validation. Round 5 repeats their (already filtered,
+# fully grounded) training conversations once more. Duplicates are disclosed in the docs.
+HARD = {"cleaner_contact", "more_spin"}
 FILTERED = {"cleaner_contact", "more_spin", "more_pace"}
 
 
@@ -51,11 +55,16 @@ def main():
     rows = [json.loads(line) for line in SRC.read_text(encoding="utf-8").splitlines() if line.strip()]
     kept = [r for r in rows if keep(r)]
     DST.write_text("".join(json.dumps(r, ensure_ascii=False) + "\n" for r in kept), encoding="utf-8")
+    extra = [r for r in kept if r["metadata"].get("objective") in HARD]
+    DST_HARD.write_text("".join(json.dumps(r, ensure_ascii=False) + "\n" for r in kept + extra), encoding="utf-8")
     dropped = collections.Counter(r["metadata"].get("objective") for r in rows if not keep(r))
     report = {"source": str(SRC.relative_to(ROOT)), "source_conversations": len(rows),
               "kept": len(kept), "dropped_by_objective": dict(dropped),
               "output": str(DST.relative_to(ROOT)),
-              "output_sha256": hashlib.sha256(DST.read_bytes()).hexdigest()}
+              "output_sha256": hashlib.sha256(DST.read_bytes()).hexdigest(),
+              "hard_output": str(DST_HARD.relative_to(ROOT)), "hard_conversations": len(kept) + len(extra),
+              "hard_repeated_kinds": sorted(HARD),
+              "hard_output_sha256": hashlib.sha256(DST_HARD.read_bytes()).hexdigest()}
     print(json.dumps(report, indent=2))
 
 

@@ -26,22 +26,25 @@ image = (
                     f"{REMOTE}/data/whatif/conversations_train.jsonl")
     .add_local_file(ROOT / "data" / "whatif" / "conversations_train_target.jsonl",
                     f"{REMOTE}/data/whatif/conversations_train_target.jsonl")
+    .add_local_file(ROOT / "data" / "whatif" / "conversations_train_target_hard.jsonl",
+                    f"{REMOTE}/data/whatif/conversations_train_target_hard.jsonl")
 )
 volume = modal.Volume.from_name("tennis-buddee-adapters", create_if_missing=True)
 app = modal.App("tennis-buddee-train", image=image)
 
 
 @app.function(gpu=GPU, timeout=3 * 3600, volumes={"/out": volume})
-def train(steps: int = 300, seed: int = 7, name: str = "qwen2.5-1.5b-noempty", target_filtered: bool = False):
+def train(steps: int = 300, seed: int = 7, name: str = "qwen2.5-1.5b-noempty", target_filtered: bool = False, hard: bool = False):
     import subprocess
     subprocess.run(
         ["python", f"{REMOTE}/tools/train_ondevice.py", "--steps", str(steps), "--seed", str(seed),
          "--output", f"/out/{name}"]
-        + (["--train-file", f"{REMOTE}/data/whatif/conversations_train_target.jsonl"] if target_filtered else []),
+        + (["--train-file", f"{REMOTE}/data/whatif/conversations_train_target_hard.jsonl"] if hard else
+           ["--train-file", f"{REMOTE}/data/whatif/conversations_train_target.jsonl"] if target_filtered else []),
         check=True)
     volume.commit()
 
 
 @app.local_entrypoint()
-def main(steps: int = 300, seed: int = 7, name: str = "qwen2.5-1.5b-noempty", target_filtered: bool = False):
-    train.remote(steps, seed, name, target_filtered)
+def main(steps: int = 300, seed: int = 7, name: str = "qwen2.5-1.5b-noempty", target_filtered: bool = False, hard: bool = False):
+    train.remote(steps, seed, name, target_filtered, hard)
