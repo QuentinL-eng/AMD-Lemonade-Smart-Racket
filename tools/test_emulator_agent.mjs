@@ -16,7 +16,7 @@ const mock=http.createServer(async(req,res)=>{
   }else{
     const result=JSON.parse(body.messages.find(m=>m.tool_call_id==='test-call').content);
     assert.equal(result.count,1);
-    res.end(JSON.stringify({choices:[{message:{role:'assistant',content:'Your replay has 1 forehand.'}}]}));
+    res.end(JSON.stringify({choices:[{message:{role:'assistant',content:null,tool_calls:[{id:'answer',type:'function',function:{name:'present_answer',arguments:JSON.stringify({parts:[{text:'Your replay has '},{tool_call_id:'test-call',path:'/count'},{text:' forehand.'}]})}}]}}]}));
   }
 });
 await new Promise(resolve=>mock.listen(0,'127.0.0.1',resolve));
