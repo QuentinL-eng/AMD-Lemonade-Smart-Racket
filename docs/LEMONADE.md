@@ -54,6 +54,10 @@ Open `http://localhost:8765/emulator`, press **Start Session**, then **Skip to e
 
 The local proxy uses the browser's own origin, so its agent requests avoid cross-origin configuration. A direct-browser connection to Lemonade would need the proper origin headers. A loopback preflight from `http://localhost:8765` was verified to return HTTP 204 and the matching `Access-Control-Allow-Origin` header. See [Lemonade CORS configuration](https://lemonade-server.ai/docs/guide/configuration/#allowed-origins).
 
+Browser chat now uses the `present_answer` tool and a tested numeric reference renderer; references are resolved from actual tool results in application code. Free-form numeric literals and common English number words in prose are rejected. Live accuracy and refusal rates for this new path have not yet been measured; the native app and other browser features have not adopted it. See [scope and limitations](COMMUNITY_CONTRIBUTION.md). The existing 51.0% model evaluation remains unchanged.
+
+The separate Ubuntu RX 580 installation successfully loaded a Vulkan model and answered a short prompt, then was stopped after the user reported historical shutdowns. It remains stopped with tighter resource limits. See [the observed hardware state and bounded test policy](HOMELAB_RX580.md).
+
 Before implementing or testing a direct-browser chat request, check that the browser preflight succeeds. Replace the example origin and address with the actual page and server values:
 
 ```bash

@@ -9,6 +9,10 @@ Tennis Buddee is being prepared as an entry for the AMD Lemonade Developer Chall
 - **Emulator:** [Tennis Buddee in the browser](https://tennisbuddy.net/emulator)
 - **Lemonade setup:** [Install, connect, and troubleshoot](docs/LEMONADE.md)
 - **Submission summary:** [SUBMISSION.md](SUBMISSION.md)
+- **Judge quick start:** [fresh-checkout commands](docs/JUDGE_QUICKSTART.md)
+- **Player feedback:** [trial protocol and blank results sheet](docs/PLAYER_TRIAL.md)
+- **Reusable developer example:** [numeric tool references](docs/COMMUNITY_CONTRIBUTION.md)
+- **AMD hardware evidence:** [RX 580 observations and stopped state](docs/HOMELAB_RX580.md)
 
 ## What the smart racket does
 
