@@ -66,12 +66,16 @@ def main() -> None:
     ap.add_argument("--max-length", type=int, default=4608)
     ap.add_argument("--gradient-accumulation", type=int, default=8)
     ap.add_argument("--resume", type=Path)
+    ap.add_argument("--train-file", type=Path, default=TRAIN,
+                    help="Training conversations; defaults to the full train split. Never a validation or test file.")
     ap.add_argument("--output", type=Path, default=ROOT / "models" / "ondevice" / "qwen2.5-1.5b")
     args = ap.parse_args()
     if args.steps <= 0 or args.rank <= 0 or args.gradient_accumulation <= 0:
         ap.error("--steps and --rank must be positive")
-    if not TRAIN.is_file():
-        ap.error(f"Training data not found: {TRAIN}")
+    if not args.train_file.is_file():
+        ap.error(f"Training data not found: {args.train_file}")
+    if any(x in args.train_file.name for x in ("val", "test")):
+        ap.error("Refusing a validation or test file as training data")
 
     import torch
     from datasets import Dataset
@@ -84,7 +88,7 @@ def main() -> None:
         ap.error("CUDA is required for this QLoRA recipe")
     set_seed(args.seed)
     torch.backends.cuda.enable_math_sdp(False)
-    raw = [json.loads(line) for line in TRAIN.read_text(encoding="utf-8").splitlines() if line.strip()]
+    raw = [json.loads(line) for line in args.train_file.read_text(encoding="utf-8").splitlines() if line.strip()]
     tokenizer = AutoTokenizer.from_pretrained(args.model, trust_remote_code=False)
     if tokenizer.pad_token is None:
         tokenizer.pad_token = tokenizer.eos_token
@@ -173,8 +177,8 @@ def main() -> None:
         "supervision": "assistant messages only; selective vocabulary logits",
         "training_examples": len(raw),
         "empty_assistant_turns_dropped": sum(len(i["messages"]) - len(drop_empty_assistant_turns(i["messages"])) for i in raw),
-        "training_data": "data/whatif/conversations_train.jsonl",
-        "training_data_sha256": digest(TRAIN),
+        "training_data": str(args.train_file.name),
+        "training_data_sha256": digest(args.train_file),
         "hardware": torch.cuda.get_device_name(0),
         "cuda": torch.version.cuda,
         "adapter_path": str((args.output / "adapter").resolve()),

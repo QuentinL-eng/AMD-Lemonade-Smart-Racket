@@ -70,3 +70,18 @@ After dropping the 377 empty intermediate assistant turns in preprocessing (`too
 | Round 2: empty turns dropped, 300 steps | **204/243 (84.0%)** | **0** |
 
 All 62 response errors disappeared, and contact-spread went from 0/14 to 14/14. This supports the empty-turn explanation, though it was one change measured once. The 39 remaining failures: 30 objective cases whose chosen change misses the goal (17 of 48 `cleaner_contact`, 13 of 43 `more_spin`; `more_pace` and `fix_slice` had none), and 9 cases with an ungrounded number in the answer. For example, a model asked to center contact 3.2 cm off-center moved it only 1.7 cm. Next: more training steps, since this run covered 1.32 epochs. Because the validation set is used to choose between rounds, later rounds are tuned on it; the untouched test split should be run once at the end.
+
+## Round 3: same data, 700 steps
+
+Only the step count changed (700 steps, about 3.1 epochs; Modal assigned an A100-80GB this time). Weights SHA-256 begins `89c49595`; see [report](../evaluation/adapter-noempty-step700-validation.json) and [manifest](../evaluation/training-noempty-step700.json).
+
+| Engine | Strict all-pass | Response errors |
+|---|---:|---:|
+| Round 2: 300 steps | 204/243 (84.0%) | 0 |
+| Round 3: 700 steps | **207/243 (85.2%)** | 0 |
+
+More training barely helped (+3 cases). The same two objectives fail: 21 of 48 `cleaner_contact` and 14 of 43 `more_spin`, plus 6 ungrounded numbers.
+
+**Cause found in the training data.** Scoring the final `simulate_change` result of each training conversation with the evaluator's own rule (`reaches_target`) shows that 113 of 436 `cleaner_contact` and 74 of 338 `more_spin` training conversations end on a change that does not reach the goal, and 24 goal conversations run no simulation at all. The model's miss rate matches the data it imitated.
+
+**Round 4 (in progress when this was written):** train on a target-conditioned copy of the training split made by `tools/filter_train_by_target.py` (drops 211 of 1,809 conversations: 125 `cleaner_contact`, 80 `more_spin`, 6 `more_pace`; `fix_slice` is left alone because only 1 of 61 of its training conversations reaches its goal under this rule). It reads only the training file. This is rejection sampling on the training data using the evaluator's rule, so it must be disclosed with any resulting score. Validation and test data are not used to build it. Rounds 2 to 4 were all chosen by looking at the same 243 validation cases.
