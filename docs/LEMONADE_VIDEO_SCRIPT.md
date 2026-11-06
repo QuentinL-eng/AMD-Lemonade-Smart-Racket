@@ -2,8 +2,7 @@
 
 The existing `video/DEMO_SCRIPT.md` is for a different contest (Meta rubric). This one is written for the Lemonade
 challenge, which scores **community impact, technical depth and creativity**, and gives bonus points for recorded demos.
-Spoken lines are in quotes. Brackets are what is on screen. Anything marked **[FILL]** depends on a result that does not
-exist yet; read it off the final evaluation file and do not say it until it is true.
+Spoken lines are in quotes. Brackets are what is on screen. All numbers in the script are measured and recorded in `docs/ADAPTER_EVAL.md`; re-read it before recording.
 
 Say "smart racket". Say "estimate", not "prediction", for simulator output. Every number on screen comes from a file in
 the repo.
@@ -34,16 +33,19 @@ account."
 "I scored every engine on the same 243 validation cases with the same strict scorer. Untuned Qwen3 1.7B on Lemonade got
 51.0%. The hosted baseline got 87.7%. I didn't hide that. I fine-tuned a 1.5-billion-parameter model with QLoRA on a rented
 GPU, and my first result had 62 response errors. I traced them to 377 training conversations with an empty assistant turn,
-removed them, and errors went to zero. Then I removed training examples that ended on a change that didn't hit the goal.
-Best result: 212 of 243, 87.2%, zero errors, validation set."
-[On screen, small print: "Rounds were chosen on the same validation cases. Test split: **[FILL]**."]
+removed them, and errors went to zero. Then I removed training examples that ended on a change that didn't hit the goal,
+and that took my own server to 87.2%."
 
 **1:50 to 2:25, closing the loop on Lemonade (community impact)**
-[Terminal: `lemonade pull` of the custom model, `lemonade load`, then the evaluation running against it.]
-"**[FILL, only if the converted model runs through Lemonade]** Then I converted the tuned model to GGUF and loaded it into
-Lemonade as a custom model. Same scorer, served by Lemonade: **[FILL: x of 243, errors]**."
-(If conversion does not work in time, say instead: "The tuned model currently runs on my own Transformers server.
-Moving it into Lemonade as a GGUF is the next step, and I've documented the exact commands.")
+[Terminal: the model loaded with `lemonade load`, then the evaluation summary from `python tools/summarize_eval.py`.]
+"Then I converted the tuned model to GGUF and loaded it into Lemonade as a custom model. The first score through Lemonade
+was 48 percent, and I found out why. Lemonade sorts the tool schema, and llama.cpp forces the model's call arguments into
+that order, so my model, which writes the stroke type first, lost every change after it. I trained it to write arguments
+in that order. Through Lemonade, 197 of 243 on validation, 81.1 percent, and 136 of 166 on a test set I touched exactly
+once, 81.9 percent. Zero response errors."
+[On screen, small print: "6.6 points below the hosted baseline's 87.7%. Greedy decoding. Validation reused across rounds; test run once."]
+[Show `tools/lemonade_schema_order_check.py` printing 204 and 204.]
+"I wrote a one-second check so any Lemonade developer can see whether their server does this."
 
 **2:25 to 2:50, why local (community impact)**
 [Slide with four lines from `docs/WHY_LEMONADE.md`.]
@@ -62,12 +64,12 @@ parameter model against this one on the same scorer, and publish the recipe for 
 2. Terminal capture: `lemonade --version`, `lemonade status`, `node tools/judge-demo.mjs --check`.
 3. Browser capture: emulator, Start Session, skip to end, Racket agent, one question.
 4. Screen capture of `docs/ADAPTER_EVAL.md` results table.
-5. **[FILL]** Lemonade custom-model load and the evaluation summary from `python tools/summarize_eval.py`.
+5. Lemonade custom-model load and the evaluation summary from `python tools/summarize_eval.py`.
 
 ## Claims to keep true
 
-- Never call 87.2% "better than the hosted model". It is 0.5 points below the hosted baseline's single retained number.
-- Say the tuned model was scored on a Transformers/CUDA server, unless the Lemonade run in the 1:50 slot exists.
+- Never call any of these numbers "better than the hosted model". Served by Lemonade it is 81.1% (validation) and 81.9% (test) against the hosted 87.7%. The 87.2% was on my own server.
+- The Lemonade-served numbers ran on an RTX 4070 laptop GPU with Lemonade's CUDA backend, not AMD hardware. Don't imply otherwise.
 - The RX 580 test was one short smoke test, not a benchmark. Don't call it a performance result.
 - Don't show or read out the form data (address, phone) anywhere.
-- Round 5 and the test split: say the numbers only after they are recorded in `docs/ADAPTER_EVAL.md`.
+- Every number in the script is recorded in `docs/ADAPTER_EVAL.md`; re-read it before recording.
