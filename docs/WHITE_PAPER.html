@@ -156,16 +156,11 @@ tr.bad td { background: var(--b-soft); }
 <p class="kicker">Technical white paper</p>
 <h1>Tennis Buddee: a smart racket with a local, tool-calling coach</h1>
 <p class="sub">Sensing, on-racket computation, physics-based what-if analysis and a small language model served by AMD Lemonade</p>
-<div class="byline">
-<span><b>Project</b> Tennis Buddee</span>
-<span><b>Draft</b> 1.0, 6 November 2026</span>
-<span><b>Source state</b> repository at commit 15527c3 plus uncommitted work</span>
-</div>
 
 <section class="abstract" id="abstract">
 <h2>Abstract</h2>
 <p>Recreational tennis players receive no usable feedback about their own strokes. Tennis Buddee puts a sensor insert in the handle of an ordinary racket: a six-axis inertial unit with two accelerometer ranges, a microphone, and a Bluetooth LE microcontroller. The racket detects each hit, computes an 80-byte shot summary on board, and sends it to an iPhone, Mac or Apple Watch. The apps turn the summary into swing speed, face and path angles, stroke type, contact point, ball speed and spin, and run a bounded physics sensitivity model to estimate what a swing change would do. A tool-calling language model chooses which tools to call and explains the result, while application code supplies every number.</p>
-<p>This paper documents the hardware, firmware, signal processing, models and evaluation. On a 243-case validation sample, a QLoRA-tuned Qwen2.5-1.5B reached 212 strict passes (87.2%, 95% interval 82.5 to 90.9), within 0.5 points of a historical hosted baseline of 87.7% and 88 passes above the untuned Qwen3-1.7B served by Lemonade (124, 51.0%). Serving the tuned weights through Lemonade as GGUF led to a useful finding about grammar-constrained tool calling: Lemonade delivers tool schemas with sorted keys, and llama.cpp then forces call arguments into that order, so a model should be trained on the argument order the server allows. Field recordings on court drove the architecture: impact detection on the racket, 80-byte summaries computed on board, and an acknowledged window path with a flash backlog.</p>
+<p>This paper documents the hardware, firmware, signal processing, models and evaluation. On a 243-case validation sample, a QLoRA-tuned Qwen2.5-1.5B reached 212 strict passes (87.2%) on our own Transformers server, within 0.5 points of a historical hosted baseline of 87.7%. The final round, merged to GGUF and served by Lemonade itself, passed 197 of 243 validation cases (81.1%, 95% interval 75.7 to 85.5) and 136 of 166 on a test split run once (81.9%, 75.4 to 87.0), with no response errors and 73 more validation passes than the untuned Qwen3-1.7B on Lemonade (124, 51.0%). Getting there depended on a finding about grammar-constrained tool calling: Lemonade delivers tool schemas with sorted keys, and llama.cpp forces call arguments into that order, so earlier Lemonade rounds scored 46 to 49% until training wrote arguments in the allowed order. Field recordings on court drove the racket architecture: impact detection on the racket, 80-byte summaries computed on board, and an acknowledged window path with a flash backlog.</p>
 <p class="keywords"><b>Keywords</b> wearable sensing, impact detection, edge inference, tool-calling LLM, QLoRA, llama.cpp grammar, grounded generation, Lemonade</p>
 </section>
 
@@ -177,8 +172,8 @@ tr.bad td { background: var(--b-soft); }
 <li>A complete description of the sensing hardware and firmware: wiring, sensor ranges, impact detection, on-racket shot analysis, a Bluetooth protocol with acknowledgements and a flash backlog, and the on-racket acoustic model (sections 3 to 6).</li>
 <li>The physics and rules that convert a hit window into shot metrics, and the sensitivity model used for what-if questions (sections 5 and 7).</li>
 <li>The agent: ten tools, a bounded loop, and code-level number grounding (section 8).</li>
-<li>A reproducible tuning and evaluation record across six scored rounds and two serving paths (sections 9 and 10).</li>
-<li>A finding for anyone fine-tuning a tool-calling model for Lemonade: the property order of a tool schema is part of the model's output contract (section 10.4).</li>
+<li>A reproducible tuning and evaluation record across seven scored rounds and two serving paths (sections 9 and 10).</li>
+<li>A finding for anyone fine-tuning a tool-calling model for Lemonade: the property order of a tool schema is part of the model's output contract, and training on the order the server allows recovers the score (sections 10.4 and 10.5).</li>
 </ol>
 <div class="callout"><b class="t">How to read the evidence</b>
 <p>Statements are tagged where it matters. <span class="tag m">measured</span> means a file in the repository holds the result. <span class="tag d">design</span> means the code does this but no outcome was measured. <span class="tag p">planned</span> means it has not been done. Section 14 states the scope of the evidence.</p></div>
@@ -300,7 +295,7 @@ tr.bad td { background: var(--b-soft); }
 <tr><td>Sweet-spot distance</td><td>Racket (C++)</td><td>Ridge regression, 156 features</td><td>67.2% accuracy, 1.83 cm error, 274 clips <span class="tag m">measured</span></td></tr>
 <tr><td>Tap zone</td><td>Racket (C++)</td><td>Nearest centroid, 10 features</td><td>Fitted from taps at known positions with the provided tools <span class="tag p">planned</span></td></tr>
 <tr><td>Forehand side</td><td>App</td><td>Consistent sign over 5 swings</td><td>Unit-tested <span class="tag d">design</span></td></tr>
-<tr><td>Racket agent</td><td>Lemonade server</td><td>Qwen2.5-1.5B, QLoRA; or Qwen3-1.7B</td><td>212/243 and 118/243, by serving path <span class="tag m">measured</span></td></tr>
+<tr><td>Racket agent</td><td>Lemonade server</td><td>Qwen2.5-1.5B, QLoRA; or Qwen3-1.7B</td><td>212/243 on our server; 197/243 on Lemonade <span class="tag m">measured</span></td></tr>
 <tr><td>Swing film director</td><td>Server, then validator</td><td>LLM script, fixed renderer</td><td>Built with an earlier hosted engine <span class="tag d">design</span></td></tr>
 <tr><td>Stroke labels for the emulator</td><td>Offline</td><td>F3Tennis <code>tsm_e2espot</code></td><td>58/60 stroke types on the model's own match <span class="tag m">measured</span></td></tr>
 <tr><td>Racket tracks for review</td><td>Hosted API</td><td>SAM 3.1</td><td>Proposals, not labels <span class="tag d">design</span></td></tr>
@@ -375,7 +370,7 @@ tr.bad td { background: var(--b-soft); }
 
 <h3><span class="n">3.2</span>Mechanical placement</h3>
 <p>The insert sits in the butt end of the handle. The CAD plan from the first build put the board at 0 to 30 mm from the butt flange, the inertial sensors at 18 to 39 mm and the microphone near 55 mm, facing into the handle, with the battery beyond the insert wrapped in foam so it cannot rattle. The racket profile defaults are 325 g, 686 mm long, balance near 320 mm and a string-bed centre 520 mm from the butt. The motion analysis uses an effective radius of 1.15 m, a single calibration scalar that folds the arm into the lever, not a physical length. Figure 4 shows these positions and the contact-point axes the software reports.</p>
-<figure id="fig-frame"><div class="figwrap"><svg viewBox="0 0 760 332" role="img" aria-label="Racket schematic: 686 mm long, sensor insert in the butt end, tap zones along the handle, and the contact-point axes on the string bed." class="fig-svg"><defs><marker id="ah22" viewBox="0 0 10 10" refX="9" refY="5" markerWidth="7" markerHeight="7" orient="auto-start-reverse"><path d="M0 0L10 5L0 10z" class="svg-head"/></marker></defs>
+<figure id="fig-frame"><div class="figwrap"><svg viewBox="0 0 760 344" role="img" aria-label="Racket schematic: 686 mm long, sensor insert in the butt end, tap zones along the handle, and the contact-point axes on the string bed." class="fig-svg"><defs><marker id="ah22" viewBox="0 0 10 10" refX="9" refY="5" markerWidth="7" markerHeight="7" orient="auto-start-reverse"><path d="M0 0L10 5L0 10z" class="svg-head"/></marker></defs>
 <line x1="36.0" y1="26" x2="708.28" y2="26" class="svg-dim"/>
 <line x1="36.0" y1="20" x2="36.0" y2="32" class="svg-dim"/>
 <text x="36.0" y="14" text-anchor="start" class="svg-note">butt</text>
@@ -414,7 +409,8 @@ tr.bad td { background: var(--b-soft); }
 <text x="169.0" y="264" text-anchor="middle" class="svg-text">IMU 18–39 mm, microphone near 55 mm</text>
 <text x="169.0" y="278" text-anchor="middle" class="svg-text">(CAD plan); battery beyond the insert, in foam</text>
 <line x1="70.3" y1="172" x2="70.3" y2="214" class="svg-dim"/>
-<text x="550.5" y="320" text-anchor="middle" class="svg-note">z: face normal, out of the page. Head outline is schematic; lengths on the dimension line are the profile defaults.</text>
+<text x="380" y="318" text-anchor="middle" class="svg-note">z: face normal, out of the page.</text>
+<text x="380" y="332" text-anchor="middle" class="svg-note">Head outline is schematic; lengths on the dimension line are the profile defaults.</text>
 </svg></div>
 <figcaption><b>Figure 4.</b> Racket schematic. Zone names are the tap-gesture zones the firmware reports; their distances from the butt are read from the names. The sweet-spot circle is the 4 cm threshold used by the acoustic model. Positions inside the insert come from the CAD plan.</figcaption></figure>
 
@@ -475,7 +471,7 @@ tr.bad td { background: var(--b-soft); }
 <line x1="221.0" y1="150" x2="320" y2="104" class="svg-arrow dashed" marker-end="url(#ah2)"/>
 <text x="215.0" y="136" text-anchor="end" class="svg-note">soft-hit confirm</text>
 <line x1="671.0" y1="104" x2="671.0" y2="150" class="svg-arrow" marker-end="url(#ah2)"/>
-<text x="677.0" y="138" text-anchor="start" class="svg-note">summary + window</text>
+<text x="665.0" y="138" text-anchor="end" class="svg-note">summary + window</text>
 <rect x="460" y="276" width="122" height="80" rx="4" class="svg-box"/>
 <text x="521.0" y="294" text-anchor="middle" class="svg-title">TBShot</text>
 <text x="521.0" y="312" text-anchor="middle" class="svg-text">6 B: sweet, off %,</text>
@@ -866,11 +862,11 @@ tr.bad td { background: var(--b-soft); }
 <text x="380.0" y="344" text-anchor="middle" class="svg-title">Same strict scorer on both paths, 243 validation cases, seed 7</text>
 <text x="380.0" y="362" text-anchor="middle" class="svg-text">digest first, numbers grounded in tool output, estimate labels, known tools, goal reached</text>
 <line x1="180" y1="296" x2="180" y2="326" class="svg-arrow" marker-end="url(#ah27)"/>
-<text x="188" y="316" text-anchor="start" class="svg-note">212 pass</text>
+<text x="188" y="316" text-anchor="start" class="svg-note">212 pass, round 4</text>
 <line x1="580" y1="296" x2="580" y2="326" class="svg-arrow" marker-end="url(#ah27)"/>
-<text x="588" y="316" text-anchor="start" class="svg-note">118 pass</text>
+<text x="588" y="316" text-anchor="start" class="svg-note">197 pass, round 8</text>
 </svg></div>
-<figcaption><b>Figure 11.</b> From real-data priors to a scored adapter. Only the training file is uploaded to the rented GPU. The same scorer judges both serving paths. *Training time for 300 steps; the first run on the laptop GPU took 7,885 s.</figcaption></figure>
+<figcaption><b>Figure 11.</b> From real-data priors to a scored adapter. Only the training file is uploaded to the rented GPU. The same scorer judges both serving paths. The boxes show the round 4 recipe; round 8 repeated the cleaner-contact and more-spin chats and trained 600 steps. *Training time for 300 steps; the first run on the laptop GPU took 7,885 s.</figcaption></figure>
 <div class="scroll"><table>
 <caption><b>Table 5.</b> Conversation kinds in the dataset (2,263 in total, 400 simulated players, split by player 80/10/10).</caption>
 <thead><tr><th>Kind</th><th class="num">Count</th><th>What the model learns</th></tr></thead>
@@ -884,7 +880,7 @@ tr.bad td { background: var(--b-soft); }
 </tbody></table></div>
 
 <h3><span class="n">9.2</span>Fine-tuning recipe</h3>
-<p>The base model is Qwen2.5-1.5B-Instruct <a href="#r4">[4]</a> (1,562,179,072 parameters, Apache-2.0, a documented tool-call template). We apply QLoRA <a href="#r2">[2]</a>, <a href="#r3">[3]</a> with a 4-bit NF4 base with double quantization, rank 16, alpha 32, dropout 0.05 on all seven attention and MLP projection matrices, learning rate 2×10<sup>−4</sup>, AdamW, fp16 with gradient checkpointing, batch size 1 with 8 accumulation steps, seed 7 and a 4,608-token limit. Loss is taken on assistant messages only, with selective vocabulary logits to reduce memory; a CPU comparison against the full masked loss agreed within 10<sup>−6</sup>. Every one of the 1,809 training conversations fits within the limit (longest 4,509 tokens) and none is truncated. The adapter weights are not in the repository, and each run records the SHA-256 of its adapter and training file.</p>
+<p>The base model is Qwen2.5-1.5B-Instruct <a href="#r4">[4]</a> (1,562,179,072 parameters, Apache-2.0, a documented tool-call template). We apply QLoRA <a href="#r2">[2]</a>, <a href="#r3">[3]</a> with a 4-bit NF4 base with double quantization, rank 16, alpha 32, dropout 0.05 on all seven attention and MLP projection matrices, learning rate 2×10<sup>−4</sup>, AdamW, fp16 with gradient checkpointing, batch size 1 with 8 accumulation steps, seed 7 and a 4,608-token limit. Loss is taken on assistant messages only, with selective vocabulary logits to reduce memory; a CPU comparison against the full masked loss agreed within 10<sup>−6</sup>. Every one of the 1,809 training conversations fits within the limit (longest 4,509 tokens) and none is truncated. The adapter weights are not in the repository, and each run records the SHA-256 of its adapter and training file. Round 8 used the round 4 filtered set with the cleaner-contact and more-spin conversations repeated once (2,185 conversations) and 600 steps.</p>
 
 <h2 id="lemonade"><span class="n">10</span>Lemonade evaluation</h2>
 <h3><span class="n">10.1</span>Method</h3>
@@ -900,22 +896,22 @@ tr.bad td { background: var(--b-soft); }
 <tr><td>3</td><td>Same data, more steps</td><td class="num">700</td><td class="num">207 (85.2%)</td><td class="num">0</td></tr>
 <tr class="hl"><td>4</td><td>Keep goal chats only if their last simulation reaches the goal</td><td class="num">400</td><td class="num">212 (87.2%)</td><td class="num">0</td></tr>
 </tbody></table></div>
-<p>Round 1 produced 62 errors, all from empty answers. An audit found 377 training conversations with an empty intermediate assistant turn, so the loader had been supervising an end-of-turn token with no content. Removing them took errors to zero and contact-spread cases from 0 of 14 to 14 of 14. More steps barely helped. Scoring each training conversation with the evaluator's own goal rule showed that 113 of 436 cleaner-contact and 74 of 338 more-spin conversations ended on a change that does not reach the goal, so the model's miss rate matched the data it imitated; filtering to goal-reaching conversations (dropping 211 of 1,809) gave round 4. That filter is rejection sampling with the evaluator's rule and must be disclosed with any resulting score. Rounds 2 to 4 were selected on these validation cases, and the test split is reserved for one final scoring.</p>
+<p>Round 1 produced 62 errors, all from empty answers. An audit found 377 training conversations with an empty intermediate assistant turn, so the loader had been supervising an end-of-turn token with no content. Removing them took errors to zero and contact-spread cases from 0 of 14 to 14 of 14. More steps barely helped. Scoring each training conversation with the evaluator's own goal rule showed that 113 of 436 cleaner-contact and 74 of 338 more-spin conversations ended on a change that does not reach the goal, so the model's miss rate matched the data it imitated; filtering to goal-reaching conversations (dropping 211 of 1,809) gave round 4. That filter is rejection sampling with the evaluator's rule and must be disclosed with any resulting score. Rounds 2 to 4 were selected on these validation cases; the test split was run once, on round 8 (section 10.5).</p>
 
 <h3><span class="n">10.3</span>Serving the same weights through Lemonade</h3>
 <p>Lemonade Server 2026.45.3 on Windows served an untuned Qwen3-1.7B (Q4_0) with 124 strict passes (51.0%), the starting point that motivated tuning. We then merged the round 4 adapter into fp16 weights, converted to GGUF with llama.cpp's converter, quantised to Q8_0 (1.5 GB) and loaded it as a normal Lemonade model. A 243-case run takes about six minutes this way, against about 2.5 hours on the Transformers/NF4 server. The score was 118, which led to the finding in section 10.4.</p>
-<figure id="fig-results"><div class="figwrap"><svg viewBox="0 0 760 338" role="img" aria-label="Strict all-pass on 243 validation cases with 95 percent Wilson intervals. Transformers-served rounds climb from 69.5 to 87.2 percent; the same round 4 weights served by Lemonade score 48.6 percent." class="fig-svg"><line x1="236.0" y1="16" x2="236.0" y2="292" class="svg-grid"/>
-<text x="236.0" y="308" text-anchor="middle" class="svg-note">0%</text>
-<line x1="332.0" y1="16" x2="332.0" y2="292" class="svg-grid"/>
-<text x="332.0" y="308" text-anchor="middle" class="svg-note">20%</text>
-<line x1="428.0" y1="16" x2="428.0" y2="292" class="svg-grid"/>
-<text x="428.0" y="308" text-anchor="middle" class="svg-note">40%</text>
-<line x1="524.0" y1="16" x2="524.0" y2="292" class="svg-grid"/>
-<text x="524.0" y="308" text-anchor="middle" class="svg-note">60%</text>
-<line x1="620.0" y1="16" x2="620.0" y2="292" class="svg-grid"/>
-<text x="620.0" y="308" text-anchor="middle" class="svg-note">80%</text>
-<line x1="716.0" y1="16" x2="716.0" y2="292" class="svg-grid"/>
-<text x="716.0" y="308" text-anchor="middle" class="svg-note">100%</text>
+<figure id="fig-results"><div class="figwrap"><svg viewBox="0 0 760 398" role="img" aria-label="Strict all-pass with 95 percent Wilson intervals. Transformers-served rounds climb from 69.5 to 87.2 percent; round 4 weights served by Lemonade score 48.6 percent; round 8 served by Lemonade scores 81.1 percent on validation and 81.9 percent on the test split." class="fig-svg"><line x1="236.0" y1="16" x2="236.0" y2="352" class="svg-grid"/>
+<text x="236.0" y="368" text-anchor="middle" class="svg-note">0%</text>
+<line x1="332.0" y1="16" x2="332.0" y2="352" class="svg-grid"/>
+<text x="332.0" y="368" text-anchor="middle" class="svg-note">20%</text>
+<line x1="428.0" y1="16" x2="428.0" y2="352" class="svg-grid"/>
+<text x="428.0" y="368" text-anchor="middle" class="svg-note">40%</text>
+<line x1="524.0" y1="16" x2="524.0" y2="352" class="svg-grid"/>
+<text x="524.0" y="368" text-anchor="middle" class="svg-note">60%</text>
+<line x1="620.0" y1="16" x2="620.0" y2="352" class="svg-grid"/>
+<text x="620.0" y="368" text-anchor="middle" class="svg-note">80%</text>
+<line x1="716.0" y1="16" x2="716.0" y2="352" class="svg-grid"/>
+<text x="716.0" y="368" text-anchor="middle" class="svg-note">100%</text>
 <text x="226" y="37" text-anchor="end" class="svg-text">Hosted model (historical aggregate)</text>
 <rect x="236" y="26" width="420.7" height="16" class="bar-c"/>
 <line x1="634.0" y1="34" x2="673.8" y2="34" class="svg-whisker"/>
@@ -970,29 +966,41 @@ tr.bad td { background: var(--b-soft); }
 <line x1="443.1" y1="269" x2="443.1" y2="279" class="svg-whisker"/>
 <line x1="503.0" y1="269" x2="503.0" y2="279" class="svg-whisker"/>
 <text x="509.0" y="278" class="svg-value">49.4%</text>
-<rect x="236" y="319" width="12" height="12" class="bar-c"/>
-<text x="254" y="329" class="svg-note" text-anchor="start">hosted baseline</text>
-<rect x="369.0" y="319" width="12" height="12" class="bar-a"/>
-<text x="387.0" y="329" class="svg-note" text-anchor="start">own Transformers server, no grammar</text>
-<rect x="626.0" y="319" width="12" height="12" class="bar-b"/>
-<text x="644.0" y="329" class="svg-note" text-anchor="start">served by Lemonade (llama.cpp, grammar)</text></svg></div>
-<figcaption><b>Figure 12.</b> Strict all-pass on 243 cases with 95% Wilson intervals. The Transformers rounds climb from 69.5% to 87.2%. The same round 4 weights score 48.6% when served by Lemonade, where tool calls are grammar-constrained, and rounds 6 and 7 tested training on the order Lemonade delivers. The hosted baseline is a single retained aggregate (87.7%, which is 213 of 243 if exact).</figcaption></figure>
+<text x="226" y="307" text-anchor="end" class="svg-text">Round 8, Lemonade</text>
+<rect x="236" y="296" width="389.1" height="16" class="bar-b"/>
+<line x1="599.2" y1="304" x2="646.4" y2="304" class="svg-whisker"/>
+<line x1="599.2" y1="299" x2="599.2" y2="309" class="svg-whisker"/>
+<line x1="646.4" y1="299" x2="646.4" y2="309" class="svg-whisker"/>
+<text x="652.4" y="308" class="svg-value">81.1%</text>
+<text x="226" y="337" text-anchor="end" class="svg-text">Round 8, Lemonade, test split (166)</text>
+<rect x="236" y="326" width="393.3" height="16" class="bar-b"/>
+<line x1="597.8" y1="334" x2="653.8" y2="334" class="svg-whisker"/>
+<line x1="597.8" y1="329" x2="597.8" y2="339" class="svg-whisker"/>
+<line x1="653.8" y1="329" x2="653.8" y2="339" class="svg-whisker"/>
+<text x="659.8" y="338" class="svg-value">81.9%</text>
+<rect x="236" y="379" width="12" height="12" class="bar-c"/>
+<text x="254" y="389" class="svg-note" text-anchor="start">hosted baseline</text>
+<rect x="369.0" y="379" width="12" height="12" class="bar-a"/>
+<text x="387.0" y="389" class="svg-note" text-anchor="start">own server, no grammar</text>
+<rect x="545.4" y="379" width="12" height="12" class="bar-b"/>
+<text x="563.4" y="389" class="svg-note" text-anchor="start">Lemonade, llama.cpp grammar</text></svg></div>
+<figcaption><b>Figure 12.</b> Strict all-pass on 243 cases with 95% Wilson intervals. The Transformers rounds climb from 69.5% to 87.2%. The same round 4 weights score 48.6% when served by Lemonade, where tool calls are grammar-constrained, rounds 6 and 7 trained on sorted schemas, and round 8, which also writes call arguments in the allowed order, scores 81.1% on validation and 81.9% on the test split. The hosted baseline is a single retained aggregate (87.7%, which is 213 of 243 if exact).</figcaption></figure>
 <div class="scroll"><table>
-<caption><b>Table 7.</b> Strict passes by kind for four configurations (243 cases).</caption>
-<thead><tr><th>Kind</th><th class="num">Cases</th><th class="num">Qwen3 untuned, Lemonade</th><th class="num">Round 4, Transformers</th><th class="num">Round 4, Lemonade</th><th class="num">Round 7, Lemonade</th></tr></thead>
+<caption><b>Table 7.</b> Strict passes by kind for five configurations (243 validation cases).</caption>
+<thead><tr><th>Kind</th><th class="num">Cases</th><th class="num">Qwen3 untuned, Lemonade</th><th class="num">Round 4, Transformers</th><th class="num">Round 4, Lemonade</th><th class="num">Round 7, Lemonade</th><th class="num">Round 8, Lemonade</th></tr></thead>
 <tbody>
-<tr class="bad"><td>objective</td><td class="num">127</td><td class="num">31</td><td class="num">96</td><td class="num">6</td><td class="num">4</td></tr>
-<tr><td>player_whatif</td><td class="num">57</td><td class="num">48</td><td class="num">57</td><td class="num">57</td><td class="num">57</td></tr>
-<tr><td>player_whatif_extreme</td><td class="num">18</td><td class="num">11</td><td class="num">18</td><td class="num">16</td><td class="num">18</td></tr>
-<tr><td>unmodeled</td><td class="num">25</td><td class="num">20</td><td class="num">25</td><td class="num">24</td><td class="num">25</td></tr>
-<tr><td>contact_spread</td><td class="num">14</td><td class="num">12</td><td class="num">14</td><td class="num">13</td><td class="num">14</td></tr>
-<tr><td>no_motion, error</td><td class="num">2</td><td class="num">2</td><td class="num">2</td><td class="num">2</td><td class="num">2</td></tr>
-<tr><th>Total</th><th class="num">243</th><th class="num">124</th><th class="num">212</th><th class="num">118</th><th class="num">120</th></tr>
+<tr class="bad"><td>objective</td><td class="num">127</td><td class="num">31</td><td class="num">96</td><td class="num">6</td><td class="num">4</td><td class="num">87</td></tr>
+<tr><td>player_whatif</td><td class="num">57</td><td class="num">48</td><td class="num">57</td><td class="num">57</td><td class="num">57</td><td class="num">57</td></tr>
+<tr><td>player_whatif_extreme</td><td class="num">18</td><td class="num">11</td><td class="num">18</td><td class="num">16</td><td class="num">18</td><td class="num">13</td></tr>
+<tr><td>unmodeled</td><td class="num">25</td><td class="num">20</td><td class="num">25</td><td class="num">24</td><td class="num">25</td><td class="num">25</td></tr>
+<tr><td>contact_spread</td><td class="num">14</td><td class="num">12</td><td class="num">14</td><td class="num">13</td><td class="num">14</td><td class="num">13</td></tr>
+<tr><td>no_motion, error</td><td class="num">2</td><td class="num">2</td><td class="num">2</td><td class="num">2</td><td class="num">2</td><td class="num">2</td></tr>
+<tr class="hl"><th>Total</th><th class="num">243</th><th class="num">124</th><th class="num">212</th><th class="num">118</th><th class="num">120</th><th class="num">197</th></tr>
 </tbody></table></div>
-<p>Round 4 on Lemonade used temperature 0. Nearly all of the loss sits in one kind: the 116 non-goal cases pass at nearly the same rate on both servers, and the objective cases fall from 96 of 127 to 6.</p>
+<p>All Lemonade runs in this table used temperature 0. Nearly all of the difference between configurations sits in the objective kind: the 116 non-goal cases pass at close to the same rate everywhere, while the objective cases go from 96 of 127 on our own server, to 6 for round 4 on Lemonade, to 87 for round 8 on Lemonade.</p>
 
 <h3><span class="n">10.4</span>Finding: Lemonade sorts schema keys, and the grammar enforces that order</h3>
-<p>On goal cases the effect was narrow. The model's call to <code>simulate_change</code> was <code>{"type":"forehand"}</code> with no change, so the tool reported "no change" and the model concluded the contact was already centred. Across the four Lemonade runs, the last simulation in a goal case applied no change in 111, 119, 123 and 123 of 123 goal cases, against 0 of 123 on the Transformers server (Figure 14). A paired comparison of round 4 on the two servers has 94 cases that pass only on the Transformers server and none that pass only on Lemonade (McNemar χ² = 92.0 with continuity correction <a href="#r8">[8]</a>).</p>
+<p>On goal cases the effect was narrow. The model's call to <code>simulate_change</code> was <code>{"type":"forehand"}</code> with no change, so the tool reported "no change" and the model concluded the contact was already centred. Across the four Lemonade runs trained on other argument orders, the last simulation in a goal case applied no change in 111, 119, 123 and 123 of 123 goal cases, against 0 of 123 on the Transformers server and 0 of 123 for round 8, which was trained on the allowed order (Figure 14). A paired comparison of round 4 on the two servers has 94 cases that pass only on the Transformers server and none that pass only on Lemonade (McNemar χ² = 92.0 with continuity correction <a href="#r8">[8]</a>).</p>
 <figure id="fig-mech"><div class="figwrap"><svg viewBox="0 0 760 190" role="img" aria-label="Mechanism: Lemonade sorts tool schema keys alphabetically, the grammar forces call arguments into that order, and a model that writes type first can add no further arguments." class="fig-svg"><defs><marker id="ah4" viewBox="0 0 10 10" refX="9" refY="5" markerWidth="7" markerHeight="7" orient="auto-start-reverse"><path d="M0 0L10 5L0 10z" class="svg-head"/></marker></defs>
 <rect x="6" y="18" width="150" height="150" rx="4" class="svg-box"/>
 <text x="81.0" y="36" text-anchor="middle" class="svg-title">App schema order</text>
@@ -1026,14 +1034,14 @@ tr.bad td { background: var(--b-soft); }
 <text x="561.0" y="85.0" text-anchor="middle" class="svg-note">type comes first</text>
 </svg></div>
 <figcaption><b>Figure 13.</b> The mechanism. The app writes <code>type</code> before the numeric fields, Lemonade re-serialises the request with sorted keys, and llama.cpp's grammar <a href="#r5">[5]</a> forces a call's keys into the schema's property order. A model that writes <code>type</code> first, as ours always did, has nothing it is allowed to add after it.</figcaption></figure>
-<figure id="fig-empty"><div class="figwrap"><svg viewBox="0 0 760 202" role="img" aria-label="Of 123 goal cases, the final simulate_change call applied no change in 0 cases on the Transformers server and in 111 to 123 cases through Lemonade." class="fig-svg"><line x1="236.0" y1="12" x2="236.0" y2="168" class="svg-grid"/>
-<text x="236.0" y="184" text-anchor="middle" class="svg-note">0</text>
-<line x1="390.7" y1="12" x2="390.7" y2="168" class="svg-grid"/>
-<text x="390.7" y="184" text-anchor="middle" class="svg-note">41</text>
-<line x1="545.3" y1="12" x2="545.3" y2="168" class="svg-grid"/>
-<text x="545.3" y="184" text-anchor="middle" class="svg-note">82</text>
-<line x1="700.0" y1="12" x2="700.0" y2="168" class="svg-grid"/>
-<text x="700.0" y="184" text-anchor="middle" class="svg-note">123</text>
+<figure id="fig-empty"><div class="figwrap"><svg viewBox="0 0 760 232" role="img" aria-label="Of 123 goal cases, the final simulate_change call applied no change in 0 cases on the Transformers server, in 111 to 123 cases for rounds 4, 6 and 7 through Lemonade, and in 0 cases for round 8." class="fig-svg"><line x1="236.0" y1="12" x2="236.0" y2="198" class="svg-grid"/>
+<text x="236.0" y="214" text-anchor="middle" class="svg-note">0</text>
+<line x1="390.7" y1="12" x2="390.7" y2="198" class="svg-grid"/>
+<text x="390.7" y="214" text-anchor="middle" class="svg-note">41</text>
+<line x1="545.3" y1="12" x2="545.3" y2="198" class="svg-grid"/>
+<text x="545.3" y="214" text-anchor="middle" class="svg-note">82</text>
+<line x1="700.0" y1="12" x2="700.0" y2="198" class="svg-grid"/>
+<text x="700.0" y="214" text-anchor="middle" class="svg-note">123</text>
 <text x="226" y="33" text-anchor="end" class="svg-text">Round 4, Transformers</text>
 <line x1="236" y1="22" x2="236" y2="38" class="svg-whisker"/>
 <text x="242.0" y="34" class="svg-value">0</text>
@@ -1049,8 +1057,11 @@ tr.bad td { background: var(--b-soft); }
 <text x="226" y="153" text-anchor="end" class="svg-text">Round 7, Lemonade</text>
 <rect x="236" y="142" width="464.0" height="16" class="bar-b"/>
 <text x="706.0" y="154" class="svg-value">123</text>
-<text x="236" y="200" class="svg-note" text-anchor="start">goal cases whose last simulate_change tested no change (of 123)</text></svg></div>
-<figcaption><b>Figure 14.</b> Goal cases whose final simulation tested no change, out of 123. The Transformers server applies no grammar, so the order constraint does not arise there.</figcaption></figure>
+<text x="226" y="183" text-anchor="end" class="svg-text">Round 8, Lemonade</text>
+<line x1="236" y1="172" x2="236" y2="188" class="svg-whisker"/>
+<text x="242.0" y="184" class="svg-value">0</text>
+<text x="236" y="230" class="svg-note" text-anchor="start">goal cases whose last simulate_change tested no change (of 123)</text></svg></div>
+<figcaption><b>Figure 14.</b> Goal cases whose final simulation tested no change, out of 123. The Transformers server applies no grammar, so the order constraint does not arise there. Round 8 was trained on the order the grammar allows.</figcaption></figure>
 <p>Two explanations were tested and ruled out, each costing a training run. First, the prompt text does differ: the same request is 3,009 tokens through Lemonade and 3,022 sent straight to the llama.cpp backend, and sorting the tool schemas by hand reproduces 3,009 exactly. Training rounds 6 and 7 used that sorted text (round 7's training prompt matched what llama.cpp renders, character for character) and did not fix the problem. Second, the weights and the conversion are not broken: given the rendered prompt, the fp16 merge in Transformers and the Q8_0 GGUF in llama.cpp's completion endpoint both produced the correct call, <code>{"type":"forehand","swing_percent":10}</code>, for both key orders. The grammar was shown directly by changing only the order of <code>properties</code> for <code>simulate_change</code> and sending the same request to the backend:</p>
 <div class="scroll"><table>
 <caption><b>Table 8.</b> Arguments the model produced under each schema property order (llama.cpp backend).</caption>
@@ -1060,9 +1071,20 @@ tr.bad td { background: var(--b-soft); }
 <tr><td>session, swing_percent, …, type (type last)</td><td><code>session</code>, <code>swing_percent</code> (type lost)</td></tr>
 <tr><td>alphabetical (what Lemonade delivers)</td><td><code>type</code> only (swing_percent lost)</td></tr>
 </tbody></table></div>
-<p>The recommendations are practical. Test a tuned model through the server it will be deployed on, because a no-grammar serving path can overstate quality. Make the model's argument order the order the grammar allows: <code>--sort-tool-keys</code> in the training script renders sorted <code>parameters</code> and writes every training call's arguments alphabetically, with <code>type</code> last. Round 8 is trained with it and is the next evaluation <span class="tag p">planned</span>. Training on shuffled orders is a natural way to make a small model independent of argument order. A one-command check, <code>tools/lemonade_schema_order_check.py</code>, shows whether a server normalises key order by comparing prompt-token counts for the two orders (204 and 204 through Lemonade, 205 and 204 straight to llama.cpp). A draft upstream compatibility report is prepared.</p>
+<p>The recommendations are practical. Test a tuned model through the server it will be deployed on, because a no-grammar serving path can overstate quality. Make the model's argument order the order the grammar allows: <code>--sort-tool-keys</code> in the training script renders sorted <code>parameters</code> and writes every training call's arguments alphabetically, with <code>type</code> last. Round 8 uses it and recovered the Lemonade path (section 10.5). Training on shuffled orders is a natural way to make a small model independent of argument order. A one-command check, <code>tools/lemonade_schema_order_check.py</code>, shows whether a server normalises key order by comparing prompt-token counts for the two orders (204 and 204 through Lemonade, 205 and 204 straight to llama.cpp). A draft upstream compatibility report is prepared.</p>
 
-<h3><span class="n">10.5</span>AMD hardware evidence</h3>
+<h3><span class="n">10.5</span>Round 8: trained for the order Lemonade allows</h3>
+<p>Round 8 combined three changes: tool schemas rendered with sorted parameters and call arguments written alphabetically (<code>type</code> last), the round 4 filtered data with the cleaner-contact and more-spin conversations repeated once (2,185 conversations), and 600 steps on a rented A100. It was merged to fp16, converted to GGUF, quantised to Q8_0 (1.5 GB), loaded into Lemonade as a custom model, and scored through Lemonade's own endpoint at temperature 0, first on the validation sample and then once on the test split.</p>
+<div class="scroll"><table>
+<caption><b>Table 9.</b> Round 8 served by Lemonade (Server 2026.45.3).</caption>
+<thead><tr><th>Split</th><th class="num">Cases</th><th class="num">Strict pass</th><th class="num">95% interval</th><th class="num">Errors</th><th class="num">Goal reached</th><th class="num">Digest-first</th><th class="num">Grounded</th></tr></thead>
+<tbody>
+<tr class="hl"><td>Validation</td><td class="num">243</td><td class="num">197 (81.1%)</td><td class="num">75.7 to 85.5</td><td class="num">0</td><td class="num">90/123</td><td class="num">243/243</td><td class="num">230/243</td></tr>
+<tr class="hl"><td>Test, run once</td><td class="num">166</td><td class="num">136 (81.9%)</td><td class="num">75.4 to 87.0</td><td class="num">0</td><td class="num">70/92</td><td class="num">166/166</td><td class="num">158/166</td></tr>
+</tbody></table></div>
+<p>The final simulation changed something in all 123 validation goal cases, against 111 to 123 empty ones in the earlier Lemonade rounds, and the score moved from 120 (round 7) to 197. Round 8 also repeated the hard objectives and trained longer, so the effect of argument order is not separated from those changes; the grammar experiment in Table 8 is the direct evidence for the mechanism. Among goal cases on validation, more_pace reached 32 of 32 and cleaner_contact 37 of 48, while more_spin reached 21 of 43, which is the next lever. The remaining 6.1 points to round 4 on our own server coincide with the Lemonade path (merge, Q8 quantisation, tool grammar) and the changed data; these were not separated. The test split scores within a point of validation, which suggests the validation selection did not inflate the result by much, although a single run has its own sampling interval.</p>
+
+<h3><span class="n">10.6</span>AMD hardware evidence</h3>
 <p>The full evaluations ran on a Windows laptop with an NVIDIA RTX 4070 through Lemonade's llama.cpp CUDA backend. On AMD hardware, the official Lemonade container loaded Qwen3-1.7B (Q4_0) on a 4 GiB RX 580 under Vulkan, using about 1.59 GB of VRAM, and answered a bounded 16-token request in about 0.27 s end to end through an SSH tunnel. Tests on that machine run under a watchdog that stops the container at 75 °C or low memory. A full evaluation on AMD hardware, and a larger tuned model on a machine with more unified memory, are the next steps.</p>
 
 <h2 id="field"><span class="n">11</span>Field findings</h2>
@@ -1123,8 +1145,8 @@ tr.bad td { background: var(--b-soft); }
 <p>The results reflect what each experiment was designed to show.</p>
 <ul>
 <li><b>Synthetic evaluation.</b> The 243 cases use simulated players and a Python mirror of the tools, so they test tool choice, grounding and goal-reaching, not tennis improvement.</li>
-<li><b>Validation and test.</b> Rounds 2 to 4 were selected on the validation cases and the training data was filtered with the evaluator's goal rule; the test split is reserved for one final run. Each configuration was trained once.</li>
-<li><b>Serving path.</b> The 87.2% was measured on our Transformers server. The Lemonade results use the merged fp16 weights quantised to Q8_0, which are close to, not identical to, the NF4 model on the other path.</li>
+<li><b>Validation and test.</b> Rounds 2 to 4 were selected on the validation cases and the training data was filtered with the evaluator's goal rule; the test split was run once, on the final round 8 model (136 of 166, 81.9%). Each configuration was trained once.</li>
+<li><b>Serving path.</b> The 87.2% was measured on our Transformers server. The 81.1% and 81.9% were measured through Lemonade itself, on merged fp16 weights quantised to Q8_0, which are close to, not identical to, the NF4 model.</li>
 <li><b>Comparisons.</b> The hosted baseline is a single retained aggregate, and Qwen3-1.7B differs from the tuned model in base model, quantisation and runtime.</li>
 <li><b>Sensing.</b> The acoustic model is trained on two sessions, ball-speed constants await the wall drill, and stroke typing is validated on forehands from one reviewed session.</li>
 <li><b>Players.</b> A small player-trial protocol is prepared for usability feedback.</li>
@@ -1133,7 +1155,7 @@ tr.bad td { background: var(--b-soft); }
 
 <h2 id="future"><span class="n">15</span>Future work</h2>
 <ol class="list">
-<li>Score a model trained on alphabetical argument order through Lemonade, then try shuffled orders, and run the untouched test split once on the final model.</li>
+<li>Analyse the remaining round 8 misses (mainly more-spin goals), try shuffled argument orders, and separate the effect of argument order from the repeated data and longer training.</li>
 <li>Fit the ball-speed radius from the wall drill and the simulator's restitution from completed what-if trials, then regenerate the dataset.</li>
 <li>Record a third sweet-spot session on court with the microphone, audit label scales between sessions, and send distance or a "close" state on the wire.</li>
 <li>Fit the tap-zone model from taps at known positions.</li>

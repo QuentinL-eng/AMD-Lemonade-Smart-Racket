@@ -1,0 +1,24 @@
+# Tennis Buddee on quentinengineering.com/tennisbuddy (info page) and /tennisbuddy/emulator.
+# Build first:  node tools/build_hosted_emulator.mjs
+# Deploy:       npx wrangler deploy -c wrangler.tennisbuddy.toml
+# See docs/FIREWORKS_EMULATOR.md for the secrets and the DNS/zone requirement.
+name = "tennisbuddy-quentinengineering"
+main = "website/hosted/worker.js"
+compatibility_date = "2026-10-01"
+workers_dev = false
+
+routes = [
+  { pattern = "quentinengineering.com/tennisbuddy", zone_name = "quentinengineering.com" },
+  { pattern = "quentinengineering.com/tennisbuddy/*", zone_name = "quentinengineering.com" },
+]
+
+[assets]
+directory = ".website-hosted"
+binding = "ASSETS"
+# Pages and files are served straight from the assets store; only the agent endpoint runs the worker.
+run_worker_first = ["/tennisbuddy/api/*"]
+
+[vars]
+FIREWORKS_BASE_URL = "https://api.fireworks.ai/inference/v1"
+SORT_TOOL_KEYS = "false"   # "true" only if the model was trained with --sort-tool-keys
+# Set with `npx wrangler secret put -c wrangler.tennisbuddy.toml`: FIREWORKS_API_KEY, FIREWORKS_MODEL

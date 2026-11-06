@@ -717,6 +717,8 @@ function detailHTML(el){
 }
 
 /* ---------- Racket agent (offline demo engine over real local tool ports) ---------- */
+// ENGINE is rewritten by tools/build_hosted_emulator.mjs for the Fireworks-hosted site.
+const ENGINE={label:"Lemonade · local server",name:"Lemonade",about:"Lemonade runs on this computer and",api:"/api/muse"};
 const CANDS=[
  {k:"swing",d:{...Z(),swing:8},title:"Swing a little faster",cue:"Let the racket head run through the ball",why:"More head speed adds ball speed on your average swing."},
  {k:"path",d:{...Z(),path:6},title:"Brush up the back",cue:"Swing low to high through the ball",why:"A steeper brush adds spin without needing more speed."},
@@ -738,7 +740,7 @@ function evalCands(b){
 }
 function museHTML(el){
   const rs=shownRows(),f=S.film,st=f?f.stroke:curStroke(rs),b=baselineOf(strokeRows(rs,st));
-  let h=`<div class="mh"><span class="t">Racket agent</span><span class="s"><span class="dot" style="background:var(--m-muted)"></span>Lemonade · local server</span></div>`;
+  let h=`<div class="mh"><span class="t">Racket agent</span><span class="s"><span class="dot" style="background:var(--m-muted)"></span>${ENGINE.label}</span></div>`;
   h+=`<div class="hero" ${f?'data-act="openwi" style="cursor:pointer"':""}><div class="top"><div class="eyebrow" style="opacity:.7">BEST CHANGE · ${st.toUpperCase()}</div><div class="ti">${f?f.title:"Find your best change"}</div>
    <div class="cu2">${f?f.cue:`Racket agent tests changes on your average ${LABEL[st].toLowerCase()} and shows you the one that helps most.`}</div></div>
    <svg class="sk" viewBox="0 0 300 110" preserveAspectRatio="none"><path d="M18 42C75 130 190 118 246 28" fill="none" stroke="rgba(17,19,12,.35)" stroke-width="3" stroke-dasharray="6 7"/><path d="M18 52C75 140 190 118 246 20" fill="none" stroke="#11130C" stroke-width="6" stroke-linecap="round"/><circle cx="214" cy="62" r="10" fill="#FBFBF4" stroke="#11130C" stroke-width="3"/></svg>
@@ -755,7 +757,7 @@ function museHTML(el){
   h+=`<button class="mrow" data-act="review">${ic("flag")}<span><div class="a">Review queue</div><div class="b">${pend?`${pend} waiting for you`:"Flag a session for a human look"}</div></span><span class="ch">${ic("chev")}</span></button>`;
   h+=`<div><div class="eyebrow" style="color:var(--m-muted);margin:4px 0 8px">ASK</div><div class="asklist">${SUGG.map(q=>`<button data-act="ask" data-v="${q}"><span>${q}</span>${ic("chev")}</button>`).join("")}</div></div>`;
   S.chat.forEach((c,i)=>{h+=`<div class="mcard"><div class="mq">${c.q}</div><div class="mans">${c.a}</div></div>`;});
-  h+=`<div class="mcard" style="font-size:12px;color:var(--m-muted)">Ask a free-form question. Lemonade running on this computer, answers using the current replay. Replay statistics are estimates; no physical racket is connected.</div>`;
+  h+=`<div class="mcard" style="font-size:12px;color:var(--m-muted)">Ask a free-form question. ${ENGINE.about} answers using the current replay. Replay statistics are estimates; no physical racket is connected.</div>`;
   el.innerHTML=h;
   const bar=document.createElement("div");bar.className="askbar";bar.id="askbar";
   bar.innerHTML=`<div class="in"><input id="q" placeholder="Ask Racket agent anything about your game" value="${S.question.replace(/"/g,"&quot;")}"><button data-act="send" aria-label="Send">${ic("up")}</button></div>`;
@@ -799,7 +801,7 @@ const chatEscape=s=>String(s).replace(/[&<>"']/g,c=>({'&':'&amp;','<':'&lt;','>'
 async function museRequest(q,task="chat"){
  const rs=shownRows();const context={source:"Session replay; physics figures are estimates, contact points assumed",shotCount:rs.length,shots:rs.map(x=>({stroke:x.type,time:x.t,parameters:x.p,estimates:{ball:x.r.ball,rpm:x.r.rpm,dist:x.r.dist},outcome:x.outcome})),units:"km/h, degrees, rpm, cm"};
  let r,lastError;for(let attempt=0;attempt<2;attempt++){
-  try{const controller=new AbortController(),timer=setTimeout(()=>controller.abort(),180000);try{r=await fetch('/api/muse',{method:'POST',headers:{'Content-Type':'application/json'},body:JSON.stringify({question:q,task,context}),signal:controller.signal});}finally{clearTimeout(timer)}if(r.ok||![502,503,504].includes(r.status))break;}catch(e){lastError=e;}
+  try{const controller=new AbortController(),timer=setTimeout(()=>controller.abort(),180000);try{r=await fetch(ENGINE.api,{method:'POST',headers:{'Content-Type':'application/json'},body:JSON.stringify({question:q,task,context}),signal:controller.signal});}finally{clearTimeout(timer)}if(r.ok||![502,503,504].includes(r.status))break;}catch(e){lastError=e;}
   if(attempt===0)await new Promise(resolve=>setTimeout(resolve,700));
  }
  if(!r)throw Error(lastError?.name==='AbortError'?'Racket agent took too long to reply. Please try again.':'Could not reach Racket agent. Check your connection and try again.');
@@ -807,7 +809,7 @@ async function museRequest(q,task="chat"){
  const data=await r.json();if(!r.ok)throw Error(data.error||'Racket agent is temporarily unavailable. Please try again.');return data;
 }
 async function askAgent(q){
- q=(q||"").trim();if(!q||musePending)return;musePending=true;const generation=museGeneration;const c={q:chatEscape(q),a:"Asking Lemonade…",tools:[]};S.chat.push(c);S.question="";refreshOther();
+ q=(q||"").trim();if(!q||musePending)return;musePending=true;const generation=museGeneration;const c={q:chatEscape(q),a:`Asking ${ENGINE.name}…`,tools:[]};S.chat.push(c);S.question="";refreshOther();
  try{const data=await museRequest(q);if(generation!==museGeneration)return;c.a=chatEscape(data.answer);c.tools=data.tools||[];}catch(e){if(generation!==museGeneration)return;c.a=chatEscape(e.name==='TimeoutError'?'Racket agent took too long to reply. Please try again.':e.message||'Racket agent unavailable. Please try again.');}
  finally{if(generation===museGeneration){musePending=false;refreshOther();const sc=$("v-other");sc.scrollTop=sc.scrollHeight;}}
 }
@@ -832,7 +834,7 @@ function memoryHTML(el){el.innerHTML=`<div class="mh"><span class="t">Memory</sp
 
 /* ---------- Racket agent feature screens (demo engine over the replay's own numbers) ---------- */
 const museHead=(t,sub,right="")=>`<div class="mh"><span class="t" style="font-size:30px">${t}</span>${right}</div><div class="msub">${sub}</div>`;
-const engLabel=()=>`<div class="eng"><i></i>Lemonade · local server</div>`;
+const engLabel=()=>`<div class="eng"><i></i>${ENGINE.label}</div>`;
 function strokeStats(rs){return strokesIn(rs).map(g=>{const q=strokeRows(rs,g);return {g,n:q.length,sw:q.filter(x=>x.sweet).length/q.length,ball:mean(q.map(x=>x.r.ball)),off:q.filter(x=>!x.sweet)};}).filter(x=>x.n>=3);}
 function makePlan(rs){
   const st=strokeStats(rs).sort((a,z)=>a.sw-z.sw),w=st[0]||{g:"hit",sw:rs.filter(x=>x.sweet).length/Math.max(1,rs.length)};
@@ -845,7 +847,7 @@ function makePlan(rs){
 function planHTML(el){
   const rs=shownRows(),P=S.plan;let h=museHead("Practice plan","Three steps from your last session: the weakest link first, a progression, then a rally count.");
   if(P){
-    h+=`<div style="background:var(--m-lime);color:var(--m-ink);border-radius:22px;padding:16px"><div class="eyebrow" style="opacity:.7">PLAN · ${P.when.toUpperCase()}</div><div style="font:800 24px var(--rounded);margin:6px 0">${P.title}</div><div style="font-size:11px;opacity:.7">Lemonade · local server</div></div>`;
+    h+=`<div style="background:var(--m-lime);color:var(--m-ink);border-radius:22px;padding:16px"><div class="eyebrow" style="opacity:.7">PLAN · ${P.when.toUpperCase()}</div><div style="font:800 24px var(--rounded);margin:6px 0">${P.title}</div><div style="font-size:11px;opacity:.7">${ENGINE.label}</div></div>`;
     P.steps.forEach((x,i)=>{const run=S.planRun===i;
       h+=`<div class="mcard"><div class="eyebrow" style="color:var(--m-muted)">STEP ${i+1}</div><div style="font:800 20px var(--rounded);margin:6px 0">${x.title}</div><div style="display:flex;gap:8px;align-items:center;margin-bottom:6px">${ic("target")}<span>${x.goal}</span></div><div style="font-size:12px;color:var(--m-muted)">${x.why}</div>${x.note?`<div style="font-style:italic;opacity:.85;margin-top:6px">${x.note}</div>`:""}
        <button class="mbtn" style="margin-top:12px;${run?"opacity:.6":""}" data-act="planstep" data-v="${i}" ${run?"disabled":""}>${ic(run?"check":"play")} ${run?"Running on Watch":"Start"}</button></div>`;});

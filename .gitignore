@@ -86,6 +86,11 @@ TennisRobot/TennisBuddyDayOne_20261029/
 !/website/api/muse-worker.js
 !/website/api/grounded-answer.js
 !/website/emulator/
+!/website/hosted/
 /marketing/*
 !/marketing/tennis-buddee-logo/
 .gguf-work/
+video/public/audio/comin-wit-it-full.mp3
+
+.website-hosted/
+.dev.vars

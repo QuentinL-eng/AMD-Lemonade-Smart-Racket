@@ -12,6 +12,7 @@ UI, plus slots for real footage. No AI-generated video.
 | `RobotHype` | 0:27 | X clip from the 2026-10-29 robot-arm session: real footage cut against CGI, on "Ten" |
 | `BuildLog` | 0:26 | X clip: the build as a six-step how-to (bench, robot, court footage + CGI), on "Comin Wit It" |
 | `EverySwing` | 0:29 | X clip: on court under a HUD, a CGI swing, the app; tagline "Be better.", on "Not My First Rodeo" |
+| `LemonadeCut` | 1:57 | AMD Lemonade Developer Challenge: court footage, the real CLI and app on Lemonade, on "Comin Wit It". See [`LEMONADE_CUT.md`](LEMONADE_CUT.md) |
 | `Possessed` | 0:27 | Halloween X clip: "this racket is possessed... by an AI", on "Whoop" |
 | `Scenes/scene-*` | each beat | Iterate on one scene at a time |
 

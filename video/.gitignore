@@ -14,3 +14,4 @@ public/audio/vo/
 
 # Regenerated from git and hackathon.json by npm run assets
 src/config/generated/facts.json
+public/audio/vo-lemonade/
