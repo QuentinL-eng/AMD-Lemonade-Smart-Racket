@@ -119,6 +119,8 @@ def call(base, key, model, effort, messages, tools, think_off=False):
         body["reasoning_effort"] = effort
     if think_off:
         body["enable_thinking"] = False
+    if os.environ.get("EVAL_TEMPERATURE"):  # opt-in; unset keeps each server's own default
+        body["temperature"] = float(os.environ["EVAL_TEMPERATURE"])
     headers = {"Content-Type": "application/json"}
     if key:
         headers["Authorization"] = f"Bearer {key}"

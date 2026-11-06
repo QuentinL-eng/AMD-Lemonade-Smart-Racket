@@ -57,6 +57,16 @@ def drop_empty_assistant_turns(messages):
                     and not m.get("tool_calls"))]
 
 
+def sort_keys(value):
+    """Recursively sort dict keys. Lemonade re-serializes request JSON with sorted keys, so the
+    tool schemas a model sees through Lemonade are in this order, not the app's order."""
+    if isinstance(value, dict):
+        return {k: sort_keys(value[k]) for k in sorted(value)}
+    if isinstance(value, list):
+        return [sort_keys(v) for v in value]
+    return value
+
+
 def main() -> None:
     ap = argparse.ArgumentParser()
     ap.add_argument("--model", default=DEFAULT_MODEL)
@@ -68,6 +78,8 @@ def main() -> None:
     ap.add_argument("--resume", type=Path)
     ap.add_argument("--train-file", type=Path, default=TRAIN,
                     help="Training conversations; defaults to the full train split. Never a validation or test file.")
+    ap.add_argument("--sort-tool-keys", action="store_true",
+                    help="Render tool schemas with alphabetically sorted keys, as Lemonade delivers them.")
     ap.add_argument("--output", type=Path, default=ROOT / "models" / "ondevice" / "qwen2.5-1.5b")
     args = ap.parse_args()
     if args.steps <= 0 or args.rank <= 0 or args.gradient_accumulation <= 0:
@@ -96,6 +108,8 @@ def main() -> None:
     def render(item):
         messages = template_messages(drop_empty_assistant_turns(item["messages"]))
         tools = item.get("tools") or []
+        if args.sort_tool_keys:
+            tools = sort_keys(tools)
         text = tokenizer.apply_chat_template(messages, tools=tools, tokenize=False,
                                              add_generation_prompt=False)
         ids = tokenizer(text)["input_ids"]
@@ -177,6 +191,7 @@ def main() -> None:
         "supervision": "assistant messages only; selective vocabulary logits",
         "training_examples": len(raw),
         "empty_assistant_turns_dropped": sum(len(i["messages"]) - len(drop_empty_assistant_turns(i["messages"])) for i in raw),
+        "sort_tool_keys": args.sort_tool_keys,
         "training_data": str(args.train_file.name),
         "training_data_sha256": digest(args.train_file),
         "hardware": torch.cuda.get_device_name(0),
