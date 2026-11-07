@@ -1,0 +1,25 @@
+# Tennis Buddee on quentinengineering.com/tennisbuddee (info page + video), /tennisbuddee/paper and /tennisbuddee/emulator.
+# Build first:  node tools/build_hosted_emulator.mjs
+# Deploy:       npx wrangler deploy -c wrangler.tennisbuddee.toml
+# See docs/HOSTED_EMULATOR.md for the secrets and the DNS/zone requirement.
+name = "tennisbuddee-quentinengineering"
+main = "website/hosted/worker.js"
+compatibility_date = "2026-10-01"
+workers_dev = false
+
+routes = [
+  { pattern = "quentinengineering.com/tennisbuddee", zone_name = "quentinengineering.com" },
+  { pattern = "quentinengineering.com/tennisbuddee/*", zone_name = "quentinengineering.com" },
+]
+
+[assets]
+directory = ".website-hosted"
+binding = "ASSETS"
+# Pages and files are served straight from the assets store; only the agent endpoints run the worker.
+run_worker_first = ["/tennisbuddee/api/*"]
+
+[vars]
+AGENT_BASE_URL = "https://qslman05--tennis-buddee-serve-serve.us-east.modal.run/v1"
+AGENT_MODEL = "r4"
+SORT_TOOL_KEYS = "false"   # "true" only if the model was trained with --sort-tool-keys
+# Secret (not stored here): npx wrangler secret put AGENT_API_KEY -c wrangler.tennisbuddee.toml

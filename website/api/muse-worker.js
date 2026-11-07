@@ -12,17 +12,17 @@ export default {
    if(raw.length>600000) return json({error:'Request too large'},413);
    const input = JSON.parse(raw);
    if(typeof input.question!=='string'||!input.question.trim()||input.question.length>2000) return json({error:'Question required (up to 2000 characters)'},400);
-   if(!env.LEMONADE_MODEL) return json({error:'Set LEMONADE_MODEL (or FIREWORKS_MODEL on the hosted site) before starting the emulator'},503);
+   if(!env.LEMONADE_MODEL) return json({error:'Set LEMONADE_MODEL (or AGENT_MODEL on the hosted site) before starting the emulator'},503);
    const upstreamURL=(env.LEMONADE_BASE_URL || 'http://127.0.0.1:8000/api/v1').replace(/\/$/, '') + '/chat/completions';
    const upstreamHeaders={'Content-Type':'application/json'};
    if(env.LEMONADE_API_KEY) upstreamHeaders.Authorization='Bearer '+env.LEMONADE_API_KEY;
    const engineLabel=env.ENGINE_LABEL||'Lemonade · local server';
-   // UPSTREAM_STYLE=fireworks: Fireworks takes max_tokens and no enable_thinking. Lemonade re-serializes request JSON
-   // with sorted keys (docs/LEMONADE_SCHEMA_ORDER.md); Fireworks does not. Set SORT_REQUEST_KEYS=true only for a model
+   // UPSTREAM_STYLE=hosted (Modal/vLLM, Fireworks): standard OpenAI fields, no enable_thinking, temperature 0. Lemonade re-serializes request JSON
+   // with sorted keys (docs/LEMONADE_SCHEMA_ORDER.md); hosted servers do not. Set SORT_REQUEST_KEYS=true only for a model
    // trained on sorted tool schemas (--sort-tool-keys).
    const sortKeys=v=>Array.isArray(v)?v.map(sortKeys):v&&typeof v==='object'?Object.fromEntries(Object.keys(v).sort().map(k=>[k,sortKeys(v[k])])):v;
-   const prepare=body=>{if(env.UPSTREAM_STYLE!=='fireworks')return body;const {enable_thinking,max_completion_tokens,...rest}=body;const out={...rest,max_tokens:max_completion_tokens,temperature:0};return env.SORT_REQUEST_KEYS==='true'?sortKeys(out):out;};
-   const complete=body=>{console.info('[AgentRequest] engine='+(env.UPSTREAM_STYLE||'Lemonade')+' method=POST url='+upstreamURL+' model='+body.model+' messages='+body.messages.length);return fetch(upstreamURL,{method:'POST',headers:upstreamHeaders,body:JSON.stringify(prepare(body)),signal:AbortSignal.timeout(45000)});};
+   const prepare=body=>{if(env.UPSTREAM_STYLE!=='hosted')return body;const {enable_thinking,max_completion_tokens,...rest}=body;const out={...rest,max_tokens:max_completion_tokens,temperature:0};return env.SORT_REQUEST_KEYS==='true'?sortKeys(out):out;};
+   const complete=body=>{console.info('[AgentRequest] engine='+(env.UPSTREAM_STYLE||'Lemonade')+' method=POST url='+upstreamURL+' model='+body.model+' messages='+body.messages.length);return fetch(upstreamURL,{method:'POST',headers:upstreamHeaders,body:JSON.stringify(prepare(body)),signal:AbortSignal.timeout(45000),...(env.UPSTREAM_STYLE==='hosted'?{redirect:'manual'}:{})});};
    const shots=Array.isArray(input.context?.shots)?input.context.shots.slice(-3000):[];
    const properties={session:{type:'string'},type:{type:'string'},metric:{type:'string'},contact:{type:'string'},order:{type:'string'},limit:{type:'number'},swing_percent:{type:'number'},face_deg:{type:'number'},path_deg:{type:'number'},contact_x_cm:{type:'number'},contact_y_cm:{type:'number'}};
    const schema=(name,description,keys=[])=>({type:'function',function:{name,description,parameters:{type:'object',properties:Object.fromEntries(keys.map(k=>[k,properties[k]])),additionalProperties:false}}});

@@ -718,7 +718,8 @@ function detailHTML(el){
 
 /* ---------- Racket agent (offline demo engine over real local tool ports) ---------- */
 // ENGINE is rewritten by tools/build_hosted_emulator.mjs for the Fireworks-hosted site.
-const ENGINE={label:"Lemonade · local server",name:"Lemonade",about:"Lemonade runs on this computer and",api:"/api/muse"};
+const ENGINE={label:"Lemonade · local server",name:"Lemonade",about:"Lemonade runs on this computer and",api:"/api/muse",warm:null};
+if(ENGINE.warm)fetch(ENGINE.warm,{method:"POST"}).catch(()=>{});
 const CANDS=[
  {k:"swing",d:{...Z(),swing:8},title:"Swing a little faster",cue:"Let the racket head run through the ball",why:"More head speed adds ball speed on your average swing."},
  {k:"path",d:{...Z(),path:6},title:"Brush up the back",cue:"Swing low to high through the ball",why:"A steeper brush adds spin without needing more speed."},
